@@ -1,0 +1,86 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Disjunction Example #1: MVC, Phases, Signals, Updates</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+</head>
+<body>
+	<div id="Menu" style="display: none;">
+		<p id="RandomText"></p>
+		<!-- Play: Modify the model, to be acted on in the next phase.ctrl.update() -->
+		<!-- Menu: Call a utility method on the view, which modifies the model and may additionally update view state -->
+		<button name="play" onclick="app.model.hitOption = 'play';">Play</button>
+		<button name="exit" onclick="app.phaser.phase.view.onExitClicked();">Exit</button>  
+	</div>
+
+	<div id="Play" style="display: none;">
+		<div id="Ball" style="position:absolute; width:10px; height: 10px; left: 0px; top: 0px; background-color: blue;"></div>
+		<button name="menu" onclick="app.model.hitOption = 'menu';">Menu</button>  <!-- Here we call a utility method on the view, which modifies the model and may additionally update view state -->
+	</div>
+
+	<div id="Exit" style="display: none; background-color: black;">
+		<p style="color: green; font-family: Courier">We're done!</p>
+	</div>
+
+	<!-- framework prequisites -->
+	<script src="../../core/Utility.js"></script>
+
+	<!-- framework -->
+	<script src="../../core/Ctrl.js"></script>
+	<script src="../../core/View.js"></script>
+	<script src="../../core/Phase.js"></script>
+	<script src="../../core/Phaser.js"></script>
+	<script src="../../core/App.js"></script>
+	<script src="../../extensions/Timer.js"></script>
+	<script src="../../extensions/TimerRAF.js"></script>
+
+	<!-- user implementations -->
+	<script src="./MenuView.js"></script>
+	<script src="./MenuCtrl.js"></script>
+	<script src="./PlayView.js"></script>
+	<script src="./PlayCtrl.js"></script>
+
+	<script>
+		//APPLICATION
+		app = new App();
+
+		//MODEL
+		//app model is optional - used to share data across phases. one can get away with using the app model alone.
+		app.model = 
+		{
+			hitOption: undefined
+		};
+
+		//phase models
+		var menuModel =
+		{
+			randomText: undefined
+		};
+		var playModel =
+		{
+			ballPos:
+			{
+				x: 0,
+				y: 0,
+				xVelocity: 0,
+				yVelocity: 0
+			}
+		};
+
+		//PHASES: register, then proceed to initial phase.
+		app.phaser.register(new Phase('menu', menuModel, menuView, menuCtrl));
+		app.phaser.register(new Phase('play', playModel, playView, playCtrl));
+		app.phaser.change('menu');
+		
+		//TIMING
+		var timer = 
+		app.timer = //optional - allows ctrls to manipulate frame rate via app.
+			new TimerRAF(app, true, true); //OR app.timer = new Timer(app, 0.1, true, true);
+		app.timer.start();
+		
+	</script>
+</body>
+</html>
