@@ -1,9 +1,9 @@
 var playCtrl = new Ctrl();
 playCtrl.start = function()
 {
-	//Gameplay phase initialisation logic here...
+	//...PlayCtrl initialisation here... (called when PlayPhase is entered, before PlayView.start)
+	console.log('starting PlayCtrl...');
 	
-	console.log('start play ctrl');
 	this.model.ballPos.x = 100;
 	this.model.ballPos.y = 100;
 	this.model.ballPos.xVelocity = Math.random() * 30;
@@ -12,7 +12,8 @@ playCtrl.start = function()
 
 playCtrl.finish = function()
 {	
-	//Gameplay phase cleanup logic here...
+	//...PlayCtrl cleanup here... (called when PlayPhase is entered)
+	console.log('finishing PlayCtrl...');
 	
 	var playDOM = document.getElementById('Play');
 	playDOM.style.display = 'none';
@@ -20,7 +21,7 @@ playCtrl.finish = function()
 
 playCtrl.update = function(deltaSec)
 {
-	//Gameplay phase update logic here...
+	//...PlayCtrl update here... (called when PlayPhase is entered)
 
 	//UI
 	if (app.model.hitOption)

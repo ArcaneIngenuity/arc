@@ -10,15 +10,14 @@
 <body>
 	<div id="Menu" style="display: none;">
 		<p id="RandomText"></p>
-		<!-- Play: Modify the model, to be acted on in the next phase.ctrl.update() -->
-		<!-- Menu: Call a utility method on the view, which modifies the model and may additionally update view state -->
-		<button name="play" onclick="app.model.hitOption = 'play';">Play</button>
-		<button name="exit" onclick="app.phaser.phase.view.onExitClicked();">Exit</button>  
+		
+		<button name="play" onclick="app.model.hitOption = 'play';">Play</button> <!-- Modify app.model directly, read on next phase.ctrl.update() -->
+		<button name="exit" onclick="app.phaser.phase.view.onExitClicked();">Exit</button> <!-- Call helper function on MenuView to modify app.model -->
 	</div>
 
 	<div id="Play" style="display: none;">
 		<div id="Ball" style="position:absolute; width:10px; height: 10px; left: 0px; top: 0px; background-color: blue;"></div>
-		<button name="menu" onclick="app.model.hitOption = 'menu';">Menu</button>  <!-- Here we call a utility method on the view, which modifies the model and may additionally update view state -->
+		<button name="menu" onclick="app.model.hitOption = 'menu';">Menu</button>
 	</div>
 
 	<div id="Exit" style="display: none; background-color: black;">
@@ -48,7 +47,7 @@
 		app = new App();
 
 		//MODEL
-		//app model is optional - used to share data across phases. one can get away with using the app model alone.
+		//app.model is optional - used to share data across phases; may also be used as the sole Model (no phase Models).
 		app.model = 
 		{
 			hitOption: undefined
@@ -78,7 +77,8 @@
 		//TIMING
 		var timer = 
 		app.timer = //optional - allows ctrls to manipulate frame rate via app.
-			new TimerRAF(app, true, true); //OR app.timer = new Timer(app, 0.1, true, true);
+			new TimerRAF(app, true, true);   //uses requestAnimationFrame
+		//	new Timer(app, 0.1, true, true); //uses setInterval (used for older browsers)
 		app.timer.start();
 		
 	</script>

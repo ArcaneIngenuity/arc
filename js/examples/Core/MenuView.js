@@ -1,8 +1,10 @@
 var menuView = new View();
 menuView.start = function()
 {
-	console.log('start menu view');
-	//ordinarily we'd cache these as part of the View
+	//...MenuView initialisation here... (called when MenuPhase is entered, after MenuCtrl.start)
+	console.log('starting MenuMiew...');
+	
+	//ordinarily we'd pre-assign these as part of the View, to avoid calling getElementById() every frame
 	var menuDOM = document.getElementById('Menu');
 	menuDOM.style.display = 'block';
 	
@@ -25,6 +27,9 @@ menuView.update = function()
 //helper function: when using the DOM, we must rely on its subsystem for interactions.
 menuView.onExitClicked = function()
 {
+	//...MenuView cleanup here... (called when MenuPhase is exited)
+	console.log('exiting MenuView...');
+
 	this.app.model.hitOption = 'exit'
-	console.log('exiting...');
+	
 }

@@ -1,10 +1,10 @@
 var playView = new View();
 playView.start = function()
 {
-	console.log('start play view');
+	//...PlayView initialisation here... (called when PlayPhase is entered, after PlayCtrl.start)
+	console.log('starting PlayView...');
 	var playDOM = document.getElementById('Play');
 	playDOM.style.display = 'block';
-	
 }
 
 playView.update = function()
@@ -14,3 +14,4 @@ playView.update = function()
 	ballDOM.style.top  = this.model.ballPos.y + 'px';
 }
 	
+//Here we haven't overridden PlayView.finish(), so we won't see an "exiting..." log message when we phase back to Menu.
