@@ -1,12 +1,9 @@
-Timer = function(app, periodSec, isUpdatingView, isUpdatingCtrl)
+Timer = function(app, periodSec)//, isUpdatingView, isUpdatingCtrl)
 {
 	this.app = app;
 	
 	var timingID = undefined;
-	
-	this.isUpdatingCtrl = isUpdatingCtrl;
-	this.isUpdatingView = isUpdatingView;
-	
+
 	//TODO make setter to update this whenever periodMs is changed
 	this.periodMs = periodSec * 1000;
 	
@@ -31,17 +28,7 @@ Timer = function(app, periodSec, isUpdatingView, isUpdatingCtrl)
 		this.lastUpdateSec = thisUpdateSec;
         var deltaSec = (thisUpdateSec - (lastUpdateSec || thisUpdateSec)) / 1000;
 		
-		var phase = this.app.phaser.phase;
-		
-		if (this.isUpdatingCtrl)
-		{
-			phase.ctrl.update(deltaSec);
-		}
-		
-		if (this.isUpdatingView)
-		{
-			phase.view.update(deltaSec);
-		}
+		this.app.update(deltaSec);
 	}
 	
 }

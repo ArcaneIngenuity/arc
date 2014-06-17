@@ -5,13 +5,6 @@ Phaser = function(app) //(final) Updatable, Disposable
 	this.phase = undefined; //current (public)
 	this.app = app;
 	
-	/*
-	this.update = function(deltaSec)
-	{
-		phase.update(deltaSec);
-	}
-	*/
-	
 	this.dispose = function()
 	{
 		for (var name in this.phases)
@@ -26,6 +19,7 @@ Phaser = function(app) //(final) Updatable, Disposable
 		{
 			phases[phase.name] = phase;
 			phase.setApp(this.app);
+			phase.view.disable();
 		}
 		else
 			throw "Cannot register Phase using name '"+phase.name+"'.";
@@ -36,8 +30,15 @@ Phaser = function(app) //(final) Updatable, Disposable
 		if (this.phase)
 		{
 			this.phase.finish();
+			this.phase.view.disable();
 		}	
 		this.phase = phases[name];
+		this.phase.view.enable();
 		this.phase.start();
+	}
+	
+	this.update = function(deltaSec)
+	{
+		this.phase.update(deltaSec);
 	}
 }
