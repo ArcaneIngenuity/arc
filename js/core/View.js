@@ -1,10 +1,12 @@
 View = function()
 {
 	this.app = undefined;
+	this.phase = undefined;
 	this.model = undefined;
 	this.enabled = true; //used by timing mechanism to know whether to update or not
 	this.parent = undefined;
 	this.children = []; //in draw order!
+	this.childrenByName = {}; //should be private
 	this.root = undefined; //TODO remove?
 	this.body = undefined;//pixel or 3D geometry, typically Box2 or 3 - explicitly injected after view construction... could be bitmap or arbitrary tri mesh
 	this.bounds = undefined; //always necessary for first pass pointer detection, and pointer transformations -- may be defined by body
@@ -12,59 +14,35 @@ View = function()
 	
 	this.enable = function()
 	{
-		/* ABSTRACT: OVERRIDE ME for retained mode render elements */
+		/* ABSTRACT: OVERRIDE ME */
 	}
 	
 	this.disable = function()
 	{
-		/* ABSTRACT: OVERRIDE ME for retained mode render elements */
-	}
-	
-	this.onFocusGained = function()
-	{
 		/* ABSTRACT: OVERRIDE ME */
-		//typically, gain foreground
-	}
-
-	this.onFocusLost = function()
-	{
-		/* ABSTRACT: OVERRIDE ME */
-		//typically, lose foreground
-	}
-	
-	this.onEntered = function()
-	{
-		/* ABSTRACT: OVERRIDE ME */
-		console.log('entered', this);
-	}
-	
-	this.onExited = function()
-	{
-		/* ABSTRACT: OVERRIDE ME */
-		console.log('exited', this);
 	}
 	
 	this.start = function()
 	{
 		/* ABSTRACT: OVERRIDE ME */
-		if (app.DEBUG)
-			console.warn(this.app.phaser.phase.name+"'s View.start() is not implemented.");
+		//if (app.DEBUG)
+		//	console.warn(this.app.phaser.phase.name+"'s View.start() is not implemented.");
 	}
 	
 	this.finish = function()
 	{
 		//console.log(this.app);
 		/* ABSTRACT: OVERRIDE ME */
-		if (app.DEBUG)
-			console.warn(this.app.phaser.phase.name+"'s View.finish() is not implemented.");
+		//if (app.DEBUG)
+		//	console.warn(this.app.phaser.phase.name+"'s View.finish() is not implemented.");
 	}
 	
 	/** Occurs before recursive, collective update of subviews. Use this if you want to simply overdraw all views as in a windowed UI using ordinary blitting. **/
 	this.input = function(deltaSec)
 	{
 		/* ABSTRACT: OVERRIDE ME */
-		if (app.DEBUG)
-			console.warn(this.app.phaser.phase.name+"'s View.input() is not implemented.");
+		//if (app.DEBUG)
+		//	console.warn(this.app.phaser.phase.name+"'s View.input() is not implemented.");
 	}
 	
 	/** Occurs after recursive, collective update of subviews. Use this if you used update(pre) to gather information onto a single canvas, and want to render that canvas in retrospect. **/
@@ -79,16 +57,16 @@ View = function()
 	this.output = function(deltaSec)
 	{
 		/* ABSTRACT: OVERRIDE ME */
-		if (app.DEBUG)
-			console.warn(this.app.phaser.phase.name+"'s View.output() is not implemented.");
+		//if (app.DEBUG)
+		//	console.warn(this.app.phaser.phase.name+"'s View.output() is not implemented.");
 	}
 
 	/** Occurs after recursive, collective update of subviews. Use this if you used update(pre) to gather information onto a single canvas, and want to render that canvas in retrospect. **/
 	this.outputPost = function(deltaSec)
 	{
 		/* ABSTRACT: OVERRIDE ME */
-		if (app.DEBUG)
-			console.warn(this.app.phaser.phase.name+"'s View.outputPost() is not implemented.");
+		//if (app.DEBUG)
+		//	console.warn(this.app.phaser.phase.name+"'s View.outputPost() is not implemented.");
 	}
 	
 	//only focus must be able to change order!
@@ -111,9 +89,26 @@ View = function()
 	this.addChild = function(childView) //final
 	{
 		this.children.push(childView);
+		this.childrenByName[childView.name] = childView;
 		childView.parent = this;
 		childView.root = this.root;
 		childView.app = this.app;
+		childView.model = this.model;
+	}
+	/*
+	this.removeChild = function(childView) //final
+	{
+		this.children.push(childView);
+		this.childrenByName[childView.name] = undefined;
+		childView.parent = undefined;
+		childView.root = undefined;
+		childView.app = undefined;
+		childView.model = undefined;
+	}
+	*/
+	this.getChildByName = function(name)
+	{
+		return this.childrenByName[name];
 	}
 	
 	this.hasChildren = function()
@@ -121,37 +116,53 @@ View = function()
 		return this.children.length > 0;
 	}
 	
-	/*
-	this.inputRecurse = function(deltaSec, inputMaps) //final
+	this.startRecurse = function() //final
 	{
-		this.input(deltaSec, inputMaps);
+		this.start();
 	
 		var children = this.children;
-		var length = children.length;
-		
-		for (var i = 0; i < length; i++)
+		if (children)
 		{
-			//TODO if child had "focus" (in whatever way focus is applied for that input: we should have hover focus and explicit select focus)
-			var child = children[i];
-			child.inputRecurse(deltaSec, inputMaps);
+			var length = children.length;
+			for (var i = 0; i < length; i++)
+			{
+				var child = children[i];
+				child.startRecurse();
+			}
 		}
-		
-		this.inputPost(deltaSec, inputMaps);
 	}
-	*/
+	
+	this.finishRecurse = function(deltaSec) //final
+	{
+		this.finish();
+	
+		var children = this.children;
+		if (children)
+		{
+			var length = children.length;
+			for (var i = 0; i < length; i++)
+			{
+				var child = children[i];
+				child.finishRecurse();
+			}
+		}
+	}
 	
 	this.outputRecurse = function(deltaSec) //final
 	{
 		this.output(deltaSec);
 	
 		var children = this.children;
-		var length = children.length;
-		for (var i = 0; i < length; i++)
+		if (children)
 		{
-			var child = children[i];
-			child.outputRecurse(deltaSec);
+			var length = children.length;
+			for (var i = 0; i < length; i++)
+			{
+				var child = children[i];
+				if (child.enabled)
+					child.outputRecurse(deltaSec);
+			}
 		}
-		
 		this.outputPost(deltaSec);
 	}
 	
@@ -207,6 +218,16 @@ View = function()
 			}
 		}
 		return leaves;
+	}
+	
+	this.makeLeaf = function()
+	{
+		this.children = undefined;
+	}
+	
+	this.isLeaf = function()
+	{
+		return this.children == undefined;
 	}
 	
 	//--- transformation functions -- later to go in Transform abstract class (2D or 3D) ---//
@@ -273,15 +294,26 @@ View = function()
 			position.y += view.bounds.y0;
 		}
 	}
-	
-	this.enable = function()
+
+	this.takeFocus = function()
 	{
-		/* ABSTRACT: OVERRIDE ME */
+		//var phase = this.phase;
+		//phase.focus = this;
+		
+		this.app.pointer.focus = this;
 	}
 	
-	this.disable = function()
+	//JS - should be in extensions?
+	
+	//from http://bradsknutson.com/blog/javascript-detect-mouse-leaving-browser-window/
+	this.addDOMEvent = function(obj, evt, fn)
 	{
-		/* ABSTRACT: OVERRIDE ME */
+		if (obj.addEventListener) {
+			obj.addEventListener(evt, fn, false);
+		}
+		else if (obj.attachEvent) {
+			obj.attachEvent("on" + evt, fn);
+		}
 	}
 }
 

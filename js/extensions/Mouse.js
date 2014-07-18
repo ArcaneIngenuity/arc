@@ -29,7 +29,7 @@ Mouse = function()
 				valueOld = channel.value;
 				valueNew = channel.value = 0;
 				channel.delta = valueNew - valueOld;
-				console.log('channel delta', channel.delta);
+				//console.log('channel delta', channel.delta);
 			}
 			if (inputType === 'mo') //move
 			{

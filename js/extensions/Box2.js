@@ -53,4 +53,14 @@ Box2 = function(x0, y0, x1, y1)
 	{
 		this.y1 = this.y0 + value;
 	}
+	
+	this.getCentreX = function()
+	{
+		return this.x0 + this.getWidth() / 2;
+	}
+	
+	this.getCentreY = function()
+	{
+		return this.y0 + this.getHeight() / 2;
+	}
 }

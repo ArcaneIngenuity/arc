@@ -1,19 +1,30 @@
+/*
+dj.array.clear = function(array) //use only for sparse arrays / lists
+{
+	array.length = 0; //most efficient.
+}
+*/
+
+/*
 Array.prototype.clear = function() //use only for sparse arrays / lists
 {
 	this.length = 0; //most efficient.
 }
+*/
+/*
 Array.prototype.removeAtIndex = function(index) //use only for sparse arrays / lists
 {
 	this.splice(index, 1);
 }
-
+*/
+/*
 //add one array's elements to the end of another array
 Array.prototype.extend = function (other_array)
 {
-    /* you should include a test to check whether other_array really is an array */
+    // you should include a test to check whether other_array really is an array
     other_array.forEach(function(v) {this.push(v)}, this);    
 }
-
+*/
 /*
 Array.prototype.remove = function(element)
 {
