@@ -8,9 +8,45 @@ View = function()
 	this.children = []; //in draw order!
 	this.childrenByName = {}; //should be private
 	this.root = undefined; //TODO remove?
-	this.body = undefined;//pixel or 3D geometry, typically Box2 or 3 - explicitly injected after view construction... could be bitmap or arbitrary tri mesh
+	this.body = undefined; //pixel or 3D geometry, typically Box2 or 3 - explicitly injected after view construction... could be bitmap or arbitrary tri mesh
 	this.bounds = undefined; //always necessary for first pass pointer detection, and pointer transformations -- may be defined by body
-	//TODO draggability bounds (e.g. top bar, corner grip)
+	this.interactor = undefined;
+	this.interactors = [];
+	
+	//ABSTRACT METHODS
+	/** Used to set up resources or values specific to this View. */ 
+	this.start = function()
+	{
+		/* ABSTRACT: OVERRIDE ME */
+	}
+	
+	/** Used to clean up resources or reset values for this View, if it is no longer needed and can be released. */ 
+	this.finish = function()
+	{
+		/* ABSTRACT: OVERRIDE ME */
+	}
+	
+	/** (When focused) Process all input into this View and modify model and View state (if using a persistent / retained mode display list) accordingly, if View enabled. **/
+	this.input = function(deltaSec)
+	{
+		//ABSTRACT: OVERRIDE ME
+		//-run only for the currently focused view in a given global update
+		//-runInteractors() can be called by user during this function (typically at start) for when Interactors have been registered with this View.
+		
+	}
+
+	/** Render all output for this View based on model state, on View tree walk-down, if View enabled. **/
+	this.output = function(deltaSec)
+	{
+		//ABSTRACT: OVERRIDE ME
+	}
+
+	/** Render all output for this View based on model state, on View tree walk-up, if View enabled. **/
+	/** Occurs after recursive, collective update of subviews. Use this if you used update(pre) to gather information onto a single canvas, and want to render that canvas in retrospect. **/
+	this.outputPost = function(deltaSec)
+	{
+		//ABSTRACT: OVERRIDE ME
+	}
 	
 	this.enable = function()
 	{
@@ -22,51 +58,56 @@ View = function()
 		/* ABSTRACT: OVERRIDE ME */
 	}
 	
-	this.start = function()
+	//FINAL METHODS
+	this.outputRecurse = function(deltaSec) //final
 	{
-		/* ABSTRACT: OVERRIDE ME */
-		//if (app.DEBUG)
-		//	console.warn(this.app.phaser.phase.name+"'s View.start() is not implemented.");
+		this.output(deltaSec);
+	
+		var children = this.children;
+		if (children)
+		{
+			var length = children.length;
+			for (var i = 0; i < length; i++)
+			{
+				var child = children[i];
+				if (child.enabled)
+					child.outputRecurse(deltaSec);
+			}
+		}
+		this.outputPost(deltaSec);
 	}
 	
-	this.finish = function()
+	//TODO Interactors from markup?
+	//TODO View to register interaction modes via method which binds Interactor to View and vice versa
+	this.runInteractors = function(deltaSec)
 	{
-		//console.log(this.app);
-		/* ABSTRACT: OVERRIDE ME */
-		//if (app.DEBUG)
-		//	console.warn(this.app.phaser.phase.name+"'s View.finish() is not implemented.");
-	}
-	
-	/** Occurs before recursive, collective update of subviews. Use this if you want to simply overdraw all views as in a windowed UI using ordinary blitting. **/
-	this.input = function(deltaSec)
-	{
-		/* ABSTRACT: OVERRIDE ME */
-		//if (app.DEBUG)
-		//	console.warn(this.app.phaser.phase.name+"'s View.input() is not implemented.");
-	}
-	
-	/** Occurs after recursive, collective update of subviews. Use this if you used update(pre) to gather information onto a single canvas, and want to render that canvas in retrospect. **/
-	/*
-	this.inputPost = function(deltaSec, inputMaps)
-	{
-		// ABSTRACT: OVERRIDE ME 
-		if (app.DEBUG)
-			console.warn(this.app.phaser.phase.name+"'s View.inputPost() is not implemented.");
-	}
-	*/
-	this.output = function(deltaSec)
-	{
-		/* ABSTRACT: OVERRIDE ME */
-		//if (app.DEBUG)
-		//	console.warn(this.app.phaser.phase.name+"'s View.output() is not implemented.");
-	}
-
-	/** Occurs after recursive, collective update of subviews. Use this if you used update(pre) to gather information onto a single canvas, and want to render that canvas in retrospect. **/
-	this.outputPost = function(deltaSec)
-	{
-		/* ABSTRACT: OVERRIDE ME */
-		//if (app.DEBUG)
-		//	console.warn(this.app.phaser.phase.name+"'s View.outputPost() is not implemented.");
+		if (!this.interactor) //seek entry into an interactive state
+		{
+			for (var i = 0; i < this.interactors.length; i++)
+			{
+				var interactor = this.interactors[i];
+				if (interactor.hasInputStarted())
+				{
+					interactor.inputStart();
+					this.interactor = interactor;
+					break; //interactors are checked in array order of precedence
+				}
+			}
+		}
+		else
+		{
+			if (this.interactor.hasInputFinished())
+			{
+				this.interactor.inputFinish();
+				this.interactor = undefined;
+			}
+		}
+		//as this.mode may have just changed, check condition again for update.
+		if (this.interactor) //do processing on that mode
+		{
+			this.interactor.inputUpdate(deltaSec);
+			this.interactor.ctrlUpdate(deltaSec);
+		}
 	}
 	
 	//only focus must be able to change order!
@@ -147,24 +188,7 @@ View = function()
 			}
 		}
 	}
-	
-	this.outputRecurse = function(deltaSec) //final
-	{
-		this.output(deltaSec);
-	
-		var children = this.children;
-		if (children)
-		{
-			var length = children.length;
-			for (var i = 0; i < length; i++)
-			{
-				var child = children[i];
-				if (child.enabled)
-					child.outputRecurse(deltaSec);
-			}
-		}
-		this.outputPost(deltaSec);
-	}
+
 	
 	this.getDepth = function()
 	{

@@ -1,6 +1,7 @@
 DragInteractor = function(app, phase, model, view, ctrl)
 {
 	Interactor.call(this, app, phase, model, view, ctrl)
+	this.grabOffset = undefined;
 	
 	this.hasInputStarted = function()
 	{
@@ -20,7 +21,7 @@ DragInteractor = function(app, phase, model, view, ctrl)
 		var view = this.view;
 		var pointer = this.app.pointer;
 	
-		this.grabOffset = ;
+		//this.grabOffset = ;
 	}
 	
 	this.inputUpdate = function(deltaSec)
@@ -82,12 +83,12 @@ DragInteractor = function(app, phase, model, view, ctrl)
 		var width = bounds.getWidth();
 		var height = bounds.getHeight();
 		
-		block.xCountOld = block.xCount;
-		block.yCountOld = block.yCount;
+		block.xCountLast = block.xCount;
+		block.yCountLast = block.yCount;
 		block.xCount = Math.abs(Math.floor(width  / block.xSpacePerElement));
 		block.yCount = Math.abs(Math.floor(height / block.ySpacePerElement));
-		block.xCountDelta = block.xCount - block.xCountOld;
-		block.yCountDelta = block.yCount - block.yCountOld;
+		block.xCountDelta = block.xCount - block.xCountLast;
+		block.yCountDelta = block.yCount - block.yCountLast;
 
 		//TODO move into this class, out of ctrl?
 		ctrl.alignBox2(bounds, model.blockStart, model.blockEnd);
@@ -101,5 +102,5 @@ DragInteractor = function(app, phase, model, view, ctrl)
 	}
 }
 
-PlaySelectInteractor.prototype = Object.create(Interactor.prototype);
-PlaySelectInteractor.prototype.constructor = PlaySelectInteractor;
+DragInteractor.prototype = Object.create(Interactor.prototype);
+DragInteractor.prototype.constructor = DragInteractor;

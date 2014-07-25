@@ -11,6 +11,8 @@ Phase = function(name, model, view, ctrl) //(abstract) Updatable, Disposable
 	this.ctrl.model = model; //inject
 	
 	this.app = undefined;
+	
+	this.bindings = [];
                        
 	this.setApp = function(app)
 	{
@@ -55,10 +57,10 @@ Phase = function(name, model, view, ctrl) //(abstract) Updatable, Disposable
 		view.dispose();
 	}
 	
-	
 	this.update = function(deltaSec) //final
 	{
 		//use global input to refresh focus if necessary.
+		var model = this.model;
 		var view = this.view;
 		var ctrl = this.ctrl;
 		var pointer = this.app.pointer;
@@ -76,19 +78,38 @@ Phase = function(name, model, view, ctrl) //(abstract) Updatable, Disposable
 		//this may occur externally via an event-based system like the DOM writing pointer.focus, or be done here, internally, for all views. 
 		if (pointer.pollFocus)
 			pointer.pollFocus();
+		//console.log(focus);
+		//update last state for each bound value in this phase's model so we know what has changed for binding purposes
+		//TODO same for global / app model
+		//TODO in C, we would just provide a list of pairs of 32-bit pointers to the model elements -- new / old -- after model had been fully allocated.
+		
+		model.updateHistory();
 		
 		//global update: view.input, ctrl.update, view.output
 		var focus = this.app.pointer.focus;
-		if (focus) 
-			focus.input(deltaSec); //single view gets input processed
+		var bubble = focus;
+		while (bubble)
+			bubble = bubble.input(deltaSec); //focus returns next ancestor, and so on... or not. this is the logical opposite of stopPropagation -- instead we propagate if appropriate.
+		//....TODO  either this, or we simply set certain views which ALWAYS update input. Or maybe both approaches.
+		
 		//TODO put dragging in as feature of View
 		//if (pointer)
 		//	if (pointer.dragging)
 		//		pointer.progressDrag();
 		ctrl.update(deltaSec);
+		/*
+		//TODO not sure about this part; it really only caches whether a change was made, as a boolean. useful or not useful?
+		for (var i = 0; i < this.bindings.length; i++)
+		{
+			var binding = this.bindings[i];
+			binding.markDirtyIfChanged();
+		} //now current is fresh
+		*/
 		//view.updateBindings();
 		view.outputRecurse(deltaSec); //render all views from root
 	}
+	
+
 	
 	/*
 	this.changeFocus = function(view)

@@ -11,7 +11,7 @@ App = function() //(abstract)
 	this.model = undefined; //optional app-wide model
 	//abstraction of the device used to perform screen pointing - encapsulates hierarchical transformation of device coordinates to focused view's own coordinate system
 	
-	this.setPointer = function(deviceIndex, xChannelIndex, yChannelIndex, hitIndex)
+	this.setPointer = function(deviceIndex, xChannelIndex, yChannelIndex, selectIndex)
 	{
 		//console.log('?');
 		//if (deviceIndex === undefined || xChannelIndex === undefined || yChannelIndex === undefined)
@@ -24,7 +24,7 @@ App = function() //(abstract)
 		//pointer.yChannelIndex = yChannelIndex;
 		pointer.xChannel = pointer.device.channels[xChannelIndex];
 		pointer.yChannel = pointer.device.channels[yChannelIndex];
-		pointer.hitChannel = pointer.device.channels[hitIndex];
+		pointer.selectChannel = pointer.device.channels[selectIndex];
 	}
 	
 	this.dispose = function()

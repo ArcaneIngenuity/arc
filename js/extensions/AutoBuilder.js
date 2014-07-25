@@ -49,6 +49,8 @@ AutoBuilder = function()
 			//recurse
 			if (childElement.children.length > 0)
 				this.addChildViews(childView ? childView : view, childElement);//, domRect); //conditional will skip DOM tree levels that don't have a related View
+			else
+				this.prepareElement(childElement, view);
 			//else	
 			//	childView.makeLeaf(); //if no DOM children, set View children array undefined
 			

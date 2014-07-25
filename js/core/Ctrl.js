@@ -4,27 +4,23 @@ Ctrl = function()
 	this.model = undefined;
 	this.enabled = true; //used by timing mechanism to know whether to update or not
 	
+	/** Used to set up resources or values specific to this Ctrl / Model (and thus the entire Phase). */ 
 	this.start = function()
 	{
-		/* ABSTRACT: OVERRIDE ME */
-		if (app.DEBUG)
-			console.warn(this.app.phaser.phase.name+"'s Ctrl.start() is not implemented.");
+		//ABSTRACT: OVERRIDE ME
 	}
 	
+	/** Used to clean up resources or reset values for this Ctrl, if it is no longer needed and can be released. */ 
 	this.finish = function()
 	{
-		//console.log(this.app);
-		/* ABSTRACT: OVERRIDE ME */
-		if (app.DEBUG)
-			console.warn(this.app.phaser.phase.name+"'s Ctrl.finish() is not implemented.");
+		//ABSTRACT: OVERRIDE ME
 	}
 	
-	/** Update simulation state. **/
-	this.update = function(deltaSec, inputMaps)
+	/** Update simulation state by making changes to associated Model. */
+	this.update = function(deltaSec)
 	{
-		/* ABSTRACT: OVERRIDE ME */
-		if (app.DEBUG)
-			console.warn(this.app.phaser.phase.name+"'s Ctrl.update() is not implemented.");
+		//ABSTRACT: OVERRIDE ME
+		//-input that applies irrespective of View focus, should be run here.
 	}
 };
 

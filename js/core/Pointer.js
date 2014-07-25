@@ -18,8 +18,8 @@ Pointer = function() //ABSTRACT / INTERFACE
 	this.targetLast = undefined;
 	this.targetSelected = undefined;
 	this.targetReleased = undefined;
-	this.targetPosition;// = new Point2(); //local position of pointer within pointed element
-	this.position = new Point2(); //local position of pointer within pointed element
+	this.positionInTarget;// = new Point2(); //local position of pointer within pointed element
+	this.position = new Point2(); //world position of pointer within pointed element
 	this.entered = undefined;
 	this.exited = undefined;
 	
@@ -28,7 +28,7 @@ Pointer = function() //ABSTRACT / INTERFACE
 	
 	this.xChannel = undefined;
 	this.yChannel = undefined;
-	this.hitChannel = undefined;
+	this.selectChannel = undefined;
 	
 	this.dragging = undefined;
 	
@@ -76,8 +76,8 @@ Pointer = function() //ABSTRACT / INTERFACE
 	this.updateSelectedness = function() //TODO change for touch devices.
 	{
 		this.wasSelected = this.isSelected;
-		if (this.hitChannel.delta > 0)
-			this.isSelected = this.hitChannel.value > 0;
+		if (this.selectChannel.delta > 0)
+			this.isSelected = this.selectChannel.value > 0;
 	}
 	
 	this.findTarget = function(view)
@@ -100,8 +100,8 @@ Pointer = function() //ABSTRACT / INTERFACE
 			this.target = intersectedViews.length > 0 ? intersectedViews[intersectedViews.length-1] : undefined;
 			
 			//3. get position of pointer within target
-			this.targetPosition = this.position.clone();
-			this.target.fromWorld(this.targetPosition);
+			this.positionInTarget = this.position.clone();
+			this.target.fromWorld(this.positionInTarget);
 		}
 	}
 	
@@ -134,7 +134,7 @@ Pointer = function() //ABSTRACT / INTERFACE
 				}
 				
 				//add view if intersected
-				var pointerTargetPosition = this.targetPosition = pointerPosition.clone();
+				var pointerTargetPosition = this.positionInTarget = pointerPosition.clone();
 				view.fromWorld(pointerTargetPosition);
 				var inBounds = view.bounds.contains(pointerTargetPosition);
 				var inGeometry = view.geometry ? view.geometry.intersects(pointerTargetPosition) : true;
