@@ -1,23 +1,20 @@
 Phaser = function(app) //(final) Updatable, Disposable
 {
 	/** Must be defined before it can be set into the manager's map. */
-	var phases = {};
+	var array = {};
 	this.phase = undefined; //current (public)
 	this.app = app;
 	
-	this.dispose = function()
+	this.get = function(i)
 	{
-		for (var name in this.phases)
-		{
-			phases[name].dispose();
-		}
+		return this.array[i];
 	}
 
-	this.register = function(phase)
+	this.add = function(phase)
 	{
 		if (phase.name)
 		{
-			phases[phase.name] = phase;
+			array[phase.name] = phase;
 			phase.setApp(this.app);
 			phase.view.disable();
 		}
@@ -32,7 +29,8 @@ Phaser = function(app) //(final) Updatable, Disposable
 			this.phase.finish();
 			this.phase.view.disable();
 		}	
-		this.phase = phases[name];
+		this.phase = array[name];
+		//console.log(name, this.phase);
 		this.phase.view.enable();
 		this.phase.start();
 	}
@@ -40,5 +38,13 @@ Phaser = function(app) //(final) Updatable, Disposable
 	this.update = function(deltaSec)
 	{
 		this.phase.update(deltaSec);
+	}
+	
+	this.dispose = function()
+	{
+		for (var name in this.array)
+		{
+			array[name].dispose();
+		}
 	}
 }

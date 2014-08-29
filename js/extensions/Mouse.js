@@ -1,6 +1,6 @@
 Mouse = function()
 {
-	InputDevice.call(this, 6); //super-constructor (add params after this)
+	Input.call(this, 6); //super-constructor (add params after this)
 	
 	//passive: use as an input event handler - DOM
 	this.receive = function(event)
@@ -59,7 +59,7 @@ Mouse = function()
 	}
 }
 
-Mouse.prototype = new InputDevice();
+Mouse.prototype = new Input();
 Mouse.prototype.constructor = Mouse;
 
 MOUSE_X = 0;

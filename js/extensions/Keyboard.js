@@ -3,11 +3,11 @@
 
 Keyboard = function()
 {
-	InputDevice.call(this, 256); //super-constructor (add params after this)
+	Input.call(this, 256); //super-constructor (add params after this)
 	
 	this.receive = function(event)
 	{
-		//console.log(event);
+		console.log(event);
 		var deviceName = event.type.substring(0, 3);
 		if (deviceName === 'key')
 		{
@@ -31,7 +31,7 @@ Keyboard = function()
 	}
 }
 
-Keyboard.prototype = new InputDevice();
+Keyboard.prototype = new Input();
 Keyboard.prototype.constructor = Keyboard;
 
 //from code.google.com/p/closure-library/source/browse/closure/goog/events/keycodes.js

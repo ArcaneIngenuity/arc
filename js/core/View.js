@@ -31,7 +31,7 @@ View = function()
 	{
 		//ABSTRACT: OVERRIDE ME
 		//-run only for the currently focused view in a given global update
-		//-runInteractors() can be called by user during this function (typically at start) for when Interactors have been registered with this View.
+		//-runTasks() can be called by user during this function (typically at start) for when Tasks have been registered with this View.
 		
 	}
 
@@ -79,6 +79,8 @@ View = function()
 	
 	//TODO Interactors from markup?
 	//TODO View to register interaction modes via method which binds Interactor to View and vice versa
+	/*
+	THIS IS NOT A GOOD PATTERN. It necessarily assumes exclusion of other Tasks/Interactors if one is already running. This should be a user choice.
 	this.runInteractors = function(deltaSec)
 	{
 		if (!this.interactor) //seek entry into an interactive state
@@ -109,6 +111,7 @@ View = function()
 			this.interactor.ctrlUpdate(deltaSec);
 		}
 	}
+	*/
 	
 	//only focus must be able to change order!
 	this.bringToFore = function(child)
@@ -159,18 +162,18 @@ View = function()
 	
 	this.startRecurse = function() //final
 	{
-		this.start();
-	
 		var children = this.children;
 		if (children)
 		{
-			var length = children.length;
+			var length = children.length; console.log(length);
 			for (var i = 0; i < length; i++)
 			{
 				var child = children[i];
 				child.startRecurse();
 			}
 		}
+		
+		this.start(); //create from bottom up
 	}
 	
 	this.finishRecurse = function(deltaSec) //final

@@ -1,36 +1,31 @@
-//stores a list of current devices
-//listens for connecting / disconnecting devices
-
-//INPUT_KEYBOARD = 0;
-//INPUT_MOUSE = 1;
-
-InputDeviceManager = function(domElement)
+//TODO listen for connecting / disconnecting devices
+InputHub = function(domElement)
 {
-	//var NUM_DEVICES = 2;
-	
 	//TODO actually in C we should simply realloc when devices are added, and in JS just use array length after pushes.
 	//use sufficiently large number for devices
-	this.devices = [];
+	this.array = [];
 	
-
+	this.get = function(i)
+	{
+		return this.array[i];
+	}
 	
-
 	this.poll = function()
 	{
-		var numDevices = this.devices.length;
+		var numDevices = this.array.length;
 		for (var i = 0; i < numDevices; i++)
 		{
-			var device = this.devices[i];
+			var device = this.array[i];
 			device.poll();
 		}
 	}
 
 	this.flush = function()
 	{
-		var numDevices = this.devices.length;
+		var numDevices = this.array.length;
 		for (var i = 0; i < numDevices; i++)
 		{
-			var device = this.devices[i];
+			var device = this.array[i];
 			if (device.eventBased)
 			{
 				var numChannels = device.channels.length;
@@ -45,15 +40,19 @@ InputDeviceManager = function(domElement)
 	
 	//add device as reader and let function create the associate map in a single exclusive array. (This makes passing the map array alone, to the View hierarchy, simpler.)
 	//return the newly assigned index.
-	this.addDevice = function(device)
+	this.add = function(device)
 	{
-		this.devices.push(device);
+		this.array.push(device);
 		
-		return this.devices.length - 1;
+		return this.array.length - 1;
 	}
 	
 	this.dispose = function()
 	{
-		//TODO free maps allocated
+		var array = this.array;
+		for (var i = 0; i < array.length; i++)
+		{
+			array[i].dispose();
+		}
 	}
 }

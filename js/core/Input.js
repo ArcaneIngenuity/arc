@@ -1,4 +1,4 @@
-InputDevice = function(numChannels) //ABSTRACT / INTERFACE
+Input = function(numChannels) //ABSTRACT / INTERFACE
 {
 	this.channels = [];
 	this.numChannels = numChannels;
@@ -7,7 +7,7 @@ InputDevice = function(numChannels) //ABSTRACT / INTERFACE
 	//constructor
 	for (var i = 0; i < this.numChannels; i++)
 	{
-		this.channels[i] = new InputDeviceChannel();
+		this.channels[i] = new InputChannel();
 	}
 	
 	//passive: use as an input event handler - DOM
@@ -18,6 +18,11 @@ InputDevice = function(numChannels) //ABSTRACT / INTERFACE
 
 	//active: poll underlying system on global update
 	this.poll = function()
+	{
+		//ABSTRACT
+	}
+	
+	this.dispose = function()
 	{
 		//ABSTRACT
 	}

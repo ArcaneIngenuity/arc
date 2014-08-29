@@ -88,7 +88,7 @@ Pointer = function() //ABSTRACT / INTERFACE
 		var device = this.device;
 		this.position.x = this.xChannel.value;
 		this.position.y = this.yChannel.value;
-		
+		//console.log(device);
 		if (this.position.x && this.position.y) //often undefined for touch interfaces
 		{
 			//1. determine which views pointer is in (exhaustively because parents do not necessarily geometrically contain children)
@@ -102,6 +102,7 @@ Pointer = function() //ABSTRACT / INTERFACE
 			//3. get position of pointer within target
 			this.positionInTarget = this.position.clone();
 			this.target.fromWorld(this.positionInTarget);
+			//console.log('in')
 		}
 	}
 	

@@ -1,21 +1,21 @@
-DragInteractor = function(app, phase, model, view, ctrl)
+DragTimeline = function(app, phase, model, view, ctrl)
 {
 	Interactor.call(this, app, phase, model, view, ctrl)
 	this.grabOffset = undefined;
 	
-	this.hasInputStarted = function()
+	this.isToStart = function()
 	{
 		var pointer = this.app.pointer;
 		return pointer.selectChannel.delta > 0;
 	}
 	
-	this.hasInputFinished = function()
+	this.isToFinish = function()
 	{
 		var pointer = this.app.pointer;
 		return pointer.selectChannel.delta < 0;
 	}
 	
-	this.inputStart = function()
+	this.start = function()
 	{
 		var model = this.model;
 		var view = this.view;
@@ -24,7 +24,7 @@ DragInteractor = function(app, phase, model, view, ctrl)
 		//this.grabOffset = ;
 	}
 	
-	this.inputUpdate = function(deltaSec)
+	this.input = function(deltaSec)
 	{
 		/*
 		var model = this.model;
@@ -51,7 +51,7 @@ DragInteractor = function(app, phase, model, view, ctrl)
 		*/
 	}
 	
-	this.inputFinish = function()
+	this.finish = function()
 	{
 	/*
 		var model = this.model;
@@ -69,7 +69,7 @@ DragInteractor = function(app, phase, model, view, ctrl)
 		
 	}
 
-	this.ctrlUpdate = function(deltaSec)
+	this.simulate = function(deltaSec)
 	{
 		/*
 		var model = this.model;
@@ -102,5 +102,5 @@ DragInteractor = function(app, phase, model, view, ctrl)
 	}
 }
 
-DragInteractor.prototype = Object.create(Interactor.prototype);
-DragInteractor.prototype.constructor = DragInteractor;
+DragTimeline.prototype = Object.create(Timeline.prototype);
+DragTimeline.prototype.constructor = DragTimeline;

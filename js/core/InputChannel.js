@@ -1,4 +1,4 @@
-InputDeviceChannel = function()
+InputChannel = function()
 {
 	this.value = 0;
 	//this.valueLast = undefined;

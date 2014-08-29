@@ -12,7 +12,8 @@ Phase = function(name, model, view, ctrl) //(abstract) Updatable, Disposable
 	
 	this.app = undefined;
 	
-	this.bindings = [];
+	this.tasks = [];
+	//this.bindings = [];
                        
 	this.setApp = function(app)
 	{
@@ -73,7 +74,7 @@ Phase = function(name, model, view, ctrl) //(abstract) Updatable, Disposable
 				pointer.updateSelectedness();
 			}
 		}
-
+//console.log(pointer.target);
 		//check whether focus has changed
 		//this may occur externally via an event-based system like the DOM writing pointer.focus, or be done here, internally, for all views. 
 		if (pointer.pollFocus)
@@ -83,7 +84,7 @@ Phase = function(name, model, view, ctrl) //(abstract) Updatable, Disposable
 		//TODO same for global / app model
 		//TODO in C, we would just provide a list of pairs of 32-bit pointers to the model elements -- new / old -- after model had been fully allocated.
 		
-		model.updateHistory();
+		model.updateJournals();
 		
 		//global update: view.input, ctrl.update, view.output
 		var focus = this.app.pointer.focus;

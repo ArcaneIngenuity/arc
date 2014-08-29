@@ -17,7 +17,7 @@ Ctrl = function()
 	}
 	
 	/** Update simulation state by making changes to associated Model. */
-	this.update = function(deltaSec)
+	this.simulate = function(deltaSec)
 	{
 		//ABSTRACT: OVERRIDE ME
 		//-input that applies irrespective of View focus, should be run here.
