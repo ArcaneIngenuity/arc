@@ -1,0 +1,75 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Disjunction Basic Template</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+</head>
+<body onload="app = (new AppBuilder()).buildFrom(document.body);" onmouseup="app.input.array[INPUT_MOUSE].receive(event)" onmousemove="app.input.array[INPUT_MOUSE].receive(event)" onkeydown="app.input.array[INPUT_KEYBOARD].receive(event)" onkeyup="app.input.array[INPUT_KEYBOARD].receive(event)">
+	<app model="AppModel" oncontextmenu="return false">
+		<devices>
+			<device class="Mouse"></device>
+			<device class="Keyboard"></device>
+			<!-- TODO include any other input device interfaces here, supplying custom Input implementations -->
+		</devices>
+		<services>
+			<!-- TODO include any Services here -->
+		</services>
+		<phases>
+			<phase-div class="Main" current>
+			</phase-div>
+			<!-- TODO include all Phases here -->
+		</phases>
+	</app>
+</body>
+
+<!-- JS framework prequisites -->
+<script src="../../extensions/ES5.js"></script>
+<script src="../../extensions/Math.js"></script>
+<script src="../../extensions/Object.js"></script>
+<script src="../../extensions/Array.js"></script>
+<script src="../../extensions/Array2.js"></script>
+
+<!-- framework core -->
+<script src="../../core/AppBuilder.js"></script>
+<script src="../../core/App.js"></script>
+<script src="../../core/Phaser.js"></script>
+<script src="../../core/Phase.js"></script>
+<script src="../../core/Model.js"></script>
+<script src="../../core/View.js"></script>
+<script src="../../core/Ctrl.js"></script>
+<script src="../../core/ServiceHub.js"></script>
+<script src="../../core/InputHub.js"></script>
+<script src="../../core/Input.js"></script>
+<script src="../../core/InputChannel.js"></script>
+<script src="../../core/Pointer.js"></script>
+<script src="../../core/Display.js"></script>
+
+<!-- framework extensions -->
+<script src="../../extensions/Timer.js"></script>
+<script src="../../extensions/TimerRAF.js"></script>
+<script src="../../extensions/Keyboard.js"></script>
+<script src="../../extensions/Mouse.js"></script>
+<script src="../../extensions/Box2.js"></script>
+<script src="../../extensions/Point2.js"></script>
+
+<!-- App-related implementations -->
+<!-- NOTE directory structures and and file separations are arbitrary -- you could keep everything in the root, even in a single file. -->
+<link  href="./App.css" rel="stylesheet">
+<script src="./AppModel.js"></script>
+
+<!-- Phase-related implementations -->
+<link  href="./Phases/Main/Main.css" rel="stylesheet">
+<script src="./Phases/Main/MainModel.js"></script>
+<script src="./Phases/Main/MainView.js"></script>
+<script src="./Phases/Main/MainCtrl.js"></script>
+<!-- NOTE you may keep your Phase's Model, View, Ctrl in one file, for example...-->
+<!--<script src="./Phases/Main/Main.js"></script>-->
+
+<!-- View implementations (not specific to any Phase) -->
+
+<!-- user miscellaneous, non-framework classes -->
+
+</html>

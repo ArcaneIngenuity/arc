@@ -17,19 +17,19 @@ View = function()
 	/** Used to set up resources or values specific to this View. */ 
 	this.start = function()
 	{
-		/* ABSTRACT: OVERRIDE ME */
+		/* ABSTRACT: OVERRIDE */
 	}
 	
 	/** Used to clean up resources or reset values for this View, if it is no longer needed and can be released. */ 
 	this.finish = function()
 	{
-		/* ABSTRACT: OVERRIDE ME */
+		/* ABSTRACT: OVERRIDE */
 	}
 	
 	/** (When focused) Process all input into this View and modify model and View state (if using a persistent / retained mode display list) accordingly, if View enabled. **/
 	this.input = function(deltaSec)
 	{
-		//ABSTRACT: OVERRIDE ME
+		//ABSTRACT: OVERRIDE
 		//-run only for the currently focused view in a given global update
 		//-runTasks() can be called by user during this function (typically at start) for when Tasks have been registered with this View.
 		
@@ -38,24 +38,40 @@ View = function()
 	/** Render all output for this View based on model state, on View tree walk-down, if View enabled. **/
 	this.output = function(deltaSec)
 	{
-		//ABSTRACT: OVERRIDE ME
+		//ABSTRACT: OVERRIDE
 	}
 
 	/** Render all output for this View based on model state, on View tree walk-up, if View enabled. **/
 	/** Occurs after recursive, collective update of subviews. Use this if you used update(pre) to gather information onto a single canvas, and want to render that canvas in retrospect. **/
 	this.outputPost = function(deltaSec)
 	{
-		//ABSTRACT: OVERRIDE ME
+		//ABSTRACT: OVERRIDE
 	}
 	
+	//re-enables view processing.
 	this.enable = function()
 	{
-		/* ABSTRACT: OVERRIDE ME */
+		this.enabled = true;
+		this.show();
 	}
 	
+	//stops view processing altogether.
 	this.disable = function()
 	{
-		/* ABSTRACT: OVERRIDE ME */
+		this.enabled = false;
+		this.hide();
+	}
+	
+	//restores visibility.
+	this.show = function()
+	{
+		/* ABSTRACT: OVERRIDE */
+	}
+	
+	//keeps view processing even if its not visible.
+	this.hide = function()
+	{
+		/* ABSTRACT: OVERRIDE */
 	}
 	
 	//FINAL METHODS
@@ -74,6 +90,7 @@ View = function()
 					child.outputRecurse(deltaSec);
 			}
 		}
+		
 		this.outputPost(deltaSec);
 	}
 	

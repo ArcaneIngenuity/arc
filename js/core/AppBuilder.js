@@ -45,8 +45,10 @@ AppBuilder = function()
 		
 		var domDevices = domApp.getElementsByTagName(devicesTagName)[0];
 		if (domDevices) //should always be true
+		{
+		console.log(domDevices);
 			this.addDevices(domDevices);
-
+}
 		var domServices = domApp.getElementsByTagName(servicesTagName)[0];
 		if (domServices) //NOT always true
 			this.addServices(domServices);
@@ -54,6 +56,19 @@ AppBuilder = function()
 		var domPhases = domApp.getElementsByTagName(phasesTagName)[0];
 		if (domPhases) //should always be true
 			this.addPhases(domPhases);
+			
+		var mouse = app.input.array[INPUT_MOUSE];
+		var keyboard = app.input.array[INPUT_KEYBOARD];
+		domContainer.addEventListener('mousedown', 	ES5.bind(mouse, mouse.receive));
+		domContainer.addEventListener('mouseup',	ES5.bind(mouse, mouse.receive));
+		domContainer.addEventListener('mousemove',	ES5.bind(mouse, mouse.receive));
+		domContainer.addEventListener('keydown', 	ES5.bind(keyboard, keyboard.receive));
+		domContainer.addEventListener('keyup',		ES5.bind(keyboard, keyboard.receive));
+		//onmousedown=""
+		//onmouseup="app.input.array[INPUT_MOUSE].receive(event)"
+		//onmousemove="app.input.array[INPUT_MOUSE].receive(event)"
+		//onkeydown="app.input.array[INPUT_KEYBOARD].receive(event)"
+		//onkeyup="app.input.array[INPUT_KEYBOARD].receive(event)" style="position:absolute; width:100%; height:100%;"
 		
 		app.phaser.change(currentPhaseName);
 		
@@ -80,7 +95,8 @@ AppBuilder = function()
 				{
 					//create it, add it to InputManager, and store it's index globally (TODO -- later make index storage location changeable as it may not be wanted on window)
 					window['INPUT_'+className.replace('Device','').toUpperCase()] = app.input.add(new Class());
-					console.log(window['INPUT_'+className.toUpperCase()]);
+					console.log('INPUT_'+className.toUpperCase(), window['INPUT_'+className.toUpperCase()]);
+					console.log(app.input.array);
 				}	
 					
 			}
@@ -150,7 +166,7 @@ AppBuilder = function()
 				if (Class)
 				{
 					childView = new Class();
-					childView.domElement = childElement;
+					childView.dom = childElement;
 					childView.name = className;
 					view.addChild(childView);
 					this.prepareElement(childElement, childView);
@@ -176,7 +192,7 @@ AppBuilder = function()
 		}
 	}
 	
-	//TODO allow use of <phase> elements containing a single <div> which then becomes the Phase.view.domElement.
+	//TODO allow use of <phase> elements containing a single <div> which then becomes the Phase.view.dom.
 	//It's either that or <view-div> in <phase> which seems pointless... the idea of <view> element in the DOM(!) is a non sequitur.
 	this.addPhases = function(domContainer)
 	{
@@ -214,7 +230,7 @@ AppBuilder = function()
 					//console.log(model, view, ctrl);
 					this.prepareElement(element, view);
 
-					view.domElement = element;
+					view.dom = element;
 					var domRect = element.getBoundingClientRect();
 					view.bounds.x0 = Math.floor(domRect.left);
 					view.bounds.y0 = Math.floor(domRect.top);

@@ -1,5 +1,5 @@
 //TODO listen for connecting / disconnecting devices
-InputHub = function(domElement)
+InputHub = function(dom)
 {
 	//TODO actually in C we should simply realloc when devices are added, and in JS just use array length after pushes.
 	//use sufficiently large number for devices

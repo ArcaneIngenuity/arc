@@ -97,7 +97,7 @@ Phase = function(name, model, view, ctrl) //(abstract) Updatable, Disposable
 		//if (pointer)
 		//	if (pointer.dragging)
 		//		pointer.progressDrag();
-		ctrl.update(deltaSec);
+		ctrl.simulate(deltaSec);
 		/*
 		//TODO not sure about this part; it really only caches whether a change was made, as a boolean. useful or not useful?
 		for (var i = 0; i < this.bindings.length; i++)
