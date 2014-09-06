@@ -5,7 +5,7 @@ Mouse = function()
 	//passive: use as an input event handler - DOM
 	this.receive = function(event)
 	{
-		console.log('received', event);
+		//console.log('received', event);
 		var deviceName = event.type.substring(0, 3);//.substring(2, 5);
 		if (deviceName === 'mou')
 		{
@@ -15,7 +15,6 @@ Mouse = function()
 			if (inputType === 'do') //down
 			{
 				var buttonCode = event.button + 2;
-				console.log(this);
 				var channel = this.channels[buttonCode];
 				//channel.valueLast = channel.value;
 				valueOld = channel.value;

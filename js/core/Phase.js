@@ -20,6 +20,7 @@ Phase = function(name, model, view, ctrl) //(abstract) Updatable, Disposable
 		this.app = app;                    
 		this.ctrl.app = app;
 		this.view.app = app;
+		this.ctrl.phase = this;
 		this.view.phase = this;
 		this.view.root = this.view;
 		if (this.view.children)

@@ -37,6 +37,7 @@ AppBuilder = function()
 	  extends: 'div'
 	});
 	
+	
 	this.buildFrom = function(domContainer)
 	{	
 		var domApp = domContainer.getElementsByTagName(appTagName)[0];
@@ -115,13 +116,14 @@ AppBuilder = function()
 			var element = domContainer.children[i];
 			if (element.tagName.toLowerCase() === serviceTagName)
 			{
-				var className = element.className;
-				var Class = window[className];
+				var shortServiceName = element.className;
+				var longServiceName = element.className + 'Service';
+				var Class = window[longServiceName];
 				if (Class)
 				{
-					var shortServiceName = className.replace('Service','').toUpperCase();
+					//var shortServiceName = className.replace('Service','').toUpperCase();
 					//create it, add it to InputManager, and store it's index globally (TODO -- later make index storage location changeable as it may not be wanted on window)
-					window['SERVICE_'+shortServiceName] = app.services.add(new Class());
+					window['SERVICE_'+shortServiceName.toUpperCase()] = app.services.add(new Class());
 				}	
 			}
 		}
@@ -220,11 +222,11 @@ AppBuilder = function()
 					var ViewClass = window[className+'View'];
 					//console.log(className+'View');
 					if (ViewClass)
-						view = new ViewClass();
+						view = new ViewClass(app, model);
 						
 					var CtrlClass = window[className+'Ctrl'];
 					if (CtrlClass)
-						ctrl = new CtrlClass();
+						ctrl = new CtrlClass(app, model);
 
 					
 					//console.log(model, view, ctrl);

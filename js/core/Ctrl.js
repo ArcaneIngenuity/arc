@@ -1,7 +1,8 @@
-Ctrl = function()
+Ctrl = function(app, model)
 {
-	this.app = undefined;
-	this.model = undefined;
+	this.app = app;
+	this.model = model;
+	this.phase = undefined; //set by Phase on injection thereinto
 
 	/** Used to set up resources or values specific to this Ctrl / Model (and thus the entire Phase). */ 
 	this.start = function()

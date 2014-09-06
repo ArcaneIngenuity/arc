@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-    <title>Disjunction Basic Template</title>
+    <title>Disjunction Core Example</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="">
@@ -15,7 +15,7 @@
 			<!-- TODO include any other input device interfaces here, supplying custom Input implementations -->
 		</devices>
 		<services>
-			<!-- TODO include any Services here -->
+			<service class="Monster"></service>
 		</services>
 		<phases>
 			<phase-div class="Main" current>
@@ -25,12 +25,9 @@
 	</app>
 </body>
 
-<!-- JS framework prequisites -->
-<script src="../../extensions/ES5.js"></script>
-<script src="../../extensions/Math.js"></script>
-<script src="../../extensions/Object.js"></script>
-<script src="../../extensions/Array.js"></script>
-<script src="../../extensions/Array2.js"></script>
+<!-- framework prequisite polyfills -->
+<script src="../../polyfills/x-tag-core.min.js"></script>
+<script src="../../polyfills/ES5.js"></script>
 
 <!-- framework core -->
 <script src="../../core/AppBuilder.js"></script>
@@ -59,6 +56,7 @@
 <!-- NOTE directory structures and and file separations are arbitrary -- you could keep everything in the root, even in a single file. -->
 <link  href="./App.css" rel="stylesheet">
 <script src="./AppModel.js"></script>
+<script src="./Services/MonsterService.js"></script>
 
 <!-- Phase-related implementations -->
 <link  href="./Phases/Main/Main.css" rel="stylesheet">
@@ -71,5 +69,7 @@
 <!-- View implementations (not specific to any Phase) -->
 
 <!-- user miscellaneous, non-framework classes -->
+<script src="./Misc/md5.js"></script>
+<script src="./Misc/MonsterModel.js"></script>
 
 </html>

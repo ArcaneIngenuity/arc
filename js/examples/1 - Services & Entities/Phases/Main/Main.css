@@ -1,0 +1,24 @@
+.Main
+{
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	bottom: 0px;
+	right: 0px;
+	margin: auto;
+	padding: 0;
+	outline: none;
+	width: 100%;
+	height: 100%;
+
+    //background-color: #AB8282;
+    box-shadow:25px -25px 60px 60px rgba(0,0,0,0.5) inset;	
+
+}
+
+canvas.monster /* Note, we do not use a capital for classes that do no represent a View or Phase class 1:1 */
+{
+	position: absolute;
+	left: 0px;
+	top: 0px;
+}

@@ -1,8 +1,9 @@
-View = function()
+View = function(app, model)
 {
-	this.app = undefined;
-	this.phase = undefined;
-	this.model = undefined;
+	this.app = app;
+	this.model = model;
+	this.phase = undefined; //set by Phase on injection thereinto
+	
 	this.enabled = true; //used by timing mechanism to know whether to update or not
 	this.parent = undefined;
 	this.children = []; //in draw order!

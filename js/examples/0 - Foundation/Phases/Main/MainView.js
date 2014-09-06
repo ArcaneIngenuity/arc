@@ -36,7 +36,8 @@ MainView = function()
 		var pointer = this.app.pointer;
 		
 		//***TODO convert raw input to (App or Phase) Model state and View state.
-		if (mouse.channels[MOUSE_BUTTON_LEFT].value) console.log( 'hit mouse left mouse button' );
+		if (mouse.channels[MOUSE_BUTTON_LEFT].value)
+			console.log( 'hit mouse left mouse button' );
 	}
 	
 	this.output = function(deltaSec)
