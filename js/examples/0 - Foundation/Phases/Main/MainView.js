@@ -38,6 +38,9 @@ MainView = function()
 		//***TODO convert raw input to (App or Phase) Model state and View state.
 		if (mouse.channels[MOUSE_BUTTON_LEFT].value)
 			console.log( 'hit mouse left mouse button' );
+			
+		if (keyboard.channels[KEY_SPACE].value)
+			console.log( 'hit spacebar' );
 	}
 	
 	this.output = function(deltaSec)

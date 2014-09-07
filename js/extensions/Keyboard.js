@@ -7,7 +7,7 @@ Keyboard = function()
 	
 	this.receive = function(event)
 	{
-		console.log(event);
+		//console.log(event);
 		var deviceName = event.type.substring(0, 3);
 		if (deviceName === 'key')
 		{

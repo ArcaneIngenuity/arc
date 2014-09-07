@@ -65,11 +65,6 @@ AppBuilder = function()
 		domContainer.addEventListener('mousemove',	ES5.bind(mouse, mouse.receive));
 		domContainer.addEventListener('keydown', 	ES5.bind(keyboard, keyboard.receive));
 		domContainer.addEventListener('keyup',		ES5.bind(keyboard, keyboard.receive));
-		//onmousedown=""
-		//onmouseup="app.input.array[INPUT_MOUSE].receive(event)"
-		//onmousemove="app.input.array[INPUT_MOUSE].receive(event)"
-		//onkeydown="app.input.array[INPUT_KEYBOARD].receive(event)"
-		//onkeyup="app.input.array[INPUT_KEYBOARD].receive(event)" style="position:absolute; width:100%; height:100%;"
 		
 		app.phaser.change(currentPhaseName);
 		

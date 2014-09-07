@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 </head>
-<body onload="app = (new AppBuilder()).buildFrom(document.body);" onmouseup="app.input.array[INPUT_MOUSE].receive(event)" onmousemove="app.input.array[INPUT_MOUSE].receive(event)" onkeydown="app.input.array[INPUT_KEYBOARD].receive(event)" onkeyup="app.input.array[INPUT_KEYBOARD].receive(event)">
+<body onload="app = (new AppBuilder()).buildFrom(document.body);">
 	<app model="AppModel" oncontextmenu="return false">
 		<devices>
 			<device class="Mouse"></device>
