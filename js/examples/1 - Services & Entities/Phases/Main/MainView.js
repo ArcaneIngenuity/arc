@@ -71,8 +71,6 @@ MainView = function(app, model)
 		var monstersDOM = this.monstersDOM;
 		var length = monstersDOM.children.length;
 
-		var o = {};
-		n+= 0.1
 		for (var m = 0; m < length; m++)
 		{
 			var monsterDOM = monstersDOM.children[m];
