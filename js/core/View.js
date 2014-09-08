@@ -1,5 +1,6 @@
 View = function(app, model)
 {
+	this.id = undefined;
 	this.app = app;
 	this.model = model;
 	this.phase = undefined; //set by Phase on injection thereinto
@@ -7,7 +8,7 @@ View = function(app, model)
 	this.enabled = true; //used by timing mechanism to know whether to update or not
 	this.parent = undefined;
 	this.children = []; //in draw order!
-	this.childrenByName = {}; //should be private
+	//this.childrenByName = {}; //should be private
 	this.root = undefined; //TODO remove?
 	this.body = undefined; //pixel or 3D geometry, typically Box2 or 3 - explicitly injected after view construction... could be bitmap or arbitrary tri mesh
 	this.bounds = undefined; //always necessary for first pass pointer detection, and pointer transformations -- may be defined by body
@@ -151,7 +152,7 @@ View = function(app, model)
 	this.addChild = function(childView) //final
 	{
 		this.children.push(childView);
-		this.childrenByName[childView.name] = childView;
+		//this.childrenById[childView.id] = childView;
 		childView.parent = this;
 		childView.root = this.root;
 		childView.app = this.app;
@@ -161,16 +162,31 @@ View = function(app, model)
 	this.removeChild = function(childView) //final
 	{
 		this.children.push(childView);
-		this.childrenByName[childView.name] = undefined;
+		this.childrenByName[childView.id] = undefined;
 		childView.parent = undefined;
 		childView.root = undefined;
 		childView.app = undefined;
 		childView.model = undefined;
 	}
 	*/
-	this.getChildByName = function(name)
+	
+	//C-compatible array search to find child by id.
+	//TODO use a hashmap? ...external access remains exactly the same.
+	this.getChildById = function(id)
 	{
-		return this.childrenByName[name];
+		//return this.childrenByName[id];
+		var children = this.children;
+		var length = children.length;
+		for (var i = 0; i < length; i++)
+		{
+			var child = children[i];
+			if (child.id === id)
+			{
+				return child;
+			}
+		}
+		
+		return undefined;
 	}
 	
 	this.hasChildren = function()

@@ -5,8 +5,10 @@ MainView = function(app, model)
 	this.bounds = new Box2();
 	console.log(this.app);
 	var monsterService = this.app.services.get(SERVICE_MONSTER);
-	
 
+	this.monstersDOM = undefined;
+	this.thoughtBubble = undefined;
+	
 	//--- abstract framework methods ---//
 	this.start = function()
 	{
@@ -14,15 +16,20 @@ MainView = function(app, model)
 		var model = this.model;
 		model.arenaWidth  = dom.clientWidth;
 		model.arenaHeight = dom.clientHeight;
+		
+		this.monstersDOM		= document.getElementById('Monsters');
+		this.thoughtBubbleDOM 	= document.getElementById('ThoughtBubble');
+		console.log('mnstr', this.monstersDOM);
+		console.log('thght', this.thoughtBubbleDOM);
+		console.log(this.children);
+		console.log(dom.children);
 
 		//listeners for DOM events may be set up in View.start()
 		window.addEventListener( 'resize', this.onWindowResize.bind(this), true );
 		
 		//fire up the engines!
 		this.onWindowResize();
-		this.show();
-
-		
+		this.show();		
 	}
 	
 	this.finish = function()
@@ -55,33 +62,25 @@ MainView = function(app, model)
 		if (mouse.channels[MOUSE_BUTTON_RIGHT].delta > 0)
 			console.log( 'remove' );
 	}
-	this.d = false;
+	
 	this.output = function(deltaSec)
 	{
 		var dom = this.dom;
 		var model = this.model;
 		var monsters = model.monsters;
-		var monsterSprites = this.monsterSprites;
-		if (!this.d) { this.d = true; console.dir(dom); }
-		for (var m = 0; m < dom.children.length; m++)
+		var monstersDOM = this.monstersDOM;
+		var length = monstersDOM.children.length;
+
+		var o = {};
+		n+= 0.1
+		for (var m = 0; m < length; m++)
 		{
-			var monsterSprite = dom.children[m];
-			//console.log(monsterSprite);
-			var monster = monsterSprite.model;
-			var style = monsterSprite.style;
-			style.left = monster.x + 'px';
-			style.top  = monster.y + 'px';
+			var monsterDOM = monstersDOM.children[m];
+			var monster = monsterDOM.model;
+			var style = monsterDOM.style;
+			style.left = Math.floor(monster.x) + 'px';
+			style.top  = Math.floor(monster.y) + 'px';
 		}
-		
-		//***TODO render using Phases's Model and View (this) state.
-	}
-	
-	this.outputPost = function(deltaSec)
-	{
-		var dom = this.dom;
-		var model = this.model;
-		
-		//***TODO render using Phases's Model and View (this) state; always prefer use of output() unless you have special requirements.
 	}
 	
 	this.show = function()
@@ -118,6 +117,7 @@ MainView = function(app, model)
 	this.addNewMonster = function()
 	{
 		var dom = this.dom;
+		var monstersDOM = this.monstersDOM;
 		var model = this.model;
 		var monsters = this.model.monsters;
 		var monster = new MonsterModel();
@@ -125,9 +125,10 @@ MainView = function(app, model)
 		monster.name = monsterService.generateName(monster.index);
 		monster.x = Math.floor(Math.random() * dom.clientWidth);
 		monster.y = Math.floor(Math.random() * dom.clientHeight);
-		monster.scale = 0.5 + Math.random() * 1.5;
+		monster.scale = 0.5 + 2.5 * Math.random();
 		monster.width = 80;
 		monster.height = 80;
+		monster.speed = 20 + 20 * monster.scale + 20 * Math.random(); //pixel per sec
 		model.monsters.push(monster);
 			
 		var url = monsterService.getImageURL(monster.name);
@@ -170,7 +171,6 @@ MainView = function(app, model)
 			
 			//final canvas
 			var canvas = document.createElement('canvas');//document.getElementsByTagName("canvas")[0];
-			canvas.className = 'monster';
 			var ctx = canvas.getContext("2d");
 
 			//draw skewed shadow
@@ -203,12 +203,28 @@ MainView = function(app, model)
 			ctx.transform(1,0,1,1,-80,0);
 			ctx.drawImage(canvasWorking, 0, 0);
 			
-			canvas.style.transform = 'scale('+monster.scale+', '+monster.scale+')';
-			canvas.style.webkitTransform = 'scale('+monster.scale+', '+monster.scale+')';
-			canvas.style.msTransform = 'scale('+monster.scale+', '+monster.scale+')';
+			canvas.style.transform = 		'scale('+monster.scale+', '+monster.scale+')';
+			canvas.style.webkitTransform = 	'scale('+monster.scale+', '+monster.scale+')';
+			canvas.style.msTransform = 		'scale('+monster.scale+', '+monster.scale+')';
 			
-			canvas.model = monster;
-			dom.appendChild(canvas); //will be at monster.index as there are no children to this element other than monsters.
+			canvas.style.left = (-monster.width / 4) + 'px';
+			canvas.style.top = (-monster.height / 2) + 'px';
+			
+			var monsterDOM = canvas;
+			
+			//var monsterDOM = document.createElement('div');
+			//monsterDOM.className = 'monster';
+			//monsterDOM.appendChild(canvas);
+			
+			//var bub = new Image()
+			//bub.src = './Assets/ThoughtBubble.png';
+			//bub.model = monster;
+			//bub.className = 'monster';
+			//var monsterDOM = bub;
+			
+			monsterDOM.className = 'monster';
+			monsterDOM.model = monster;
+			monstersDOM.appendChild(monsterDOM); //will be at monster.index as there are no children to this element other than monsters.
 		});
 		
 		image.src = url;

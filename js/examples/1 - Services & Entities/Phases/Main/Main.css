@@ -16,9 +16,33 @@
 
 }
 
-canvas.monster /* Note, we do not use a capital for classes that do no represent a View or Phase class 1:1 */
+.monster, .monster > */* use uncapitalised name for classes or that do no represent a View or Phase class 1:1 */
 {
 	position: absolute;
 	left: 0px;
 	top: 0px;
+	
+	-moz-user-select: -moz-none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+div.ThoughtBubble /* use capitalised name for classes that do represent a View or Phase class 1:1 */
+{
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	
+	width: 54px;
+	height: 59px;
+	
+	background-image: url("./Assets/ThoughtBubble.png") no-repeat;
+	
+	-moz-user-select: -moz-none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }

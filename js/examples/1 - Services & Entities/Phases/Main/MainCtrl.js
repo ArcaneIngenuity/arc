@@ -17,7 +17,8 @@ MainCtrl = function(app, model)
 	{
 		var model = this.model;
 		var monsters = model.monsters;
-		for (var m in monsters)
+		var length = monsters.length;
+		for (var m = 0; m < length; m++)
 		{
 			var monster = monsters[m];
 			
@@ -30,32 +31,30 @@ MainCtrl = function(app, model)
 					//set new destination to begin moving to, next update
 					monster.xNext = Math.floor(Math.random() * model.arenaWidth);
 					monster.yNext = Math.floor(Math.random() * model.arenaHeight);
-				}	
+					var xDirection = monster.xNext - monster.x;
+					var yDirection = monster.yNext - monster.y;
+					var m = Math.sqrt(xDirection * xDirection + yDirection * yDirection);
+					monster.xVelocity = monster.speed * xDirection / m;
+					monster.yVelocity = monster.speed * yDirection / m;
+				}
 			}
 			else //if acting, continue moving to destination
 			{
-				//get direction of motion between current position and destination
-				var motion = {x: monster.xNext - monster.x, y: monster.yNext - monster.y};
-				//console.log('motion', motion);
-				var m = Math.sqrt(motion.x * motion.x + motion.y * motion.y);
-				//console.log('mag1', m);
-				//normalize
-				motion.x /= m;
-				motion.y /= m;
-				//console.log('mag2', Math.sqrt(motion.x * motion.x + motion.y * motion.y));
-				 
-				//multiply by velocity
-				motion.x *= 50;
-				motion.y *= 50;
-				 
-				//apply
-				monster.x += motion.x * deltaSec;
-				monster.y += motion.y * deltaSec;
+				var xToDestination = monster.xNext - monster.x;
+				var yToDestination = monster.yNext - monster.y;
 				
-				
-				if (monster.x == monster.xNext && monster.y == monster.yNext) //at destination
+				var distanceRemaining = Math.sqrt(xToDestination * xToDestination + yToDestination * yToDestination);
+		
+				if (distanceRemaining < monster.speed)
 				{
+					//monster.x = monster.xNext;
+					//monster.y = monster.yNext;
 					monster.status = MONSTER_STATUS_WAITING;
+				}
+				else
+				{
+					monster.x += monster.xVelocity * deltaSec;
+					monster.y += monster.yVelocity * deltaSec;
 				}
 			}
 		}

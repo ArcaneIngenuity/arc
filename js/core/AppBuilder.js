@@ -16,6 +16,8 @@ AppBuilder = function()
 
 	var app;
 	var currentPhaseName;
+	
+	var viewIDs = {};
 	//var document = window.document;
 	/*
 	var DOMApp = document.registerElement(appTagName, {
@@ -47,9 +49,9 @@ AppBuilder = function()
 		var domDevices = domApp.getElementsByTagName(devicesTagName)[0];
 		if (domDevices) //should always be true
 		{
-		console.log(domDevices);
+			console.log(domDevices);
 			this.addDevices(domDevices);
-}
+		}
 		var domServices = domApp.getElementsByTagName(servicesTagName)[0];
 		if (domServices) //NOT always true
 			this.addServices(domServices);
@@ -151,41 +153,53 @@ AppBuilder = function()
 		for (var a = 0; a < element.children.length; a++)
 		{
 			var childElement = element.children[a];
-			var classNamesJoined = childElement.className;
-			
-			var childView;
-			if (classNamesJoined.length > 0)
+			var id = childElement.id;
+			//TODO this should be controlled on a Phase-by-Phase or more likely App basis -- anytime we add a View, something should check that the ID / name is unique.
+			if (viewIDs.hasOwnProperty(id))
 			{
-				var classNames = classNamesJoined.split(' ');
-				var className = classNames[0];//[b];
-				
-				var Class = window[className+'View'];
-				if (Class)
-				{
-					childView = new Class();
-					childView.dom = childElement;
-					childView.name = className;
-					view.addChild(childView);
-					this.prepareElement(childElement, childView);
-				}
+				throw "Multiple Views may not have the same name / ID. '"+id+"' already exists.";
 			}
-			
-			/*
-			var domRect = childElement.getBoundingClientRect();
-			
-			childView.bounds = new Box2();
-			childView.bounds.x0 = Math.floor(domRect.left - parentDomRect.left);
-			childView.bounds.y0 = Math.floor(domRect.top - parentDomRect.top);
-			childView.bounds.setWidth(domRect.width);
-			childView.bounds.setHeight(domRect.height);
-			*/
-			//recurse
-			if (childElement.children.length > 0)
-				this.addChildViews(childView ? childView : view, childElement);//, domRect); //conditional will skip DOM tree levels that don't have a related View
 			else
-				this.prepareElement(childElement, view);
-			//else	
-			//	childView.makeLeaf(); //if no DOM children, set View children array undefined
+			{
+				viewIDs[id] = true; //set id as used
+				
+				var classNamesJoined = childElement.className;
+				
+				var childView;
+				if (classNamesJoined.length > 0)
+				{
+					var classNames = classNamesJoined.split(' ');
+					var className = classNames[0];//[b];
+					
+					var Class = window[className+'View'];
+					if (Class)
+					{
+						childView = new Class();
+						childView.dom = childElement;
+						childView.id = id;
+						console.log('id', childView.id);
+						view.addChild(childView);
+						this.prepareElement(childElement, childView);
+					}
+				}
+				
+				/*
+				var domRect = childElement.getBoundingClientRect();
+				
+				childView.bounds = new Box2();
+				childView.bounds.x0 = Math.floor(domRect.left - parentDomRect.left);
+				childView.bounds.y0 = Math.floor(domRect.top - parentDomRect.top);
+				childView.bounds.setWidth(domRect.width);
+				childView.bounds.setHeight(domRect.height);
+				*/
+				//recurse
+				if (childElement.children.length > 0)
+					this.addChildViews(childView ? childView : view, childElement);//, domRect); //conditional will skip DOM tree levels that don't have a related View
+				else
+					this.prepareElement(childElement, view);
+				//else	
+				//	childView.makeLeaf(); //if no DOM children, set View children array undefined
+			}
 		}
 	}
 	
