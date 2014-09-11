@@ -199,7 +199,7 @@ View = function(app, model)
 		var children = this.children;
 		if (children)
 		{
-			var length = children.length; console.log(length);
+			var length = children.length;
 			for (var i = 0; i < length; i++)
 			{
 				var child = children[i];

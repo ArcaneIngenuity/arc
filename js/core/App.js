@@ -1,7 +1,9 @@
-App = function() //final
+App = function(id) //final
 {
 	this.DEBUG = true;
 
+	this.id = id; //(JS only) for multi-app pages
+	
 	var phaser = this.phaser = new Phaser(this);
 	var services = this.services = new ServiceHub(this);
 	var input = this.input = new InputHub(); //set from outside

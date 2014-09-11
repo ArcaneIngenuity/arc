@@ -39,17 +39,24 @@ AppBuilder = function()
 	  extends: 'div'
 	});
 	
-	this.buildFrom = function(domApp)
+	//usage: <body onload="(new AppBuilder()).buildFrom(document.getElementById('Tagger'));">
+	this.build = function(domApp)
 	{	
-		//var domApp = domContainer.getElementsByTagName(appTagName)[0];
-		app = new App();
-		app.model = new AppModel(); //TODO change to an attribute <app modelClass=""> (<body>) or just use App name prefix e.g. 'WA' to get 'WAmodel'
+		var appId = domApp.id;
+		app = window[appId] = new App(appId); //TODO put this on a global dj.apps object?
+
+		var appModelClassName = appId+'Model';
+		var AppModelClass = window[appModelClassName];
+		if (AppModelClass)
+		{
+			app.model = new AppModelClass();
+		}
 		app.view = domApp;
 		
 		var domDevices = domApp.getElementsByTagName(devicesTagName)[0];
 		if (domDevices) //should always be true
 		{
-			console.log(domDevices);
+			//console.log(domDevices);
 			this.addDevices(domDevices);
 		}
 		var domServices = domApp.getElementsByTagName(servicesTagName)[0];
@@ -80,6 +87,22 @@ AppBuilder = function()
 		return app;
 	}
 	
+	//(JS-only)
+	this.buildByIds = function(ids)
+	{
+		for (var i in ids)
+		{
+			var id = ids[i];
+			this.buildById(id);
+		}
+	}
+	
+	this.buildById = function(id)
+	{
+		var domApp = document.getElementById(id);
+		this.build(domApp);
+	}
+	
 	this.addDevices = function(domContainer)//, parentDomRect)
 	{
 		for (var i = 0; i < domContainer.children.length; i++)
@@ -93,8 +116,8 @@ AppBuilder = function()
 				{
 					//create it, add it to InputManager, and store it's index globally (TODO -- later make index storage location changeable as it may not be wanted on window)
 					window['INPUT_'+className.replace('Device','').toUpperCase()] = app.input.add(new Class());
-					console.log('INPUT_'+className.toUpperCase(), window['INPUT_'+className.toUpperCase()]);
-					console.log(app.input.array);
+					//console.log('INPUT_'+className.toUpperCase(), window['INPUT_'+className.toUpperCase()]);
+					//console.log(app.input.array);
 				}	
 					
 			}
@@ -103,7 +126,6 @@ AppBuilder = function()
 		
 		//TODO put this as attributes on a Pointer object
 		app.setPointer(INPUT_MOUSE, MOUSE_X, MOUSE_Y, MOUSE_BUTTON_LEFT);
-		console.log(app.input);
 	}
 	
 	this.addServices = function(domContainer)//, parentDomRect)
@@ -183,7 +205,7 @@ AppBuilder = function()
 					childView = new Class();
 					childView.dom = childElement;
 					childView.id = id;
-					console.log('id', childView.id);
+					//console.log('id', childView.id);
 					view.addChild(childView);
 					this.prepareElement(childElement, childView);
 				}
@@ -247,7 +269,7 @@ AppBuilder = function()
 					//console.log(model, view, ctrl);
 					this.prepareElement(element, view);
 
-					console.log(className);
+					//console.log(className);
 					view.dom = element;
 					var domRect = element.getBoundingClientRect();
 					view.bounds.x0 = Math.floor(domRect.left);
