@@ -9,6 +9,7 @@ App = function() //final
 	this.display = new Display();
 	this.timer = undefined; //set from outside
 	this.model = undefined; //optional app-wide model
+	this.view = undefined; //used when individual disjunction apps are used as modules
 	//abstraction of the device used to perform screen pointing - encapsulates hierarchical transformation of device coordinates to focused view's own coordinate system
 	
 	this.setPointer = function(deviceIndex, xChannelIndex, yChannelIndex, selectIndex) //final

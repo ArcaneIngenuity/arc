@@ -39,12 +39,12 @@ AppBuilder = function()
 	  extends: 'div'
 	});
 	
-	
-	this.buildFrom = function(domContainer)
+	this.buildFrom = function(domApp)
 	{	
-		var domApp = domContainer.getElementsByTagName(appTagName)[0];
+		//var domApp = domContainer.getElementsByTagName(appTagName)[0];
 		app = new App();
 		app.model = new AppModel(); //TODO change to an attribute <app modelClass=""> (<body>) or just use App name prefix e.g. 'WA' to get 'WAmodel'
+		app.view = domApp;
 		
 		var domDevices = domApp.getElementsByTagName(devicesTagName)[0];
 		if (domDevices) //should always be true
@@ -62,11 +62,11 @@ AppBuilder = function()
 			
 		var mouse = app.input.array[INPUT_MOUSE];
 		var keyboard = app.input.array[INPUT_KEYBOARD];
-		domContainer.addEventListener('mousedown', 	ES5.bind(mouse, mouse.receive));
-		domContainer.addEventListener('mouseup',	ES5.bind(mouse, mouse.receive));
-		domContainer.addEventListener('mousemove',	ES5.bind(mouse, mouse.receive));
-		domContainer.addEventListener('keydown', 	ES5.bind(keyboard, keyboard.receive));
-		domContainer.addEventListener('keyup',		ES5.bind(keyboard, keyboard.receive));
+		domApp.addEventListener('mousedown', 	ES5.bind(mouse, mouse.receive));
+		domApp.addEventListener('mouseup',	ES5.bind(mouse, mouse.receive));
+		domApp.addEventListener('mousemove',	ES5.bind(mouse, mouse.receive));
+		domApp.addEventListener('keydown', 	ES5.bind(keyboard, keyboard.receive));
+		domApp.addEventListener('keyup',		ES5.bind(keyboard, keyboard.receive));
 		
 		app.phaser.change(currentPhaseName);
 		
@@ -154,52 +154,58 @@ AppBuilder = function()
 		{
 			var childElement = element.children[a];
 			var id = childElement.id;
-			//TODO this should be controlled on a Phase-by-Phase or more likely App basis -- anytime we add a View, something should check that the ID / name is unique.
-			if (viewIDs.hasOwnProperty(id))
+			id = id.length > 0 ? id : undefined;
+			
+			if (id) //if item is not anonymous / has valid id
 			{
-				throw "Multiple Views may not have the same name / ID. '"+id+"' already exists.";
-			}
-			else
-			{
-				viewIDs[id] = true; //set id as used
-				
-				var classNamesJoined = childElement.className;
-				
-				var childView;
-				if (classNamesJoined.length > 0)
+				//TODO this should be controlled on a Phase-by-Phase or more likely App basis -- anytime we add a View, something should check that the ID / name is unique.
+				if (viewIDs.hasOwnProperty(id))
 				{
-					var classNames = classNamesJoined.split(' ');
-					var className = classNames[0];//[b];
-					
-					var Class = window[className+'View'];
-					if (Class)
-					{
-						childView = new Class();
-						childView.dom = childElement;
-						childView.id = id;
-						console.log('id', childView.id);
-						view.addChild(childView);
-						this.prepareElement(childElement, childView);
-					}
+					throw "Multiple Views may not have the same name / ID. '"+id+"' already exists.";
 				}
-				
-				/*
-				var domRect = childElement.getBoundingClientRect();
-				
-				childView.bounds = new Box2();
-				childView.bounds.x0 = Math.floor(domRect.left - parentDomRect.left);
-				childView.bounds.y0 = Math.floor(domRect.top - parentDomRect.top);
-				childView.bounds.setWidth(domRect.width);
-				childView.bounds.setHeight(domRect.height);
-				*/
-				//recurse
-				if (childElement.children.length > 0)
-					this.addChildViews(childView ? childView : view, childElement);//, domRect); //conditional will skip DOM tree levels that don't have a related View
 				else
-					this.prepareElement(childElement, view);
-				//else	
-				//	childView.makeLeaf(); //if no DOM children, set View children array undefined
+				{
+					viewIDs[id] = true; //set id as used
+				}
 			}
+			
+			var classNamesJoined = childElement.className;
+			
+			var childView;
+			if (classNamesJoined.length > 0)
+			{
+				var classNames = classNamesJoined.split(' ');
+				var className = classNames[0];//[b];
+				
+				var Class = window[className+'View'];
+				if (Class)
+				{
+					childView = new Class();
+					childView.dom = childElement;
+					childView.id = id;
+					console.log('id', childView.id);
+					view.addChild(childView);
+					this.prepareElement(childElement, childView);
+				}
+			}
+			
+			/*
+			var domRect = childElement.getBoundingClientRect();
+			
+			childView.bounds = new Box2();
+			childView.bounds.x0 = Math.floor(domRect.left - parentDomRect.left);
+			childView.bounds.y0 = Math.floor(domRect.top - parentDomRect.top);
+			childView.bounds.setWidth(domRect.width);
+			childView.bounds.setHeight(domRect.height);
+			*/
+			//recurse
+			if (childElement.children.length > 0)
+				this.addChildViews(childView ? childView : view, childElement);//, domRect); //conditional will skip DOM tree levels that don't have a related View
+			else
+				this.prepareElement(childElement, view);
+			//else	
+			//	childView.makeLeaf(); //if no DOM children, set View children array undefined
+			
 		}
 	}
 	
@@ -241,6 +247,7 @@ AppBuilder = function()
 					//console.log(model, view, ctrl);
 					this.prepareElement(element, view);
 
+					console.log(className);
 					view.dom = element;
 					var domRect = element.getBoundingClientRect();
 					view.bounds.x0 = Math.floor(domRect.left);

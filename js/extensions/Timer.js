@@ -12,12 +12,14 @@ Timer = function(app, periodSec)//, isUpdatingView, isUpdatingCtrl)
 	this.start = function()
 	{
 		timingID = setInterval(update, this.periodMs);
+		//In C: running = true; while(running) this.update()
 	}
 	
 	this.stop = function()
 	{
 		if (timingID)
 			clearInterval(timingID);
+		//In C: running = false;
 	}
 	
 	this.update = function()
