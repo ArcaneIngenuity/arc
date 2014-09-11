@@ -1,6 +1,6 @@
 //TODO all instances of 'window' should be replaced with 'dj' if  we separate things out
 //TODO documentation saying what attributes (e.g. onfocus) not to implement when using this class!
-AppBuilder = function()
+AppBuilder = function(timer)
 {
 	var appTagName = 'app';
 	var devicesTagName = 'devices';
@@ -78,11 +78,14 @@ AppBuilder = function()
 		app.phaser.change(currentPhaseName);
 		
 		//TODO from markup
+		/*
 		var timer = 
 		app.timer = //optional - allows ctrls to manipulate frame rate via app.
 			new TimerRAF(app, true, true);   //uses requestAnimationFrame
 		//	new Timer(app, 0.1, true, true); //uses setInterval (for older browsers)
 		app.timer.start();
+		*/
+		app.timer = timer;
 		
 		return app;
 	}
@@ -90,17 +93,21 @@ AppBuilder = function()
 	//(JS-only)
 	this.buildByIds = function(ids)
 	{
+		var apps = [];
 		for (var i in ids)
 		{
 			var id = ids[i];
-			this.buildById(id);
+			var app = this.buildById(id);
+			apps.push(app);
 		}
+		
+		return apps;
 	}
 	
 	this.buildById = function(id)
 	{
 		var domApp = document.getElementById(id);
-		this.build(domApp);
+		return this.build(domApp);
 	}
 	
 	this.addDevices = function(domContainer)//, parentDomRect)

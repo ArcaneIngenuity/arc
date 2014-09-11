@@ -7,8 +7,8 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 </head>
-<body onload="app = (new AppBuilder()).buildFrom(document.body);">
-	<app model="AppModel" oncontextmenu="return false">
+<body onload="var app = (new AppBuilder()).build(document.body); (new TimerRAF([app])).start();">
+	<app id="App" oncontextmenu="return false">
 		<devices>
 			<device class="Mouse"></device>
 			<device class="Keyboard"></device>
@@ -43,9 +43,10 @@
 <script src="../../core/InputChannel.js"></script>
 <script src="../../core/Pointer.js"></script>
 <script src="../../core/Display.js"></script>
+<script src="../../core/Timer.js"></script>
 
 <!-- framework extensions -->
-<script src="../../extensions/Timer.js"></script>
+<script src="../../extensions/TimerInterval.js"></script>
 <script src="../../extensions/TimerRAF.js"></script>
 <script src="../../extensions/Keyboard.js"></script>
 <script src="../../extensions/Mouse.js"></script>

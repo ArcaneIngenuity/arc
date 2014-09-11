@@ -3,6 +3,7 @@ App = function(id) //final
 	this.DEBUG = true;
 
 	this.id = id; //(JS only) for multi-app pages
+	this.enabled = true; //(JS only) for multi-app pages
 	
 	var phaser = this.phaser = new Phaser(this);
 	var services = this.services = new ServiceHub(this);
@@ -35,5 +36,15 @@ App = function(id) //final
 		input.poll();
 		phaser.update(deltaSec);
 		input.flush();
+	}
+	
+	this.enable = function()
+	{
+		this.enabled = true;
+	}
+	
+	this.disable = function()
+	{
+		this.enabled = false;
 	}
 }
