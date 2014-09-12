@@ -51,12 +51,10 @@ AppBuilder = function(timer)
 		{
 			app.model = new AppModelClass();
 		}
-		app.view = domApp;
 		
 		var domDevices = domApp.getElementsByTagName(devicesTagName)[0];
 		if (domDevices) //should always be true
 		{
-			//console.log(domDevices);
 			this.addDevices(domDevices);
 		}
 		var domServices = domApp.getElementsByTagName(servicesTagName)[0];
@@ -77,14 +75,6 @@ AppBuilder = function(timer)
 		
 		app.phaser.change(currentPhaseName);
 		
-		//TODO from markup
-		/*
-		var timer = 
-		app.timer = //optional - allows ctrls to manipulate frame rate via app.
-			new TimerRAF(app, true, true);   //uses requestAnimationFrame
-		//	new Timer(app, 0.1, true, true); //uses setInterval (for older browsers)
-		app.timer.start();
-		*/
 		app.timer = timer;
 		
 		return app;
@@ -123,12 +113,8 @@ AppBuilder = function(timer)
 				{
 					//create it, add it to InputManager, and store it's index globally (TODO -- later make index storage location changeable as it may not be wanted on window)
 					window['INPUT_'+className.replace('Device','').toUpperCase()] = app.input.add(new Class());
-					//console.log('INPUT_'+className.toUpperCase(), window['INPUT_'+className.toUpperCase()]);
-					//console.log(app.input.array);
 				}	
-					
 			}
-				
 		}
 		
 		//TODO put this as attributes on a Pointer object
@@ -212,7 +198,6 @@ AppBuilder = function(timer)
 					childView = new Class();
 					childView.dom = childElement;
 					childView.id = id;
-					//console.log('id', childView.id);
 					view.addChild(childView);
 					this.prepareElement(childElement, childView);
 				}
@@ -264,7 +249,6 @@ AppBuilder = function(timer)
 						model = new ModelClass();
 						
 					var ViewClass = window[className+'View'];
-					//console.log(className+'View');
 					if (ViewClass)
 						view = new ViewClass(app, model);
 						
@@ -297,6 +281,7 @@ AppBuilder = function(timer)
 						currentPhaseName = className;
 					}
 					
+					//TODO remove?
 					var domTasks = element.getElementsByTagName(tasksTagName)[0];
 					//console.log('TASKS',  element.getElementsByTagName(tasksTagName)[0]);
 					if (domTasks)
@@ -316,10 +301,14 @@ AppBuilder = function(timer)
 		}
 		//element.onblur = function() //{this.view.wasFocused = this.view.isFocused; this.view.isFocused = false;};
 		//element.onmousedown = "app.phaser.phase.focus = "
-		if (element.tabIndex == -1) //only add if not specified in markup
+		//console.log(element, element.getAttribute('notab'));
+		/*
+		console.log(element, element.tabIndex);
+		if (element.tabIndex == -1)// && !element.hasAttribute('notab') ) //only add if not specified in markup
 		{
 			this.tabIndex++;
 			element.tabIndex = this.tabIndex;
 		}
+		*/
 	}
 }

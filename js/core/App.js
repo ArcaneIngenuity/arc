@@ -9,7 +9,6 @@ App = function(id) //final
 	var services = this.services = new ServiceHub(this);
 	var input = this.input = new InputHub(); //set from outside
 	this.pointer = undefined;
-	this.display = new Display();
 	this.timer = undefined; //set from outside
 	this.model = undefined; //optional app-wide model
 	this.view = undefined; //used when individual disjunction apps are used as modules
