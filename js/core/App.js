@@ -3,6 +3,7 @@ App = function(id) //final
 	this.DEBUG = true;
 
 	this.id = id; //(JS only) for multi-app pages
+	this.index = undefined; //(JS only) for multi-app pages, the index into the array containing instances of this app.
 	this.enabled = true; //(JS only) for multi-app pages
 	
 	var phaser = this.phaser = new Phaser(this);

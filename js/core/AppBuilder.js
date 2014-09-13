@@ -41,11 +41,13 @@ AppBuilder = function(timer)
 	
 	//usage: <body onload="(new AppBuilder()).buildFrom(document.getElementById('Tagger'));">
 	this.build = function(domApp)
-	{	
-		var appId = domApp.id;
-		app = window[appId] = new App(appId); //TODO put this on a global dj.apps object?
-
-		var appModelClassName = appId+'Model';
+	{
+		var id = domApp.id;
+		var className = domApp.className;
+		app = /*window[id] =*/ new App(id);
+		app.className = className; //TODO put in constructor
+		
+		var appModelClassName = className+'Model';
 		var AppModelClass = window[appModelClassName];
 		if (AppModelClass)
 		{
@@ -80,18 +82,32 @@ AppBuilder = function(timer)
 		return app;
 	}
 	
-	//(JS-only)
+	//(JS-only) Multi-app pages
 	this.buildByIds = function(ids)
 	{
-		var apps = [];
+		if (!window.disjunction) // don't clear the existing object if there is one on window
+		{
+			disjunction = {};
+		}
+		
 		for (var i in ids)
 		{
 			var id = ids[i];
+
 			var app = this.buildById(id);
-			apps.push(app);
+			var className = app.className;
+			//hold refs to multiple instances of same app 
+			if (!disjunction[className])
+			{
+				disjunction[className] = [];
+			}
+			var appArray = disjunction[className];
+			app.index = appArray.length;
+			
+			appArray.push(app);
+			console.log('appArray', appArray);
 		}
-		
-		return apps;
+		console.log('disjunction', disjunction);
 	}
 	
 	this.buildById = function(id)

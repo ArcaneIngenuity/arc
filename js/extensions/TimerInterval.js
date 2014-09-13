@@ -1,6 +1,6 @@
-TimerInterval = function(apps, periodSec)
+TimerInterval = function(periodSec)
 {
-	Timer.call(this, apps); //super-constructor (params after this)
+	Timer.call(this); //super-constructor (params after this)
 	
 	var timingID = undefined;
 

@@ -1,4 +1,4 @@
-TimerRAF = function(apps)//, periodSec)
+TimerRAF = function()
 {
 	//check whether RAF is supported in user agent.
 	if ( !window.requestAnimationFrame )
@@ -9,7 +9,7 @@ TimerRAF = function(apps)//, periodSec)
 			window.msRequestAnimationFrame))
 			throw 'Error: Browser does not support RequestAnimationFrame (RAF). Use Timer instead.';
 			
-	Timer.call(this, apps); //super-constructor (params after this)
+	Timer.call(this); //super-constructor (params after this)
 	
 	this.start = function()
 	{

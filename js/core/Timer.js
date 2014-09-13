@@ -1,13 +1,10 @@
-Timer = function(apps, periodSec)
+Timer = function()
 {
-	this.apps = apps;
-	console.log('?', apps)
-	for (var i in apps)
+	for (var id in disjunction)
 	{
-		var app = apps[i];
-		
-		console.log('!', app.id, this);
+		var app = disjunction[id];
 		app.timer = this;
+		disjunction.timer = this;
 	}
 	
 	this.lastUpdateSec = undefined;
@@ -30,13 +27,16 @@ Timer = function(apps, periodSec)
 		this.lastUpdateSec = thisUpdateSec;
         var deltaSec = (thisUpdateSec - (lastUpdateSec || thisUpdateSec)) / 1000;
 		
-		var apps = this.apps;
-		var length = apps.length;
-		for (var i = 0; i < length; i++)
+		for (var id in disjunction)
 		{
-			var app = apps[i];
-			if (app.enabled)
-				app.update(deltaSec);
+			var appArray = disjunction[id];
+			for (var i = 0; i < appArray.length; i++)
+			{
+				//console.log('i', i);
+				var app = appArray[i];
+				if (app.enabled)
+					app.update(deltaSec);
+			}
 		}
 	}
 }
