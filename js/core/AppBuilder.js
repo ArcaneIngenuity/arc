@@ -9,6 +9,7 @@ AppBuilder = function(timer)
 	var serviceTagName = 'service';
 	var phasesTagName = 'phases';
 	var phaseTagName = 'phase-div';
+	var pointerTagName = 'pointer';
 
 	this.tabIndex = undefined;
 
@@ -64,9 +65,33 @@ AppBuilder = function(timer)
 		
 		var domDevices = appDOM.getElementsByTagName(devicesTagName)[0];
 		if (domDevices) //should always be true
-		{
 			this.addDevices(domDevices);
+		else
+			throw "Error: <devices> must be specified, containing at least one <device>.";
+		
+		var domPointer = appDOM.getElementsByTagName(pointerTagName)[0];
+		if (domPointer)
+		{
+			if (domPointer.hasAttribute('device') &&
+				domPointer.hasAttribute('x') &&
+				domPointer.hasAttribute('y') &&
+				domPointer.hasAttribute('select'))
+			{
+				var device = domPointer.getAttribute('device');
+				var x = domPointer.getAttribute('x');
+				var y = domPointer.getAttribute('y');
+				var select = domPointer.getAttribute('select');
+			
+				console.log(device, x, y, select);
+				app.setPointer(window[device], window[x], window[y], window[select]);
+				console.log(app.pointer);
+			}
+			else
+				throw "Error: <pointer> must have attributes 'device', 'x', 'y', 'select'.";
 		}
+		else
+			throw "Error: <pointer> must be specified, referencing at least one device as found in <devices>.";
+			
 		var domServices = appDOM.getElementsByTagName(servicesTagName)[0];
 		if (domServices) //NOT always true
 			this.addServices(domServices);
@@ -74,9 +99,13 @@ AppBuilder = function(timer)
 		var domPhases = appDOM.getElementsByTagName(phasesTagName)[0];
 		if (domPhases) //should always be true
 			this.addPhases(domPhases);
+		else
+			throw "Error: <phases> must be specified, containing at least one <phase>.";
 			
+
 		var mouse = app.input.array[INPUT_MOUSE];
 		var keyboard = app.input.array[INPUT_KEYBOARD];
+		//TODO should these be specified on body vs. appDOM? they are shared between all apps.
 		appDOM.addEventListener('mousedown', 	ES5.bind(mouse, mouse.receive));
 		appDOM.addEventListener('mouseup',	ES5.bind(mouse, mouse.receive));
 		appDOM.addEventListener('mousemove',	ES5.bind(mouse, mouse.receive));
@@ -126,8 +155,6 @@ AppBuilder = function(timer)
 		
 		var appArray = disjunction[className];
 		appArray.push(app);
-		
-		//console.log('appArray', appArray);
 	}
 	
 	this.addDevices = function(domContainer)//, parentDomRect)
@@ -142,13 +169,11 @@ AppBuilder = function(timer)
 				if (Class)
 				{
 					//create it, add it to InputManager, and store it's index globally (TODO -- later make index storage location changeable as it may not be wanted on window)
-					window['INPUT_'+className.replace('Device','').toUpperCase()] = app.input.add(new Class());
+					var deviceName = 'INPUT_'+className.replace('Device','').toUpperCase();
+					window[deviceName] = app.input.add(new Class());
 				}	
 			}
 		}
-		
-		//TODO put this as attributes on a Pointer object
-		app.setPointer(INPUT_MOUSE, MOUSE_X, MOUSE_Y, MOUSE_BUTTON_LEFT);
 	}
 	
 	this.addServices = function(domContainer)//, parentDomRect)

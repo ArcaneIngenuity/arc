@@ -7,13 +7,10 @@ Phase = function(name, model, view, ctrl) //(abstract) Updatable, Disposable
 	this.view  = view; //root
 
 	this.ctrl  = ctrl;
-	this.view.model = model; //inject
-	this.ctrl.model = model; //inject
+	this.view.model = model;
+	this.ctrl.model = model;
 	
 	this.app = undefined;
-	
-	this.tasks = [];
-	//this.bindings = [];
                        
 	this.setApp = function(app)
 	{
@@ -66,7 +63,7 @@ Phase = function(name, model, view, ctrl) //(abstract) Updatable, Disposable
 		var view = this.view;
 		var ctrl = this.ctrl;
 		var pointer = this.app.pointer;
-
+		
 		if (pointer) 
 		{
 			if (view.enabled) //root enabled
@@ -75,7 +72,6 @@ Phase = function(name, model, view, ctrl) //(abstract) Updatable, Disposable
 				pointer.updateSelectedness();
 			}
 		}
-//console.log(pointer.target);
 		//check whether focus has changed
 		//this may occur externally via an event-based system like the DOM writing pointer.focus, or be done here, internally, for all views. 
 		if (pointer.pollFocus)
@@ -110,16 +106,4 @@ Phase = function(name, model, view, ctrl) //(abstract) Updatable, Disposable
 		//view.updateBindings();
 		view.outputRecurse(deltaSec); //render all views from root
 	}
-	
-
-	
-	/*
-	this.changeFocus = function(view)
-	{
-		console.log('phase.changeFocus');
-		this.focus.loseFocus();
-		this.focus = view;
-		this.focus.gainFocus();
-	}
-	*/
 };
