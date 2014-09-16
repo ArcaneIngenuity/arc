@@ -9,8 +9,6 @@ AppBuilder = function(timer)
 	var serviceTagName = 'service';
 	var phasesTagName = 'phases';
 	var phaseTagName = 'phase-div';
-	var tasksTagName = 'tasks';
-	var taskTagName = 'task';
 
 	this.tabIndex = undefined;
 
@@ -51,7 +49,7 @@ AppBuilder = function(timer)
 	//build. usage: <body onload="(new AppBuilder()).buildOne(document.getElementById('Tagger'));">
 	this.buildOne = function(appDOM)
 	{
-		console.log(appDOM);
+		//console.log(appDOM);
 		var id = appDOM.id;
 		var className = appDOM.className;
 		app = new App(id);
@@ -63,7 +61,7 @@ AppBuilder = function(timer)
 		{
 			app.model = new AppModelClass();
 		}
-		console.log('getElementsByTagName', appDOM, appDOM.getElementsByTagName);
+		
 		var domDevices = appDOM.getElementsByTagName(devicesTagName)[0];
 		if (domDevices) //should always be true
 		{
@@ -173,27 +171,6 @@ AppBuilder = function(timer)
 		}
 	}
 	
-	this.addTasks = function(domContainer, phase)//, parentDomRect)
-	{
-		for (var i = 0; i < domContainer.children.length; i++)
-		{
-			var element = domContainer.children[i];
-			if (element.tagName.toLowerCase() === taskTagName)
-			{
-				var className = element.className;
-				var Class = window[className];
-				if (Class)
-				{
-					var shortTaskName = className.replace('Task','').toUpperCase();
-					var task = new Class();
-					task.name = shortTaskName;
-					//create it, add it to InputManager, and store it's index globally (TODO -- later make index storage location changeable as it may not be wanted on window)
-					window['TASK_'+phase.name+'_'+shortTaskName] = phase.tasks.push(task);
-				}	
-			}
-		}
-	}
-	
 	//construct disjunction View tree (roughly) by DOM layout - do not include anything that does not have a classname
 	this.addChildViews = function(view, element)//, parentDomRect)
 	{
@@ -289,7 +266,7 @@ AppBuilder = function(timer)
 						ctrl = new CtrlClass(app, model);
 
 					
-					//console.log(model, view, ctrl);
+					
 					this.prepareElement(element, view);
 
 					//console.log(className);
@@ -312,12 +289,6 @@ AppBuilder = function(timer)
 					{
 						currentPhaseName = className;
 					}
-					
-					//TODO remove?
-					var domTasks = element.getElementsByTagName(tasksTagName)[0];
-					//console.log('TASKS',  element.getElementsByTagName(tasksTagName)[0]);
-					if (domTasks)
-						this.addTasks(domTasks, phase);
 				}
 			}
 		}
@@ -328,19 +299,9 @@ AppBuilder = function(timer)
 		element.view = view; // bind the view
 		element.onfocus = function()
 		{
+			//console.log('onfocus', element);
 			this.view.takeFocus();
-			//console.dir(this, this.getBoundingClientRect());
 		}
-		//element.onblur = function() //{this.view.wasFocused = this.view.isFocused; this.view.isFocused = false;};
-		//element.onmousedown = "app.phaser.phase.focus = "
-		//console.log(element, element.getAttribute('notab'));
-		/*
-		console.log(element, element.tabIndex);
-		if (element.tabIndex == -1)// && !element.hasAttribute('notab') ) //only add if not specified in markup
-		{
-			this.tabIndex++;
-			element.tabIndex = this.tabIndex;
-		}
-		*/
+		//element.onblur = function() {this.view.wasFocused = this.view.isFocused; this.view.isFocused = false;};
 	}
 }

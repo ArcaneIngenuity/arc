@@ -6,9 +6,56 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+	<!-- framework prequisite polyfills -->
+	<script src="../../polyfills/x-tag-core.min.js"></script>
+	<script src="../../polyfills/ES5.js"></script>
+
+	<!-- framework core -->
+	<script src="../../core/AppBuilder.js"></script>
+	<script src="../../core/App.js"></script>
+	<script src="../../core/Phaser.js"></script>
+	<script src="../../core/Phase.js"></script>
+	<script src="../../core/Model.js"></script>
+	<script src="../../core/View.js"></script>
+	<script src="../../core/Ctrl.js"></script>
+	<script src="../../core/ServiceHub.js"></script>
+	<script src="../../core/InputHub.js"></script>
+	<script src="../../core/Input.js"></script>
+	<script src="../../core/InputChannel.js"></script>
+	<script src="../../core/Pointer.js"></script>
+	<script src="../../core/Timer.js"></script>
+
+	<!-- framework extensions -->
+	<script src="../../extensions/TimerInterval.js"></script>
+	<script src="../../extensions/TimerRAF.js"></script>
+	<script src="../../extensions/Keyboard.js"></script>
+	<script src="../../extensions/Mouse.js"></script>
+	<script src="../../extensions/Box2.js"></script>
+	<script src="../../extensions/Point2.js"></script>
+
+	<!-- App-related implementations -->
+	<!-- NOTE directory structures and and file separations are arbitrary -- you could keep everything in the root, even in a single file. -->
+	<link  href="./App.css" rel="stylesheet">
+	<script src="./AppModel.js"></script>
+	<script src="./Services/MonsterService.js"></script>
+
+	<!-- Phase-related implementations -->
+	<link  href="./Phases/Main/Main.css" rel="stylesheet">
+	<script src="./Phases/Main/MainModel.js"></script>
+	<script src="./Phases/Main/MainView.js"></script>
+	<script src="./Phases/Main/MainCtrl.js"></script>
+	<!-- NOTE you may keep your Phase's Model, View, Ctrl in one file, for example...-->
+	<!--<script src="./Phases/Main/Main.js"></script>-->
+
+	<!-- View implementations (not specific to any Phase) -->
+
+	<!-- user miscellaneous, non-framework classes -->
+	<script src="./Misc/md5.js"></script>
+	<script src="./Misc/MonsterModel.js"></script>
 </head>
-<body onload="var app = (new AppBuilder()).build(document.body); (new TimerRAF([app])).start();">
-	<app id="App" oncontextmenu="return false">
+<body onload="(new AppBuilder()).buildAll(); (new TimerRAF()).start();">
+	<app class="App" id="App" oncontextmenu="return false">
 		<devices>
 			<device class="Mouse"></device>
 			<device class="Keyboard"></device>
@@ -18,62 +65,13 @@
 			<service class="Monster"></service>
 		</services>
 		<phases>
-			<phase-div class="Main" current>
-				<p>Click to add monsters.</p>
-				<div id="Monsters"></div>
-				<div class="ThoughtBubble" id="ThoughtBubble"></div><!-- class to provide View and style; ID to give a DOM element's View a name within its parent -->
+			<phase-div class="Main" current tabindex="0" autofocus>
+				<p tabindex="-1">Click to add monsters.</p>
+				<div class="Monsters"></div>
+				<!--<div class="ThoughtBubble" tabindex="-1"></div>-->
 			</phase-div>
 			<!-- TODO include all Phases here -->
 		</phases>
 	</app>
 </body>
-
-<!-- framework prequisite polyfills -->
-<script src="../../polyfills/x-tag-core.min.js"></script>
-<script src="../../polyfills/ES5.js"></script>
-
-<!-- framework core -->
-<script src="../../core/AppBuilder.js"></script>
-<script src="../../core/App.js"></script>
-<script src="../../core/Phaser.js"></script>
-<script src="../../core/Phase.js"></script>
-<script src="../../core/Model.js"></script>
-<script src="../../core/View.js"></script>
-<script src="../../core/Ctrl.js"></script>
-<script src="../../core/ServiceHub.js"></script>
-<script src="../../core/InputHub.js"></script>
-<script src="../../core/Input.js"></script>
-<script src="../../core/InputChannel.js"></script>
-<script src="../../core/Pointer.js"></script>
-<script src="../../core/Display.js"></script>
-<script src="../../core/Timer.js"></script>
-
-<!-- framework extensions -->
-<script src="../../extensions/TimerInterval.js"></script>
-<script src="../../extensions/TimerRAF.js"></script>
-<script src="../../extensions/Keyboard.js"></script>
-<script src="../../extensions/Mouse.js"></script>
-<script src="../../extensions/Box2.js"></script>
-<script src="../../extensions/Point2.js"></script>
-
-<!-- App-related implementations -->
-<!-- NOTE directory structures and and file separations are arbitrary -- you could keep everything in the root, even in a single file. -->
-<link  href="./App.css" rel="stylesheet">
-<script src="./AppModel.js"></script>
-<script src="./Services/MonsterService.js"></script>
-
-<!-- Phase-related implementations -->
-<link  href="./Phases/Main/Main.css" rel="stylesheet">
-<script src="./Phases/Main/MainModel.js"></script>
-<script src="./Phases/Main/MainView.js"></script>
-<script src="./Phases/Main/MainCtrl.js"></script>
-<!-- NOTE you may keep your Phase's Model, View, Ctrl in one file, for example...-->
-<!--<script src="./Phases/Main/Main.js"></script>-->
-
-<!-- View implementations (not specific to any Phase) -->
-
-<!-- user miscellaneous, non-framework classes -->
-<script src="./Misc/md5.js"></script>
-<script src="./Misc/MonsterModel.js"></script>
-
 </html>

@@ -3,7 +3,7 @@ MainView = function(app, model)
 	View.call(this, app, model); //extend base framework class
 
 	this.bounds = new Box2();
-	console.log(this.app);
+	
 	var monsterService = this.app.services.get(SERVICE_MONSTER);
 
 	this.monstersDOM = undefined;
@@ -17,12 +17,8 @@ MainView = function(app, model)
 		model.arenaWidth  = dom.clientWidth;
 		model.arenaHeight = dom.clientHeight;
 		
-		this.monstersDOM		= document.getElementById('Monsters');
-		this.thoughtBubbleDOM 	= document.getElementById('ThoughtBubble');
-		console.log('mnstr', this.monstersDOM);
-		console.log('thght', this.thoughtBubbleDOM);
-		console.log(this.children);
-		console.log(dom.children);
+		this.monstersDOM		= document.getElementsByClassName('Monsters')[0];
+		this.thoughtBubbleDOM 	= document.getElementsByClassName('ThoughtBubble')[0];
 
 		//listeners for DOM events may be set up in View.start()
 		window.addEventListener( 'resize', this.onWindowResize.bind(this), true );
@@ -53,9 +49,7 @@ MainView = function(app, model)
 		//***TODO convert raw input to (App or Phase) Model state and View state.
 		if (mouse.channels[MOUSE_BUTTON_LEFT].delta > 0)// && !this.loaded)
 		{
-		
 			console.log( 'add' );
-			
 			var monsterModel = this.addNewMonster();
 		}
 		
@@ -64,7 +58,7 @@ MainView = function(app, model)
 	}
 	
 	this.output = function(deltaSec)
-	{
+	{	
 		var dom = this.dom;
 		var model = this.model;
 		var monsters = model.monsters;
