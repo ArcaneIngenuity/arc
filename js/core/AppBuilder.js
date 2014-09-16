@@ -18,33 +18,43 @@ AppBuilder = function(timer)
 	var currentPhaseName;
 	
 	var viewIDs = {};
-	//var document = window.document;
-	/*
-	var DOMApp = document.registerElement(appTagName, {
-	  prototype: Object.create(HTMLDivElement.prototype),
-	  extends: 'div'
-	});
-	
-	var DOMPhases = document.registerElement(phasesTagName);
-	var DOMPhase = document.registerElement(phaseTagName, {
-	  prototype: Object.create(HTMLDivElement.prototype),
-	  extends: 'div'
-	});
-	var DOMTasks = document.registerElement(tasksTagName);
-	var DOMTask = document.registerElement(taskTagName);
-	*/
 	
 	var DOMPhase = document.registerElement(phaseTagName, {
 	  prototype: Object.create(HTMLDivElement.prototype),
 	  extends: 'div'
 	});
 	
-	//usage: <body onload="(new AppBuilder()).buildFrom(document.getElementById('Tagger'));">
-	this.build = function(domApp)
+	this.buildAll = function()
 	{
-		var id = domApp.id;
-		var className = domApp.className;
-		app = /*window[id] =*/ new App(id);
+		if (!window.disjunction) // don't clear the existing object if there is one on window
+		{
+			disjunction = {};
+		}
+	
+		var appDOMs = document.getElementsByTagName(appTagName);
+
+		var length = appDOMs.length;
+		for (var i = 0; i < length; i++)
+		{
+			var appDOM = appDOMs[i];
+			if (appDOM.id === "" || appDOM.className === "") //not a zero-length string
+			{
+				throw "Error: All <app> elements must have id and class attributes.";
+			}
+			
+			var app = this.buildOne(appDOM);
+			this.addApp(app);
+		}
+		//console.log('disjunction', disjunction);
+	}
+	
+	//build. usage: <body onload="(new AppBuilder()).buildOne(document.getElementById('Tagger'));">
+	this.buildOne = function(appDOM)
+	{
+		console.log(appDOM);
+		var id = appDOM.id;
+		var className = appDOM.className;
+		app = new App(id);
 		app.className = className; //TODO put in constructor
 		
 		var appModelClassName = className+'Model';
@@ -53,27 +63,27 @@ AppBuilder = function(timer)
 		{
 			app.model = new AppModelClass();
 		}
-		
-		var domDevices = domApp.getElementsByTagName(devicesTagName)[0];
+		console.log('getElementsByTagName', appDOM, appDOM.getElementsByTagName);
+		var domDevices = appDOM.getElementsByTagName(devicesTagName)[0];
 		if (domDevices) //should always be true
 		{
 			this.addDevices(domDevices);
 		}
-		var domServices = domApp.getElementsByTagName(servicesTagName)[0];
+		var domServices = appDOM.getElementsByTagName(servicesTagName)[0];
 		if (domServices) //NOT always true
 			this.addServices(domServices);
 
-		var domPhases = domApp.getElementsByTagName(phasesTagName)[0];
+		var domPhases = appDOM.getElementsByTagName(phasesTagName)[0];
 		if (domPhases) //should always be true
 			this.addPhases(domPhases);
 			
 		var mouse = app.input.array[INPUT_MOUSE];
 		var keyboard = app.input.array[INPUT_KEYBOARD];
-		domApp.addEventListener('mousedown', 	ES5.bind(mouse, mouse.receive));
-		domApp.addEventListener('mouseup',	ES5.bind(mouse, mouse.receive));
-		domApp.addEventListener('mousemove',	ES5.bind(mouse, mouse.receive));
-		domApp.addEventListener('keydown', 	ES5.bind(keyboard, keyboard.receive));
-		domApp.addEventListener('keyup',		ES5.bind(keyboard, keyboard.receive));
+		appDOM.addEventListener('mousedown', 	ES5.bind(mouse, mouse.receive));
+		appDOM.addEventListener('mouseup',	ES5.bind(mouse, mouse.receive));
+		appDOM.addEventListener('mousemove',	ES5.bind(mouse, mouse.receive));
+		appDOM.addEventListener('keydown', 	ES5.bind(keyboard, keyboard.receive));
+		appDOM.addEventListener('keyup',		ES5.bind(keyboard, keyboard.receive));
 		
 		app.phaser.change(currentPhaseName);
 		
@@ -95,25 +105,31 @@ AppBuilder = function(timer)
 			var id = ids[i];
 
 			var app = this.buildById(id);
-			var className = app.className;
-			//hold refs to multiple instances of same app 
-			if (!disjunction[className])
-			{
-				disjunction[className] = [];
-			}
-			var appArray = disjunction[className];
-			app.index = appArray.length;
-			
-			appArray.push(app);
-			console.log('appArray', appArray);
+			this.addApp(app);
 		}
-		console.log('disjunction', disjunction);
+		//console.log('disjunction', disjunction);
 	}
 	
+	//find and build
 	this.buildById = function(id)
 	{
-		var domApp = document.getElementById(id);
-		return this.build(domApp);
+		var appDOM = document.getElementById(id);
+		return this.buildOne(appDOM);
+	}
+	
+	this.addApp = function(app)
+	{
+		var className = app.className;
+		
+		if (!disjunction[className]) //hold refs to multiple instances of same app 
+		{
+			disjunction[className] = [];
+		}
+		
+		var appArray = disjunction[className];
+		appArray.push(app);
+		
+		//console.log('appArray', appArray);
 	}
 	
 	this.addDevices = function(domContainer)//, parentDomRect)
