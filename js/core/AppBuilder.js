@@ -38,7 +38,7 @@ AppBuilder = function(apps)
 			}
 			
 			var app = this.buildOne(appDOM);
-			this.addApp(app);
+			apps[app.id] = app;
 		}
 	}
 	
@@ -106,6 +106,8 @@ AppBuilder = function(apps)
 		
 		app.phaser.change(currentPhaseName);
 		
+		apps[app.id] = app;
+		
 		return app;
 	}
 	
@@ -117,7 +119,6 @@ AppBuilder = function(apps)
 			var id = ids[i];
 
 			var app = this.buildById(id);
-			this.addApp(app);
 		}
 	}
 	
@@ -126,16 +127,6 @@ AppBuilder = function(apps)
 	{
 		var appDOM = document.getElementById(id);
 		return this.buildOne(appDOM);
-	}
-	
-	this.addApp = function(app)
-	{
-		if (!apps[app.id]) //hold refs to multiple instances of same app 
-		{
-			apps[app.id] = app;
-		}
-		else
-			throw "Error: app with id '"+app.id+"' already exists.";
 	}
 	
 	this.addDevices = function(domContainer)//, parentDomRect)
