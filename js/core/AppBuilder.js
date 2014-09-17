@@ -1,6 +1,6 @@
 //TODO all instances of 'window' should be replaced with 'dj' if  we separate things out
 //TODO documentation saying what attributes (e.g. onfocus) not to implement when using this class!
-AppBuilder = function(timer)
+AppBuilder = function(apps)
 {
 	var appTagName = 'app';
 	var devicesTagName = 'devices';
@@ -13,6 +13,7 @@ AppBuilder = function(timer)
 
 	this.tabIndex = undefined;
 
+	//var apps = apps;
 	var app;
 	var currentPhaseName;
 	
@@ -25,11 +26,6 @@ AppBuilder = function(timer)
 	
 	this.buildAll = function()
 	{
-		if (!window.disjunction) // don't clear the existing object if there is one on window
-		{
-			disjunction = {};
-		}
-	
 		var appDOMs = document.getElementsByTagName(appTagName);
 
 		var length = appDOMs.length;
@@ -44,13 +40,11 @@ AppBuilder = function(timer)
 			var app = this.buildOne(appDOM);
 			this.addApp(app);
 		}
-		//console.log('disjunction', disjunction);
 	}
 	
 	//build. usage: <body onload="(new AppBuilder()).buildOne(document.getElementById('Tagger'));">
 	this.buildOne = function(appDOM)
 	{
-		//console.log(appDOM);
 		var id = appDOM.id;
 		var className = appDOM.className;
 		app = new App(id);
@@ -82,9 +76,7 @@ AppBuilder = function(timer)
 				var y = domPointer.getAttribute('y');
 				var select = domPointer.getAttribute('select');
 			
-				console.log(device, x, y, select);
 				app.setPointer(window[device], window[x], window[y], window[select]);
-				console.log(app.pointer);
 			}
 			else
 				throw "Error: <pointer> must have attributes 'device', 'x', 'y', 'select'.";
@@ -114,19 +106,12 @@ AppBuilder = function(timer)
 		
 		app.phaser.change(currentPhaseName);
 		
-		app.timer = timer;
-		
 		return app;
 	}
 	
 	//(JS-only) Multi-app pages
 	this.buildByIds = function(ids)
-	{
-		if (!window.disjunction) // don't clear the existing object if there is one on window
-		{
-			disjunction = {};
-		}
-		
+	{	
 		for (var i in ids)
 		{
 			var id = ids[i];
@@ -134,7 +119,6 @@ AppBuilder = function(timer)
 			var app = this.buildById(id);
 			this.addApp(app);
 		}
-		//console.log('disjunction', disjunction);
 	}
 	
 	//find and build
@@ -146,15 +130,12 @@ AppBuilder = function(timer)
 	
 	this.addApp = function(app)
 	{
-		var className = app.className;
-		
-		if (!disjunction[className]) //hold refs to multiple instances of same app 
+		if (!apps[app.id]) //hold refs to multiple instances of same app 
 		{
-			disjunction[className] = [];
+			apps[app.id] = app;
 		}
-		
-		var appArray = disjunction[className];
-		appArray.push(app);
+		else
+			throw "Error: app with id '"+app.id+"' already exists.";
 	}
 	
 	this.addDevices = function(domContainer)//, parentDomRect)
@@ -191,12 +172,13 @@ AppBuilder = function(timer)
 					//var shortServiceName = className.replace('Service','').toUpperCase();
 					//create it, add it to InputManager, and store it's index globally (TODO -- later make index storage location changeable as it may not be wanted on window)
 					window['SERVICE_'+shortServiceName.toUpperCase()] = app.services.add(new Class());
+					//console.log('SERVICE_'+shortServiceName.toUpperCase());
 				}	
 			}
 		}
 	}
 	
-	//construct disjunction View tree (roughly) by DOM layout - do not include anything that does not have a classname
+	//construct View tree (roughly) by DOM layout - do not include anything that does not have a classname
 	this.addChildViews = function(view, element)//, parentDomRect)
 	{
 		for (var a = 0; a < element.children.length; a++)

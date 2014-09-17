@@ -1,4 +1,4 @@
-Phaser = function(app) //(final) Updatable, Disposable
+Phaser = function(app) //final
 {
 	/** Must be defined before it can be set into the manager's map. */
 	var array = {};

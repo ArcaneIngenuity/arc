@@ -1,4 +1,4 @@
-Phase = function(name, model, view, ctrl) //(abstract) Updatable, Disposable
+Phase = function(name, model, view, ctrl) //abstract
 {
 	/** Must be defined before it can be set into the manager's map. should be unique. */
 	this.name  = name;

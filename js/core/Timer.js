@@ -1,13 +1,7 @@
 Timer = function()
-{
-	for (var id in disjunction)
-	{
-		var app = disjunction[id];
-		app.timer = this;
-		disjunction.timer = this;
-	}
-	
+{	
 	this.lastUpdateSec = undefined;
+	this.callback = undefined;
 	
 	this.start = function()
 	{
@@ -27,16 +21,9 @@ Timer = function()
 		this.lastUpdateSec = thisUpdateSec;
         var deltaSec = (thisUpdateSec - (lastUpdateSec || thisUpdateSec)) / 1000;
 		
-		for (var id in disjunction)
+		if (this.callback)
 		{
-			var appArray = disjunction[id];
-			for (var i = 0; i < appArray.length; i++)
-			{
-				//console.log('i', i);
-				var app = appArray[i];
-				if (app.enabled)
-					app.update(deltaSec);
-			}
+			this.callback(deltaSec);
 		}
 	}
 }
