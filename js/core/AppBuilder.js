@@ -8,22 +8,22 @@ AppBuilder = function(apps)
 	var servicesTagName = 'services';
 	var serviceTagName = 'service';
 	var phasesTagName = 'phases';
-	var phaseTagName = 'phase-div';
+	var phaseTagName = 'phase';
 	var pointerTagName = 'pointer';
 
 	this.tabIndex = undefined;
 
-	//var apps = apps;
 	var app;
 	var currentPhaseName;
 	
 	var viewIDs = {};
 	
+	/*
 	var DOMPhase = document.registerElement(phaseTagName, {
 	  prototype: Object.create(HTMLDivElement.prototype),
 	  extends: 'div'
 	});
-	
+	*/
 	this.buildAll = function()
 	{
 		var appDOMs = document.getElementsByTagName(appTagName);
