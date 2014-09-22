@@ -1,15 +1,16 @@
 //TODO all instances of 'window' should be replaced with 'dj' if  we separate things out
 //TODO documentation saying what attributes (e.g. onfocus) not to implement when using this class!
-AppBuilder = function(apps)
+AppBuilder = function(apps, skipPrefix)
 {
-	var appTagName = 'app';
-	var devicesTagName = 'devices';
-	var deviceTagName = 'device';
-	var servicesTagName = 'services';
-	var serviceTagName = 'service';
-	var phasesTagName = 'phases';
-	var phaseTagName = 'phase';
-	var pointerTagName = 'pointer';
+	var prefix			= skipPrefix ? '' : 'dj-';
+	var appTagName 		= prefix + 'app';
+	var devicesTagName 	= prefix + 'devices';
+	var deviceTagName 	= prefix + 'device';
+	var servicesTagName = prefix + 'services';
+	var serviceTagName 	= prefix + 'service';
+	var phasesTagName 	= prefix + 'phases';
+	var phaseTagName 	= prefix + 'phase' + (skipPrefix ? '-' : ''); //sadly necessary due to the fact that custom element need hyphens.
+	var pointerTagName 	= prefix + 'pointer';
 
 	this.tabIndex = undefined;
 
@@ -18,12 +19,11 @@ AppBuilder = function(apps)
 	
 	var viewIDs = {};
 	
-	/*
 	var DOMPhase = document.registerElement(phaseTagName, {
 	  prototype: Object.create(HTMLDivElement.prototype),
 	  extends: 'div'
 	});
-	*/
+	
 	this.buildAll = function()
 	{
 		var appDOMs = document.getElementsByTagName(appTagName);
@@ -234,6 +234,11 @@ AppBuilder = function(apps)
 	//It's either that or <view-div> in <phase> which seems pointless... the idea of <view> element in the DOM(!) is a non sequitur.
 	this.addPhases = function(domContainer)
 	{
+		//validate - JS only
+		var elements = domContainer.getElementsByTagName('phase');
+		if (elements.length)
+			throw "Error: In DOM JS, use <"+phaseTagName+"> rather than <phase>.";
+	
 		for (var a = 0; a < domContainer.children.length; a++)
 		{
 			var element = domContainer.children[a];

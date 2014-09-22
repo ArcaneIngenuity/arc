@@ -25,7 +25,8 @@
 	<script src="../../core/InputChannel.js"></script>
 	<script src="../../core/Pointer.js"></script>
 	<script src="../../core/Timer.js"></script>
-
+	<script src="../../core/Disjunction.js"></script>
+	
 	<!-- framework extensions -->
 	<script src="../../extensions/TimerInterval.js"></script>
 	<script src="../../extensions/TimerRAF.js"></script>
@@ -51,7 +52,7 @@
 
 	<!-- user miscellaneous, non-framework classes -->
 </head>
-<body onload="(new AppBuilder()).buildAll(); (new TimerRAF()).start();">
+<body onload="dj = new Disjunction(new TimerRAF(), true, true, true);">
 	<app class="App" id="App" oncontextmenu="return false">
 		<pointer device="INPUT_MOUSE" x="MOUSE_X" y="MOUSE_Y" select="MOUSE_BUTTON_LEFT"></pointer>
 		<devices>
@@ -63,8 +64,8 @@
 			<!-- TODO include any Services here -->
 		</services>
 		<phases>
-			<phase-div class="Main" current tabindex="0" autofocus>
-			</phase-div>
+			<phase- class="Main" current tabindex="0" autofocus>
+			</phase->
 			<!-- TODO include all Phases here -->
 		</phases>
 	</app>

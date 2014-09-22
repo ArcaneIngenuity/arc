@@ -30,7 +30,6 @@ Phaser = function(app) //final
 			this.phase.view.disable();
 		}	
 		this.phase = array[name];
-		//console.log(name, this.phase);
 		this.phase.view.enable();
 		this.phase.start();
 	}

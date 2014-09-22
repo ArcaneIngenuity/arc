@@ -25,6 +25,7 @@
 	<script src="../../core/InputChannel.js"></script>
 	<script src="../../core/Pointer.js"></script>
 	<script src="../../core/Timer.js"></script>
+	<script src="../../core/Disjunction.js"></script>
 
 	<!-- framework extensions -->
 	<script src="../../extensions/TimerInterval.js"></script>
@@ -54,25 +55,25 @@
 	<script src="./Misc/md5.js"></script>
 	<script src="./Misc/MonsterModel.js"></script>
 </head>
-<body onload="(new AppBuilder()).buildAll(); (new TimerRAF()).start();">
-	<app class="App" id="App" oncontextmenu="return false">
-		<pointer device="INPUT_MOUSE" x="MOUSE_X" y="MOUSE_Y" select="MOUSE_BUTTON_LEFT"></pointer>
-		<devices>
-			<device class="Mouse"></device>
-			<device class="Keyboard"></device>
+<body onload="dj = new Disjunction(new TimerRAF(), true, true);">
+	<dj-app class="App" id="App" oncontextmenu="return false">
+		<dj-pointer device="INPUT_MOUSE" x="MOUSE_X" y="MOUSE_Y" select="MOUSE_BUTTON_LEFT"></dj-pointer>
+		<dj-devices>
+			<dj-device class="Mouse"></dj-device>
+			<dj-device class="Keyboard"></dj-device>
 			<!-- TODO include any other input device interfaces here, supplying custom Input implementations -->
-		</devices>
-		<services>
-			<service class="Monster"></service>
-		</services>
-		<phases>
-			<phase-div class="Main" current tabindex="0" autofocus>
+		</dj-devices>
+		<dj-services>
+			<dj-service class="Monster"></dj-service>
+		</dj-services>
+		<dj-phases>
+			<dj-phase class="Main" current tabindex="0" autofocus>
 				<p tabindex="-1">Click to add monsters.</p>
 				<div class="Monsters"></div>
 				<!--<div class="ThoughtBubble" tabindex="-1"></div>-->
-			</phase-div>
+			</dj-phase>
 			<!-- TODO include all Phases here -->
-		</phases>
-	</app>
+		</dj-phases>
+	</dj-app>
 </body>
 </html>

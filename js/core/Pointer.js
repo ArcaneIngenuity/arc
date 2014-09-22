@@ -102,7 +102,6 @@ Pointer = function() //ABSTRACT / INTERFACE
 			//3. get position of pointer within target
 			this.positionInTarget = this.position.clone();
 			this.target.fromWorld(this.positionInTarget);
-			//console.log('in')
 		}
 	}
 	

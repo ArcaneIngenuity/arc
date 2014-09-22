@@ -1,4 +1,4 @@
-Disjunction = function(timer, autoBuildAll, autoStartTimer)
+Disjunction = function(timer, autoBuildAll, autoStartTimer, skipPrefix)
 {
 	//classes
 	this.core = {};
@@ -6,7 +6,7 @@ Disjunction = function(timer, autoBuildAll, autoStartTimer)
 	
 	//instances
 	this.apps = {}; //anything not in this map will not be updated by timer.
-	this.appBuilder = new AppBuilder(this.apps);
+	this.appBuilder = new AppBuilder(this.apps, skipPrefix);
 	
 	this.update = function(deltaSec)
 	{
