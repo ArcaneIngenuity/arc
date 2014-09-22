@@ -1,6 +1,6 @@
-MainCtrl = function()
+MainCtrl = function(app, model)
 {
-	Ctrl.call(this); //extend base framework class
+	Ctrl.call(this, app, model); //extend base framework class
 	
 	/** Used to set up resources or values specific to this Ctrl / Model (and thus the entire Phase). */ 
 	this.start = function() //abstract
@@ -21,5 +21,5 @@ MainCtrl = function()
 	};
 };
 
-MainCtrl.prototype = Object.create(Ctrl.prototype);
+MainCtrl.prototype = Object.create(disjunction.core.Ctrl.prototype);
 MainCtrl.prototype.constructor = MainCtrl;

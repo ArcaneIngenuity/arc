@@ -1,4 +1,4 @@
-Phaser = function(app) //final
+disjunction.core.Phaser = function(app) //final
 {
 	/** Must be defined before it can be set into the manager's map. */
 	var array = {};
@@ -46,4 +46,4 @@ Phaser = function(app) //final
 			array[name].dispose();
 		}
 	}
-}
+};

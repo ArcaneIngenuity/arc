@@ -1,6 +1,6 @@
-Mouse = function()
+disjunction.extensions.Mouse = function()
 {
-	Input.call(this, 6); //super-constructor (add params after this)
+	Device.call(this, 6); //super-constructor (add params after this)
 	
 	//passive: use as an input event handler - DOM
 	this.receive = function(event)
@@ -33,8 +33,8 @@ Mouse = function()
 			}
 			if (inputType === 'mo') //move
 			{
-				var xChannel = this.channels[MOUSE_X];
-				var yChannel = this.channels[MOUSE_Y];
+				var xChannel = this.channels[disjunction.constants.MOUSE_X];
+				var yChannel = this.channels[disjunction.constants.MOUSE_Y];
 				
 				//xChannel.valueLast = xChannel.value;
 				//yChannel.valueLast = yChannel.value;
@@ -59,12 +59,12 @@ Mouse = function()
 	}
 }
 
-Mouse.prototype = new Input();
-Mouse.prototype.constructor = Mouse;
+disjunction.extensions.Mouse.prototype = new disjunction.core.Device();
+disjunction.extensions.Mouse.prototype.constructor = disjunction.extensions.Mouse;
 
-MOUSE_X = 0;
-MOUSE_Y = 1;
-MOUSE_BUTTON_LEFT = 2;
-MOUSE_BUTTON_MIDDLE = 3;
-MOUSE_BUTTON_RIGHT = 4;
-MOUSE_WHEEL = 5;
+disjunction.constants.MOUSE_X = 0;
+disjunction.constants.MOUSE_Y = 1;
+disjunction.constants.MOUSE_BUTTON_LEFT = 2;
+disjunction.constants.MOUSE_BUTTON_MIDDLE = 3;
+disjunction.constants.MOUSE_BUTTON_RIGHT = 4;
+disjunction.constants.MOUSE_WHEEL = 5;

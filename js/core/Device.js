@@ -1,4 +1,4 @@
-Input = function(numChannels) //ABSTRACT / INTERFACE
+disjunction.core.Device = function(numChannels) //ABSTRACT / INTERFACE
 {
 	this.channels = [];
 	this.numChannels = numChannels;
@@ -7,7 +7,7 @@ Input = function(numChannels) //ABSTRACT / INTERFACE
 	//constructor
 	for (var i = 0; i < this.numChannels; i++)
 	{
-		this.channels[i] = new InputChannel();
+		this.channels[i] = new DeviceChannel();
 	}
 	
 	//passive: use as an input event handler - DOM

@@ -6,7 +6,7 @@ MainModel = function()
 	this.myData = 'data';
 };
 
-MainModel.prototype = Object.create(Model.prototype);
+MainModel.prototype = Object.create(disjunction.core.Model.prototype);
 MainModel.prototype.constructor = MainModel;
 
 //TODO enter any enum constants specific to this Model

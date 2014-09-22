@@ -1,4 +1,4 @@
-Phase = function(name, model, view, ctrl) //abstract
+disjunction.core.Phase = function(name, model, view, ctrl) //abstract
 {
 	/** Must be defined before it can be set into the manager's map. should be unique. */
 	this.name  = name;
@@ -14,7 +14,7 @@ Phase = function(name, model, view, ctrl) //abstract
                        
 	this.setApp = function(app)
 	{
-		this.app = app;                    
+		this.app = app;
 		this.ctrl.app = app;
 		this.view.app = app;
 		this.ctrl.phase = this;
@@ -62,7 +62,7 @@ Phase = function(name, model, view, ctrl) //abstract
 		var model = this.model;
 		var view = this.view;
 		var ctrl = this.ctrl;
-		var pointer = this.app.pointer;
+		var pointer = disjunction.pointer;
 		
 		if (pointer) 
 		{
@@ -84,7 +84,7 @@ Phase = function(name, model, view, ctrl) //abstract
 		model.updateJournals();
 		
 		//global update: view.input, ctrl.update, view.output
-		var focus = this.app.pointer.focus;
+		var focus = disjunction.pointer.focus;
 		var bubble = focus;
 		while (bubble)
 			bubble = bubble.input(deltaSec); //focus returns next ancestor, and so on... or not. this is the logical opposite of stopPropagation -- instead we propagate if appropriate.

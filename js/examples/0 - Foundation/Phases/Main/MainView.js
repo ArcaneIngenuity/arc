@@ -1,6 +1,6 @@
-MainView = function()
+MainView = function(app, model)
 {
-	View.call(this); //extend base framework class
+	View.call(this, app, model); //extend base framework class
 
 	this.bounds = new Box2();
 	
@@ -28,9 +28,9 @@ MainView = function()
 		var model = this.model;
 	
 		//get InputHub & Inputs containing InputChannels
-		var input = this.app.input;
-		var mouse = input.array[INPUT_MOUSE];
-		var keyboard = input.array[INPUT_KEYBOARD];
+		var devices = disjunction.devices;
+		var mouse = devices.array[DEVICE_MOUSE];
+		var keyboard = devices.array[DEVICE_KEYBOARD];
 		
 		//get Pointer
 		var pointer = this.app.pointer;
@@ -90,5 +90,5 @@ MainView = function()
 	}
 }
 
-MainView.prototype = Object.create(View.prototype);
+MainView.prototype = Object.create(disjunction.core.View.prototype);
 MainView.prototype.constructor = MainView;

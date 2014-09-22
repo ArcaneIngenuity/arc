@@ -1,6 +1,6 @@
 MainCtrl = function(app, model)
 {
-	Ctrl.call(this, app, model); //extend base framework class
+	dj.core.Ctrl.call(this, app, model); //extend base framework class
 	
 	/** Used to set up resources or values specific to this Ctrl / Model (and thus the entire Phase). */ 
 	this.start = function() //abstract
@@ -61,5 +61,5 @@ MainCtrl = function(app, model)
 	};
 };
 
-MainCtrl.prototype = Object.create(Ctrl.prototype);
+MainCtrl.prototype = Object.create(dj.core.Ctrl.prototype);
 MainCtrl.prototype.constructor = MainCtrl;

@@ -13,7 +13,7 @@
 
     //background-color: #AB8282;
     box-shadow:25px -25px 60px 60px rgba(0,0,0,0.5) inset;	
-
+	overflow: hidden;
 }
 
 .monster, .monster > */* use uncapitalised name for classes or that do no represent a View or Phase class 1:1 */

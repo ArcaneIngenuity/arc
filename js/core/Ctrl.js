@@ -1,4 +1,4 @@
-Ctrl = function(app, model)
+disjunction.core.Ctrl = function(app, model)
 {
 	this.app = app;
 	this.model = model;

@@ -1,9 +1,8 @@
 MainView = function(app, model)
 {
-	View.call(this, app, model); //extend base framework class
+	dj.core.View.call(this, app, model); //extend base framework class
 
 	this.bounds = new Box2();
-	
 	var monsterService = this.app.services.get(SERVICE_MONSTER);
 
 	this.monstersDOM = undefined;
@@ -39,22 +38,13 @@ MainView = function(app, model)
 		var model = this.model;
 	
 		//get InputHub & Inputs containing InputChannels
-		var input = this.app.input;
-		var mouse = input.array[INPUT_MOUSE];
-		var keyboard = input.array[INPUT_KEYBOARD];
+		var devices = disjunction.devices;
+		var mouse = devices.array[DEVICE_MOUSE];
+		var keyboard = devices.array[DEVICE_KEYBOARD];
+		var pointer = disjunction.pointer;
 		
-		//get Pointer
-		var pointer = this.app.pointer;
-		
-		//***TODO convert raw input to (App or Phase) Model state and View state.
-		if (mouse.channels[MOUSE_BUTTON_LEFT].delta > 0)// && !this.loaded)
-		{
-			console.log( 'add' );
+		if (pointer.selectChannel.delta > 0)
 			var monsterModel = this.addNewMonster();
-		}
-		
-		if (mouse.channels[MOUSE_BUTTON_RIGHT].delta > 0)
-			console.log( 'remove' );
 	}
 	
 	this.output = function(deltaSec)
@@ -225,5 +215,5 @@ MainView = function(app, model)
 	}
 }
 
-MainView.prototype = Object.create(View.prototype);
+MainView.prototype = Object.create(dj.core.View.prototype);
 MainView.prototype.constructor = MainView;

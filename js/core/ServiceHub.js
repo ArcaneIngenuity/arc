@@ -1,4 +1,4 @@
-ServiceHub = function()
+disjunction.core.ServiceHub = function()
 {
 	this.array = [];
 	
@@ -23,4 +23,4 @@ ServiceHub = function()
 			array[i].dispose();
 		}
 	}
-}
+};

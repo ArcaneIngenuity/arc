@@ -1,6 +1,6 @@
 ThoughtBubbleView = function(app, model)
 {
-	View.call(this, app, model); //extend base framework class
+	dj.core.View.call(this, app, model); //extend base framework class
 
 	this.bounds = new Box2();
 	console.log(this.app);
@@ -58,5 +58,5 @@ ThoughtBubbleView = function(app, model)
 	}
 }
 
-MainView.prototype = Object.create(View.prototype);
+MainView.prototype = Object.create(dj.core.View.prototype);
 MainView.prototype.constructor = MainView;

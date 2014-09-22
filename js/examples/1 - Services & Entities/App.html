@@ -12,7 +12,8 @@
 	<script src="../../polyfills/ES5.js"></script>
 
 	<!-- framework core -->
-	<script src="../../core/AppBuilder.js"></script>
+	<script src="../../core/Disjunction.js"></script>
+	<script src="../../core/Builder.js"></script>
 	<script src="../../core/App.js"></script>
 	<script src="../../core/Phaser.js"></script>
 	<script src="../../core/Phase.js"></script>
@@ -20,20 +21,18 @@
 	<script src="../../core/View.js"></script>
 	<script src="../../core/Ctrl.js"></script>
 	<script src="../../core/ServiceHub.js"></script>
-	<script src="../../core/InputHub.js"></script>
-	<script src="../../core/Input.js"></script>
-	<script src="../../core/InputChannel.js"></script>
+	<script src="../../core/DeviceHub.js"></script>
+	<script src="../../core/Device.js"></script>
+	<script src="../../core/DeviceChannel.js"></script>
+	<script src="../../core/Point2.js"></script>
 	<script src="../../core/Pointer.js"></script>
 	<script src="../../core/Timer.js"></script>
-	<script src="../../core/Disjunction.js"></script>
 
 	<!-- framework extensions -->
-	<script src="../../extensions/TimerInterval.js"></script>
-	<script src="../../extensions/TimerRAF.js"></script>
+	<script src="../../extensions/RAFTimer.js"></script>
 	<script src="../../extensions/Keyboard.js"></script>
 	<script src="../../extensions/Mouse.js"></script>
 	<script src="../../extensions/Box2.js"></script>
-	<script src="../../extensions/Point2.js"></script>
 
 	<!-- App-related implementations -->
 	<!-- NOTE directory structures and and file separations are arbitrary -- you could keep everything in the root, even in a single file. -->
@@ -55,14 +54,17 @@
 	<script src="./Misc/md5.js"></script>
 	<script src="./Misc/MonsterModel.js"></script>
 </head>
-<body onload="dj = new Disjunction(new TimerRAF(), true, true);">
-	<dj-app class="App" id="App" oncontextmenu="return false">
-		<dj-pointer device="INPUT_MOUSE" x="MOUSE_X" y="MOUSE_Y" select="MOUSE_BUTTON_LEFT"></dj-pointer>
+<body onload="disjunction.go(document, true);">
+	<dj-common>
+		<dj-timer class="RAF" period=""></dj-timer>
 		<dj-devices>
 			<dj-device class="Mouse"></dj-device>
 			<dj-device class="Keyboard"></dj-device>
 			<!-- TODO include any other input device interfaces here, supplying custom Input implementations -->
 		</dj-devices>
+		<dj-pointer device="DEVICE_MOUSE" x="MOUSE_X" y="MOUSE_Y" select="MOUSE_BUTTON_LEFT"></dj-pointer>
+	</dj-common>
+	<dj-app class="App" id="App" oncontextmenu="return false">
 		<dj-services>
 			<dj-service class="Monster"></dj-service>
 		</dj-services>

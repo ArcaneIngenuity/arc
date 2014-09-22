@@ -1,4 +1,4 @@
-Timer = function()
+disjunction.core.Timer = function()
 {	
 	this.lastUpdateSec = undefined;
 	this.callback = undefined;
@@ -26,4 +26,4 @@ Timer = function()
 			this.callback(deltaSec);
 		}
 	}
-}
+};

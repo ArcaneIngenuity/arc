@@ -1,17 +1,42 @@
-//TODO all instances of 'window' should be replaced with 'dj' if  we separate things out
-//TODO documentation saying what attributes (e.g. onfocus) not to implement when using this class!
-AppBuilder = function(apps, skipPrefix)
+disjunction.core.Builder = function(apps)
 {
-	var prefix			= skipPrefix ? '' : 'dj-';
-	var appTagName 		= prefix + 'app';
-	var devicesTagName 	= prefix + 'devices';
-	var deviceTagName 	= prefix + 'device';
-	var servicesTagName = prefix + 'services';
-	var serviceTagName 	= prefix + 'service';
-	var phasesTagName 	= prefix + 'phases';
-	var phaseTagName 	= prefix + 'phase' + (skipPrefix ? '-' : ''); //sadly necessary due to the fact that custom element need hyphens.
-	var pointerTagName 	= prefix + 'pointer';
+	var prefix			= undefined;
+	var commonTagName 	= undefined;
+	var appTagName 		= undefined;
+	var devicesTagName 	= undefined;
+	var deviceTagName 	= undefined;
+	var servicesTagName = undefined;
+	var serviceTagName 	= undefined;
+	var phasesTagName 	= undefined;
+	var phaseTagName 	= undefined;
+	var pointerTagName 	= undefined;
+	var timerTagName	= undefined;
+	
+	this.usePrefixedMarkup = function(value)
+	{
+		prefix			= value ? 'dj-' : '';
+		
+		commonTagName 	= prefix + 'common';
+		appTagName 		= prefix + 'app';
+		devicesTagName 	= prefix + 'devices';
+		deviceTagName 	= prefix + 'device';
+		servicesTagName = prefix + 'services';
+		serviceTagName 	= prefix + 'service';
+		phasesTagName 	= prefix + 'phases';
+		phaseTagName 	= prefix + 'phase' + (prefix === '' ? '-' : ''); //sadly necessary due to the fact that custom element need hyphens.
+		pointerTagName 	= prefix + 'pointer';
+		timerTagName 	= prefix + 'timer';
+	}
+	
+	this.usePrefixedMarkup(false); //called during construction
 
+	var useInternalConstantsOnly = undefined;
+	this.useInternalConstantsOnly = function(value)
+	{
+		useInternalConstantsOnly = value;
+	}
+	this.useInternalConstantsOnly(true);
+	
 	this.tabIndex = undefined;
 
 	var app;
@@ -24,9 +49,76 @@ AppBuilder = function(apps, skipPrefix)
 	  extends: 'div'
 	});
 	
-	this.buildAll = function()
+
+	
+	this.buildCommon = function(containerDOM, disjunction)
 	{
-		var appDOMs = document.getElementsByTagName(appTagName);
+		var commonDOM = containerDOM.getElementsByTagName(commonTagName)[0];
+		var commonServicesDOM = commonDOM.getElementsByTagName(servicesTagName)[0];
+		//var commonServiceDOMs = commonServicesDOM.getElementsByTagName(serviceTagName);
+		
+		if (commonServicesDOM) //NOT always true
+			this.addServices(commonServicesDOM, disjunction.services);
+			
+		var commonDevicesDOM = commonDOM.getElementsByTagName(devicesTagName)[0];
+		if (commonDevicesDOM) //should always be true
+			this.addDevices(commonDevicesDOM, disjunction.devices);
+		else
+			throw "Error: <devices> must be specified, containing at least one <device>.";
+			
+		var domPointer = commonDOM.getElementsByTagName(pointerTagName)[0];
+		if (domPointer)
+		{
+			if (domPointer.hasAttribute('device') &&
+				domPointer.hasAttribute('x') &&
+				domPointer.hasAttribute('y') &&
+				domPointer.hasAttribute('select'))
+			{
+				var deviceIndexName = domPointer.getAttribute('device');
+				var xChannelIndexName = domPointer.getAttribute('x');
+				var yChannelIndexName = domPointer.getAttribute('y');
+				var selectChannelIndexName = domPointer.getAttribute('select');
+			
+				
+				var deviceIndex = disjunction.constants[deviceIndexName];
+				var xChannelIndex = disjunction.constants[xChannelIndexName];
+				var yChannelIndex = disjunction.constants[yChannelIndexName];
+				var selectChannelIndex = disjunction.constants[selectChannelIndexName];
+				
+				//app.setPointer(window[device], window[x], window[y], window[select]);
+				disjunction.setPointer(deviceIndex, xChannelIndex, yChannelIndex, selectChannelIndex);
+			}
+			else
+				throw "Error: <pointer> must have attributes 'device', 'x', 'y', 'select'.";
+		}
+		else
+			throw "Error: <pointer> must be specified, referencing a valid <device>.";
+			
+		var timerDOM = commonDOM.getElementsByTagName(timerTagName)[0];
+		var classNamesJoined = timerDOM.className;
+		var periodSec = parseFloat(timerDOM.getAttribute('period'));
+		if (classNamesJoined.length > 0)
+		{
+			var classNames = classNamesJoined.split(' ');
+			var className = classNames[0];
+			
+			var TimerClass = disjunction.extensions[className+'Timer']; //TODO fix Timer not to be in extensions, or fix className to allow a dot-separated name (less likely)
+			if (TimerClass)
+			{
+				disjunction.timer = new TimerClass(periodSec);
+			}
+		}
+	}
+	
+	this.buildAll = function(dom, disjunction)
+	{
+		this.buildCommon(dom, disjunction);
+		this.buildApps(dom, disjunction);
+	}
+	
+	this.buildApps = function(containerDOM, disjunction)
+	{
+		var appDOMs = containerDOM.getElementsByTagName(appTagName);
 
 		var length = appDOMs.length;
 		for (var i = 0; i < length; i++)
@@ -37,17 +129,17 @@ AppBuilder = function(apps, skipPrefix)
 				throw "Error: All <app> elements must have id and class attributes.";
 			}
 			
-			var app = this.buildOne(appDOM);
+			var app = this.buildApp(appDOM, disjunction);
 			apps[app.id] = app;
 		}
 	}
 	
-	//build. usage: <body onload="(new AppBuilder()).buildOne(document.getElementById('Tagger'));">
-	this.buildOne = function(appDOM)
+	//build. usage: <body onload="(new Builder()).buildApp(document.getElementById('Tagger'));">
+	this.buildApp = function(appDOM, disjunction)
 	{
 		var id = appDOM.id;
 		var className = appDOM.className;
-		app = new App(id);
+		app = new disjunction.core.App(id, disjunction);
 		app.className = className; //TODO put in constructor
 		
 		var appModelClassName = className+'Model';
@@ -56,10 +148,10 @@ AppBuilder = function(apps, skipPrefix)
 		{
 			app.model = new AppModelClass();
 		}
-		
+		/*
 		var domDevices = appDOM.getElementsByTagName(devicesTagName)[0];
 		if (domDevices) //should always be true
-			this.addDevices(domDevices);
+			this.addDevices(domDevices, app.devices);
 		else
 			throw "Error: <devices> must be specified, containing at least one <device>.";
 		
@@ -83,25 +175,26 @@ AppBuilder = function(apps, skipPrefix)
 		}
 		else
 			throw "Error: <pointer> must be specified, referencing at least one device as found in <devices>.";
-			
+		*/
+		
 		var domServices = appDOM.getElementsByTagName(servicesTagName)[0];
-		if (domServices) //NOT always true
-			this.addServices(domServices);
+		if (domServices)
+			this.addServices(domServices, app.services);
 
 		var domPhases = appDOM.getElementsByTagName(phasesTagName)[0];
-		if (domPhases) //should always be true
+		if (domPhases)
 			this.addPhases(domPhases);
 		else
 			throw "Error: <phases> must be specified, containing at least one <phase>.";
 			
-
-		var mouse = app.input.array[INPUT_MOUSE];
-		var keyboard = app.input.array[INPUT_KEYBOARD];
+		//special case devices for DOM JS
+		var mouse = disjunction.devices.array[disjunction.constants.DEVICE_MOUSE];
+		var keyboard = disjunction.devices.array[disjunction.constants.DEVICE_KEYBOARD];
 		//TODO should these be specified on body vs. appDOM? they are shared between all apps.
 		appDOM.addEventListener('mousedown', 	ES5.bind(mouse, mouse.receive));
-		appDOM.addEventListener('mouseup',	ES5.bind(mouse, mouse.receive));
+		appDOM.addEventListener('mouseup',		ES5.bind(mouse, mouse.receive));
 		appDOM.addEventListener('mousemove',	ES5.bind(mouse, mouse.receive));
-		appDOM.addEventListener('keydown', 	ES5.bind(keyboard, keyboard.receive));
+		appDOM.addEventListener('keydown', 		ES5.bind(keyboard, keyboard.receive));
 		appDOM.addEventListener('keyup',		ES5.bind(keyboard, keyboard.receive));
 		
 		app.phaser.change(currentPhaseName);
@@ -126,33 +219,36 @@ AppBuilder = function(apps, skipPrefix)
 	this.buildById = function(id)
 	{
 		var appDOM = document.getElementById(id);
-		return this.buildOne(appDOM);
+		return this.buildApp(appDOM, disjunction);
 	}
 	
-	this.addDevices = function(domContainer)//, parentDomRect)
+	this.addDevices = function(containerDOM, devices)//, parentDomRect)
 	{
-		for (var i = 0; i < domContainer.children.length; i++)
+		for (var i = 0; i < containerDOM.children.length; i++)
 		{
-			var element = domContainer.children[i];
+			var element = containerDOM.children[i];
 			if (element.tagName.toLowerCase() === deviceTagName)
 			{
 				var className = element.className;
-				var Class = window[className];
+				var Class = disjunction.extensions[className];
 				if (Class)
 				{
-					//create it, add it to InputManager, and store it's index globally (TODO -- later make index storage location changeable as it may not be wanted on window)
-					var deviceName = 'INPUT_'+className.replace('Device','').toUpperCase();
-					window[deviceName] = app.input.add(new Class());
-				}	
+					var deviceConstantName = 'DEVICE_'+className.replace('Device','').toUpperCase();
+					var device = devices.add(new Class());
+					
+					disjunction.constants[deviceConstantName] = device;
+					if (!useInternalConstantsOnly)
+						window[deviceConstantName] = device; //TODO make the object on which to put this, optional, via "internalConstantsOn"
+				}
 			}
 		}
 	}
 	
-	this.addServices = function(domContainer)//, parentDomRect)
+	this.addServices = function(containerDOM, services)//, parentDomRect)
 	{
-		for (var i = 0; i < domContainer.children.length; i++)
+		for (var i = 0; i < containerDOM.children.length; i++)
 		{
-			var element = domContainer.children[i];
+			var element = containerDOM.children[i];
 			if (element.tagName.toLowerCase() === serviceTagName)
 			{
 				var shortServiceName = element.className;
@@ -160,10 +256,12 @@ AppBuilder = function(apps, skipPrefix)
 				var Class = window[longServiceName];
 				if (Class)
 				{
-					//var shortServiceName = className.replace('Service','').toUpperCase();
-					//create it, add it to InputManager, and store it's index globally (TODO -- later make index storage location changeable as it may not be wanted on window)
-					window['SERVICE_'+shortServiceName.toUpperCase()] = app.services.add(new Class());
-					//console.log('SERVICE_'+shortServiceName.toUpperCase());
+					var serviceConstantName = 'SERVICE_'+shortServiceName.toUpperCase();
+					var service = services.add(new Class());
+					
+					disjunction.constants[serviceConstantName] = service;
+					if (!useInternalConstantsOnly)
+						window[serviceConstantName] = service; //TODO make the object on which to put this, optional, via "internalConstantsOn"
 				}	
 			}
 		}
@@ -213,7 +311,7 @@ AppBuilder = function(apps, skipPrefix)
 			/*
 			var domRect = childElement.getBoundingClientRect();
 			
-			childView.bounds = new Box2();
+			childView.bounds = new disjunction.extensions.Box2();
 			childView.bounds.x0 = Math.floor(domRect.left - parentDomRect.left);
 			childView.bounds.y0 = Math.floor(domRect.top - parentDomRect.top);
 			childView.bounds.setWidth(domRect.width);
@@ -232,16 +330,16 @@ AppBuilder = function(apps, skipPrefix)
 	
 	//TODO allow use of <phase> elements containing a single <div> which then becomes the Phase.view.dom.
 	//It's either that or <view-div> in <phase> which seems pointless... the idea of <view> element in the DOM(!) is a non sequitur.
-	this.addPhases = function(domContainer)
+	this.addPhases = function(containerDOM)
 	{
 		//validate - JS only
-		var elements = domContainer.getElementsByTagName('phase');
+		var elements = containerDOM.getElementsByTagName('phase');
 		if (elements.length)
 			throw "Error: In DOM JS, use <"+phaseTagName+"> rather than <phase>.";
 	
-		for (var a = 0; a < domContainer.children.length; a++)
+		for (var a = 0; a < containerDOM.children.length; a++)
 		{
-			var element = domContainer.children[a];
+			var element = containerDOM.children[a];
 			if (element.tagName.toLowerCase() === phaseTagName)
 			{
 				//assume phase
@@ -281,7 +379,7 @@ AppBuilder = function(apps, skipPrefix)
 					view.bounds.setHeight(domRect.height);
 					
 					var shortPhaseName = className.replace('Phase','');
-					var phase = new Phase(shortPhaseName, model, view, ctrl);
+					var phase = new disjunction.core.Phase(shortPhaseName, model, view, ctrl);
 					app.phaser.add(phase);
 					if (element.children.length > 0)
 						this.addChildViews(view, element, domRect);
@@ -307,4 +405,4 @@ AppBuilder = function(apps, skipPrefix)
 		}
 		//element.onblur = function() {this.view.wasFocused = this.view.isFocused; this.view.isFocused = false;};
 	}
-}
+};

@@ -1,12 +1,15 @@
-DragTimeline = function(app, phase, model, view, ctrl)
+disjunction.extensions.DragTimeline = function(app, phase, model, view, ctrl)
 {
-	Interactor.call(this, app, phase, model, view, ctrl)
+	Timeline.call(this, app, phase, model, view, ctrl)
 	this.grabOffset = undefined;
 	
 	this.isToStart = function()
 	{
 		var pointer = this.app.pointer;
-		return pointer.selectChannel.delta > 0;
+		if (pointer.selectChannel.delta > 0)
+		{
+			
+		}
 	}
 	
 	this.isToFinish = function()
@@ -53,7 +56,7 @@ DragTimeline = function(app, phase, model, view, ctrl)
 	
 	this.finish = function()
 	{
-	/*
+		/*
 		var model = this.model;
 		var view = this.view;
 		var mouse = view.app.input.devices[INPUT_MOUSE];
@@ -66,41 +69,18 @@ DragTimeline = function(app, phase, model, view, ctrl)
 		view.blockCreationIndicator.style.visibility = "hidden";
 		*/
 		view.mode = undefined;
-		
 	}
 
 	this.simulate = function(deltaSec)
 	{
-		/*
 		var model = this.model;
-		var ctrl = this.ctrl;
-		//if (model.block) //ongoing - if there is a current block
-		//{
-		//this.updatePattern(bounds); //exactly what we're doing below
-		
-		var block = model.block;
-		var bounds = block.bounds;
-		var width = bounds.getWidth();
-		var height = bounds.getHeight();
-		
-		block.xCountLast = block.xCount;
-		block.yCountLast = block.yCount;
-		block.xCount = Math.abs(Math.floor(width  / block.xSpacePerElement));
-		block.yCount = Math.abs(Math.floor(height / block.ySpacePerElement));
-		block.xCountDelta = block.xCount - block.xCountLast;
-		block.yCountDelta = block.yCount - block.yCountLast;
-
-		//TODO move into this class, out of ctrl?
-		ctrl.alignBox2(bounds, model.blockStart, model.blockEnd);
-		
-		if (block.changedPattern())
-		{
-			model.block.modified = true;
-		}
-		//}
-		*/
+		model.x += model.xVelocity * deltaSec;
+		model.y += model.yVelocity * deltaSec;
+		model.xVelocity *= 0.98;
+		model.yVelocity *= 0.98;
+		//console.log(model);
 	}
 }
 
-DragTimeline.prototype = Object.create(Timeline.prototype);
-DragTimeline.prototype.constructor = DragTimeline;
+disjunction.extensions.DragTimeline.prototype = Object.create(disjunction.core.Timeline.prototype);
+disjunction.extensions.DragTimeline.prototype.constructor = disjunction.extensions.DragTimeline;

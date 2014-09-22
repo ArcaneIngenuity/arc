@@ -1,25 +1,16 @@
-App = function(id) //final
+disjunction.core.App = function(id, disjunction) //final
 {
 	this.DEBUG = true;
 
+	this.disjunction = disjunction;
 	this.id = id; //for compound apps
 	
-	var phaser = this.phaser = new Phaser(this);
-	var services = this.services = new ServiceHub(this);
-	var input = this.input = new InputHub(); //set from outside
-	this.pointer = undefined;
+	var phaser = this.phaser = new disjunction.core.Phaser(this);
+	var services = this.services = new disjunction.core.ServiceHub(this);
+
 	this.model = undefined; //optional app-wide model
 	this.view = undefined; //used when individual disjunction apps are used as modules
 	//abstraction of the device used to perform screen pointing - encapsulates hierarchical transformation of device coordinates to focused view's own coordinate system
-	
-	this.setPointer = function(deviceIndex, xChannelIndex, yChannelIndex, selectIndex) //final
-	{
-		var pointer = this.pointer = new Pointer();
-		pointer.device = this.input.array[deviceIndex];
-		pointer.xChannel = pointer.device.channels[xChannelIndex];
-		pointer.yChannel = pointer.device.channels[yChannelIndex];
-		pointer.selectChannel = pointer.device.channels[selectIndex];
-	}
 	
 	this.dispose = function() //final
 	{
@@ -30,8 +21,6 @@ App = function(id) //final
 	
 	this.update = function(deltaSec) //final
 	{
-		input.poll();
 		phaser.update(deltaSec);
-		input.flush();
 	}
-}
+};

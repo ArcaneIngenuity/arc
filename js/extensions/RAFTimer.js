@@ -1,4 +1,4 @@
-TimerRAF = function()
+disjunction.extensions.RAFTimer = function()
 {
 	//check whether RAF is supported in user agent.
 	if ( !window.requestAnimationFrame )
@@ -29,5 +29,5 @@ TimerRAF = function()
 	}
 }
 
-TimerRAF.prototype = Object.create(Timer.prototype);
-TimerRAF.prototype.constructor = TimerRAF;
+disjunction.extensions.RAFTimer.prototype = Object.create(disjunction.core.Timer.prototype);
+disjunction.extensions.RAFTimer.prototype.constructor = disjunction.extensions.RAFTimer;

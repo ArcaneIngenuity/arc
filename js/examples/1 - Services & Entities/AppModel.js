@@ -13,5 +13,5 @@ AppModel = function()
 	}
 };
 
-AppModel.prototype = Object.create(Model.prototype);
+AppModel.prototype = Object.create(dj.core.Model.prototype);
 AppModel.prototype.constructor = AppModel;

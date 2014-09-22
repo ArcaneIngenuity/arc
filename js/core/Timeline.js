@@ -1,6 +1,6 @@
 /** Timeline groups the lifetime of an operation in one class while respecting MVC and synchronisation boundaries within the framework. */
 
-Timeline = function(app, phase, model, view, ctrl) //abstract
+disjunction.core.Timeline = function(app, phase, model, view, ctrl) //abstract
 {
 	this.app = app;
 	this.phase = phase;
@@ -48,4 +48,4 @@ Timeline = function(app, phase, model, view, ctrl) //abstract
 	{
 		//abstract
 	}
-}
+};

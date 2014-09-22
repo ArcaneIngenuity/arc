@@ -1,4 +1,4 @@
-View = function(app, model)
+disjunction.core.View = function(app, model)
 {
 	this.id = undefined;
 	this.app = app;
@@ -358,10 +358,7 @@ View = function(app, model)
 
 	this.takeFocus = function()
 	{
-		//var phase = this.phase;
-		//phase.focus = this;
-		
-		this.app.pointer.focus = this;
+		disjunction.pointer.focus = this;
 	}
 	
 	//JS - should be in extensions?
@@ -376,5 +373,5 @@ View = function(app, model)
 			obj.attachEvent("on" + evt, fn);
 		}
 	}
-}
+};
 

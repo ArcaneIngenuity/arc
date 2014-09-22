@@ -5,7 +5,7 @@
 //knows (by proxy) the focus 
 //abstracts concepts of pointer to be device-agnostic
 
-Pointer = function() //ABSTRACT / INTERFACE
+disjunction.core.Pointer = function() //ABSTRACT / INTERFACE
 {
 	this.device = undefined;
 	//this.xChannelIndex = undefined;
@@ -19,7 +19,7 @@ Pointer = function() //ABSTRACT / INTERFACE
 	this.targetSelected = undefined;
 	this.targetReleased = undefined;
 	this.positionInTarget;// = new Point2(); //local position of pointer within pointed element
-	this.position = new Point2(); //world position of pointer within pointed element
+	this.position = new disjunction.core.Point2(); //world position of pointer within pointed element
 	this.entered = undefined;
 	this.exited = undefined;
 	
@@ -89,7 +89,12 @@ Pointer = function() //ABSTRACT / INTERFACE
 		this.position.x = this.xChannel.value;
 		this.position.y = this.yChannel.value;
 		//console.log(device);
-		if (this.position.x && this.position.y) //often undefined for touch interfaces
+		
+		//TODO use a while loop and check that whether any element of the position vector (no matter how many) are all valid, else proceed with if-block below
+		//...although this cannot work unless we can run through an array, as we may hit other properties in JS; in C, we cannot do this dynamically at all.
+		//so maybe points should be arrays, and so should bounds? - set X, Y, Z axes.
+		//TODO or else implement 3 dimensions as well as 2.
+		if (this.position.x !== undefined && this.position.y !== undefined) //often undefined for touch interfaces
 		{
 			//1. determine which views pointer is in (exhaustively because parents do not necessarily geometrically contain children)
 			var intersectedViews = [];
@@ -150,4 +155,4 @@ Pointer = function() //ABSTRACT / INTERFACE
 	{	
 		return view === this.target;
 	}
-}
+};

@@ -1,6 +1,6 @@
 MainModel = function()
 {
-	Model.call(this); //extend base framework class
+	dj.core.Model.call(this); //extend base framework class
 
 	//TODO enter model members specific to this Phase
 	//this.myData = 'data';
@@ -10,7 +10,7 @@ MainModel = function()
 	this.arenaHeight = undefined;
 };
 
-MainModel.prototype = Object.create(Model.prototype);
+MainModel.prototype = Object.create(dj.core.Model.prototype);
 MainModel.prototype.constructor = MainModel;
 
 //TODO enter any enum constants specific to this Model

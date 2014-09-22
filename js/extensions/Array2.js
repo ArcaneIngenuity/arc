@@ -1,4 +1,4 @@
-Array2 = function(xLength, yLength)
+disjunction.extensions.Array2 = function(xLength, yLength)
 {
 	this.set = function(xi, yi, element)
 	{
@@ -29,4 +29,4 @@ Array2 = function(xLength, yLength)
 	this.xLength = 0;
 	this.yLength = 0;
 	this.resize(xLength, yLength);
-}
+};
