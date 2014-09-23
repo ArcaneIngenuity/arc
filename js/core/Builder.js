@@ -1,41 +1,22 @@
-disjunction.core.Builder = function(apps)
+Disjunction.Core.Builder = function(apps)
 {
-	var prefix			= undefined;
-	var commonTagName 	= undefined;
-	var appTagName 		= undefined;
-	var devicesTagName 	= undefined;
-	var deviceTagName 	= undefined;
-	var servicesTagName = undefined;
-	var serviceTagName 	= undefined;
-	var phasesTagName 	= undefined;
-	var phaseTagName 	= undefined;
-	var pointerTagName 	= undefined;
-	var timerTagName	= undefined;
-	
-	this.usePrefixedMarkup = function(value)
-	{
-		prefix			= value ? 'dj-' : '';
+	var prefix			= disjunction.PREFIXED_MARKUP ? 'dj-' : '';
 		
-		commonTagName 	= prefix + 'common';
-		appTagName 		= prefix + 'app';
-		devicesTagName 	= prefix + 'devices';
-		deviceTagName 	= prefix + 'device';
-		servicesTagName = prefix + 'services';
-		serviceTagName 	= prefix + 'service';
-		phasesTagName 	= prefix + 'phases';
-		phaseTagName 	= prefix + 'phase' + (prefix === '' ? '-' : ''); //sadly necessary due to the fact that custom element need hyphens.
-		pointerTagName 	= prefix + 'pointer';
-		timerTagName 	= prefix + 'timer';
-	}
+	var commonTagName 	= prefix + 'common';
+	var appTagName 		= prefix + 'app';
+	var devicesTagName 	= prefix + 'devices';
+	var deviceTagName 	= prefix + 'device';
+	var servicesTagName = prefix + 'services';
+	var serviceTagName 	= prefix + 'service';
+	var phasesTagName 	= prefix + 'phases';
+	var phaseTagName 	= prefix + 'phase' + (prefix === '' ? '-' : ''); //sadly necessary due to the fact that custom element need hyphens.
+	var pointerTagName 	= prefix + 'pointer';
+	var timerTagName 	= prefix + 'timer';
 	
-	this.usePrefixedMarkup(false); //called during construction
-
-	var useInternalConstantsOnly = undefined;
-	this.useInternalConstantsOnly = function(value)
-	{
-		useInternalConstantsOnly = value;
-	}
-	this.useInternalConstantsOnly(true);
+	var DOMPhase = document.registerElement(phaseTagName, {
+	  prototype: Object.create(HTMLDivElement.prototype),
+	  extends: 'div'
+	});
 	
 	this.tabIndex = undefined;
 
@@ -44,17 +25,11 @@ disjunction.core.Builder = function(apps)
 	
 	var viewIDs = {};
 	
-	var DOMPhase = document.registerElement(phaseTagName, {
-	  prototype: Object.create(HTMLDivElement.prototype),
-	  extends: 'div'
-	});
-	
-
-	
 	this.buildCommon = function(containerDOM, disjunction)
 	{
-		var commonDOM = containerDOM.getElementsByTagName(commonTagName)[0];
+		var commonDOM = containerDOM.getElementsByTagName(commonTagName)[0];	console.log(commonTagName, commonDOM, containerDOM)
 		var commonServicesDOM = commonDOM.getElementsByTagName(servicesTagName)[0];
+	
 		//var commonServiceDOMs = commonServicesDOM.getElementsByTagName(serviceTagName);
 		
 		if (commonServicesDOM) //NOT always true
@@ -102,7 +77,7 @@ disjunction.core.Builder = function(apps)
 			var classNames = classNamesJoined.split(' ');
 			var className = classNames[0];
 			
-			var TimerClass = disjunction.extensions[className+'Timer']; //TODO fix Timer not to be in extensions, or fix className to allow a dot-separated name (less likely)
+			var TimerClass = Disjunction.Extensions[className+'Timer']; //TODO fix Timer not to be in extensions, or fix className to allow a dot-separated name (less likely)
 			if (TimerClass)
 			{
 				disjunction.timer = new TimerClass(periodSec);
@@ -139,7 +114,7 @@ disjunction.core.Builder = function(apps)
 	{
 		var id = appDOM.id;
 		var className = appDOM.className;
-		app = new disjunction.core.App(id, disjunction);
+		app = new Disjunction.Core.App(id, disjunction);
 		app.className = className; //TODO put in constructor
 		
 		var appModelClassName = className+'Model';
@@ -230,14 +205,14 @@ disjunction.core.Builder = function(apps)
 			if (element.tagName.toLowerCase() === deviceTagName)
 			{
 				var className = element.className;
-				var Class = disjunction.extensions[className];
+				var Class = Disjunction.Extensions[className];
 				if (Class)
 				{
 					var deviceConstantName = 'DEVICE_'+className.replace('Device','').toUpperCase();
 					var device = devices.add(new Class());
 					
 					disjunction.constants[deviceConstantName] = device;
-					if (!useInternalConstantsOnly)
+					if (disjunction.WINDOW_CONSTANTS)
 						window[deviceConstantName] = device; //TODO make the object on which to put this, optional, via "internalConstantsOn"
 				}
 			}
@@ -260,7 +235,7 @@ disjunction.core.Builder = function(apps)
 					var service = services.add(new Class());
 					
 					disjunction.constants[serviceConstantName] = service;
-					if (!useInternalConstantsOnly)
+					if (disjunction.WINDOW_CONSTANTS)
 						window[serviceConstantName] = service; //TODO make the object on which to put this, optional, via "internalConstantsOn"
 				}	
 			}
@@ -311,7 +286,7 @@ disjunction.core.Builder = function(apps)
 			/*
 			var domRect = childElement.getBoundingClientRect();
 			
-			childView.bounds = new disjunction.extensions.Box2();
+			childView.bounds = new Disjunction.Extensions.Box2();
 			childView.bounds.x0 = Math.floor(domRect.left - parentDomRect.left);
 			childView.bounds.y0 = Math.floor(domRect.top - parentDomRect.top);
 			childView.bounds.setWidth(domRect.width);
@@ -379,7 +354,7 @@ disjunction.core.Builder = function(apps)
 					view.bounds.setHeight(domRect.height);
 					
 					var shortPhaseName = className.replace('Phase','');
-					var phase = new disjunction.core.Phase(shortPhaseName, model, view, ctrl);
+					var phase = new Disjunction.Core.Phase(shortPhaseName, model, view, ctrl);
 					app.phaser.add(phase);
 					if (element.children.length > 0)
 						this.addChildViews(view, element, domRect);
@@ -406,3 +381,5 @@ disjunction.core.Builder = function(apps)
 		//element.onblur = function() {this.view.wasFocused = this.view.isFocused; this.view.isFocused = false;};
 	}
 };
+if (disjunction.WINDOW_CLASSES) 
+	window.Builder = Disjunction.Core.Builder;

@@ -1,5 +1,5 @@
 //all Bindable stuff for Model -- need not be extended, can be accessed as "static" in JS, i.e. from this object
-disjunction.core.Model = function()
+Disjunction.Core.Model = function()
 {
 	this.journals = {}; //array of arrays TODO array of Journal (inheriting from Array for faster internal access) to support offsets into an existing large, fast typed array
 	
@@ -40,3 +40,5 @@ disjunction.core.Model = function()
 		//ABSTRACT
 	}
 };
+if (disjunction.WINDOW_CLASSES) 
+	window.Model = Disjunction.Core.Model;

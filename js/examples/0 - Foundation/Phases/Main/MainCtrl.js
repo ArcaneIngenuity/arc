@@ -21,5 +21,5 @@ MainCtrl = function(app, model)
 	};
 };
 
-MainCtrl.prototype = Object.create(disjunction.core.Ctrl.prototype);
+MainCtrl.prototype = Object.create(Disjunction.Core.Ctrl.prototype);
 MainCtrl.prototype.constructor = MainCtrl;

@@ -1,4 +1,4 @@
-disjunction.extensions.IntervalTimer = function(periodSec)
+Disjunction.Extensions.IntervalTimer = function(periodSec)
 {
 	Timer.call(this); //super-constructor (params after this)
 	
@@ -21,5 +21,8 @@ disjunction.extensions.IntervalTimer = function(periodSec)
 	}	
 }
 
-disjunction.extensions.IntervalTimer.prototype = Object.create(disjunction.core.Timer.prototype);
-disjunction.extensions.IntervalTimer.prototype.constructor = disjunction.extensions.IntervalTimer;
+Disjunction.Extensions.IntervalTimer.prototype = Object.create(Disjunction.Core.Timer.prototype);
+Disjunction.Extensions.IntervalTimer.prototype.constructor = Disjunction.Extensions.IntervalTimer;
+
+if (disjunction.WINDOW_CLASSES) 
+	window.IntervalTimer = Disjunction.Extensions.IntervalTimer;

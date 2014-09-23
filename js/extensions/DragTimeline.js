@@ -1,4 +1,4 @@
-disjunction.extensions.DragTimeline = function(app, phase, model, view, ctrl)
+Disjunction.Extensions.DragTimeline = function(app, phase, model, view, ctrl)
 {
 	Timeline.call(this, app, phase, model, view, ctrl)
 	this.grabOffset = undefined;
@@ -54,7 +54,7 @@ disjunction.extensions.DragTimeline = function(app, phase, model, view, ctrl)
 		*/
 	}
 	
-	this.finish = function()
+	this.stop = function()
 	{
 		/*
 		var model = this.model;
@@ -82,5 +82,8 @@ disjunction.extensions.DragTimeline = function(app, phase, model, view, ctrl)
 	}
 }
 
-disjunction.extensions.DragTimeline.prototype = Object.create(disjunction.core.Timeline.prototype);
-disjunction.extensions.DragTimeline.prototype.constructor = disjunction.extensions.DragTimeline;
+Disjunction.Extensions.DragTimeline.prototype = Object.create(Disjunction.Core.prototype);
+Disjunction.Extensions.DragTimeline.prototype.constructor = Disjunction.Extensions.DragTimeline;
+
+if (disjunction.WINDOW_CLASSES) 
+	window.DragTimeline = Disjunction.Extensions.DragTimeline;

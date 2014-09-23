@@ -1,4 +1,4 @@
-disjunction.extensions.Mouse = function()
+Disjunction.Extensions.Mouse = function()
 {
 	Device.call(this, 6); //super-constructor (add params after this)
 	
@@ -59,8 +59,11 @@ disjunction.extensions.Mouse = function()
 	}
 }
 
-disjunction.extensions.Mouse.prototype = new disjunction.core.Device();
-disjunction.extensions.Mouse.prototype.constructor = disjunction.extensions.Mouse;
+Disjunction.Extensions.Mouse.prototype = new Disjunction.Core.Device();
+Disjunction.Extensions.Mouse.prototype.constructor = Disjunction.Extensions.Mouse;
+
+if (disjunction.WINDOW_CLASSES) 
+	window.Mouse = Disjunction.Extensions.Mouse;
 
 disjunction.constants.MOUSE_X = 0;
 disjunction.constants.MOUSE_Y = 1;

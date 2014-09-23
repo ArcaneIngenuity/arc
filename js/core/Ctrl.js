@@ -1,4 +1,4 @@
-disjunction.core.Ctrl = function(app, model)
+Disjunction.Core.Ctrl = function(app, model)
 {
 	this.app = app;
 	this.model = model;
@@ -11,7 +11,7 @@ disjunction.core.Ctrl = function(app, model)
 	};
 	
 	/** Used to clean up resources or reset values for this Ctrl, if it is no longer needed and can be released. */ 
-	this.finish = function()
+	this.stop = function()
 	{
 		//ABSTRACT: OVERRIDE
 	};
@@ -23,4 +23,6 @@ disjunction.core.Ctrl = function(app, model)
 		//NOTE input that applies irrespective of View focus, should be run here.
 	};
 };
+if (disjunction.WINDOW_CLASSES) 
+	window.Ctrl = Disjunction.Core.Ctrl;
 

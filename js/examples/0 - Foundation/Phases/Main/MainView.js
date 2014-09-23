@@ -33,13 +33,13 @@ MainView = function(app, model)
 		var keyboard = devices.array[DEVICE_KEYBOARD];
 		
 		//get Pointer
-		var pointer = this.app.pointer;
+		var pointer = disjunction.pointer;
 		
 		//***TODO convert raw input to (App or Phase) Model state and View state.
-		if (mouse.channels[MOUSE_BUTTON_LEFT].value)
-			console.log( 'hit mouse left mouse button' );
+		if (pointer.selectChannel.value)
+			console.log( 'hit mouse left mouse button');
 			
-		if (keyboard.channels[KEY_SPACE].value)
+		if (keyboard.channels[disjunction.constants.KEY_SPACE].value)
 			console.log( 'hit spacebar' );
 	}
 	
@@ -90,5 +90,5 @@ MainView = function(app, model)
 	}
 }
 
-MainView.prototype = Object.create(disjunction.core.View.prototype);
+MainView.prototype = Object.create(Disjunction.Core.View.prototype);
 MainView.prototype.constructor = MainView;

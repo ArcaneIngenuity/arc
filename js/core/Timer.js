@@ -1,4 +1,4 @@
-disjunction.core.Timer = function()
+Disjunction.Core.Timer = function()
 {	
 	this.lastUpdateSec = undefined;
 	this.callback = undefined;
@@ -27,3 +27,6 @@ disjunction.core.Timer = function()
 		}
 	}
 };
+
+if (disjunction.WINDOW_CLASSES) 
+	window.Timer = Disjunction.Core.Timer;

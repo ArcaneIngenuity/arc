@@ -1,4 +1,4 @@
-disjunction.extensions.Box2 = function(x0, y0, x1, y1)
+Disjunction.Extensions.Box2 = function(x0, y0, x1, y1)
 {
 	this.x0 = x0;
 	this.y0 = y0;
@@ -8,7 +8,7 @@ disjunction.extensions.Box2 = function(x0, y0, x1, y1)
 	this.intersects = function(other)
 	{
 		//console.log('/', other instanceof Point2)
-		if (other instanceof disjunction.core.Point2)
+		if (other instanceof Disjunction.Core.Point2)
 		{
 			//inclusive
 			//console.log('POINT2');
@@ -16,7 +16,7 @@ disjunction.extensions.Box2 = function(x0, y0, x1, y1)
 					this.y0 <= other.y && other.y < this.y1);
 		}
 		else
-		if (other instanceof disjunction.extensions.Box2)
+		if (other instanceof Disjunction.Extensions.Box2)
 		{
 			return (this.x0 < other.x1 && this.x1 > other.x0 &&
 					this.y0 < other.y1 && this.y1 > other.y0);
@@ -66,6 +66,9 @@ disjunction.extensions.Box2 = function(x0, y0, x1, y1)
 	
 	this.clone = function()
 	{
-		return new disjunction.extensions.Box2(this.x0, this.y0, this.x1, this.y1);
+		return new Disjunction.Extensions.Box2(this.x0, this.y0, this.x1, this.y1);
 	}
 };
+
+if (disjunction.WINDOW_CLASSES) 
+	window.Box2 = Disjunction.Extensions.Box2;

@@ -1,6 +1,6 @@
 MainView = function(app, model)
 {
-	dj.core.View.call(this, app, model); //extend base framework class
+	DJ.Core.View.call(this, app, model); //extend base framework class
 
 	this.bounds = new Box2();
 	var monsterService = this.app.services.get(SERVICE_MONSTER);
@@ -215,5 +215,5 @@ MainView = function(app, model)
 	}
 }
 
-MainView.prototype = Object.create(dj.core.View.prototype);
+MainView.prototype = Object.create(DJ.Core.View.prototype);
 MainView.prototype.constructor = MainView;

@@ -52,8 +52,9 @@
 
 	<!-- user miscellaneous, non-framework classes -->
 </head>
-<body onload="disjunction.go(); console.log(window)">
+<body onload="disjunction.go();">
 	<common>
+		<timer class="RAF" period=""></timer>
 		<services>
 			<!-- TODO include any Services here -->
 		</services>
@@ -63,7 +64,6 @@
 			<!-- TODO include any other input device interfaces here, supplying custom Input implementations -->
 		</devices>
 		<pointer device="DEVICE_MOUSE" x="MOUSE_X" y="MOUSE_Y" select="MOUSE_BUTTON_LEFT"></pointer>
-		<timer class="RAF" period=""></dj-timer>
 	</common>
 	<app class="App" id="App" oncontextmenu="return false">
 		<services>

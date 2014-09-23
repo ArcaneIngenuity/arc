@@ -1,4 +1,4 @@
-disjunction.core.Phase = function(name, model, view, ctrl) //abstract
+Disjunction.Core.Phase = function(name, model, view, ctrl) //abstract
 {
 	/** Must be defined before it can be set into the manager's map. should be unique. */
 	this.name  = name;
@@ -44,10 +44,10 @@ disjunction.core.Phase = function(name, model, view, ctrl) //abstract
 		this.view.startRecurse();
 	}
 	
-	this.finish = function() //final
+	this.stop = function() //final
 	{
-		this.ctrl.finish();
-		this.view.finish();
+		this.ctrl.stop();
+		this.view.stop();
 	}
 	
 	this.dispose = function() //final
@@ -86,7 +86,8 @@ disjunction.core.Phase = function(name, model, view, ctrl) //abstract
 		//global update: view.input, ctrl.update, view.output
 		var focus = disjunction.pointer.focus;
 		var bubble = focus;
-		while (bubble)
+		//while (bubble)
+		if (bubble)
 			bubble = bubble.input(deltaSec); //focus returns next ancestor, and so on... or not. this is the logical opposite of stopPropagation -- instead we propagate if appropriate.
 		//....TODO  either this, or we simply set certain views which ALWAYS update input. Or maybe both approaches.
 		
@@ -107,3 +108,5 @@ disjunction.core.Phase = function(name, model, view, ctrl) //abstract
 		view.outputRecurse(deltaSec); //render all views from root
 	}
 };
+if (disjunction.WINDOW_CLASSES) 
+	window.Phase = Disjunction.Core.Phase;

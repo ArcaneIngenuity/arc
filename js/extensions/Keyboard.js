@@ -1,9 +1,9 @@
 //Retrieves raw input and stores it.
 //we maintain both passive and active functions as some languages / platforms / environments may require a mix of these.
 
-disjunction.extensions.Keyboard = function()
+Disjunction.Extensions.Keyboard = function()
 {
-	disjunction.core.Device.call(this, 256); //super-constructor (add params after this)
+	Disjunction.Core.Device.call(this, 256); //super-constructor (add params after this)
 	
 	this.receive = function(event)
 	{
@@ -31,8 +31,11 @@ disjunction.extensions.Keyboard = function()
 	}
 }
 
-disjunction.extensions.Keyboard.prototype = new disjunction.core.Device();
-disjunction.extensions.Keyboard.prototype.constructor = disjunction.extensions.Keyboard;
+Disjunction.Extensions.Keyboard.prototype = new Disjunction.Core.Device();
+Disjunction.Extensions.Keyboard.prototype.constructor = Disjunction.Extensions.Keyboard;
+
+if (disjunction.WINDOW_CLASSES) 
+	window.Keyboard = Disjunction.Extensions.Keyboard;
 
 //from code.google.com/p/closure-library/source/browse/closure/goog/events/keycodes.js
 disjunction.constants.KEY_WIN_FF_LINUX = 0;

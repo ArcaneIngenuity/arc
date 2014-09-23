@@ -1,4 +1,4 @@
-disjunction.core.Device = function(numChannels) //ABSTRACT / INTERFACE
+Disjunction.Core.Device = function(numChannels) //ABSTRACT / INTERFACE
 {
 	this.channels = [];
 	this.numChannels = numChannels;
@@ -27,3 +27,5 @@ disjunction.core.Device = function(numChannels) //ABSTRACT / INTERFACE
 		//ABSTRACT
 	}
 }
+if (disjunction.WINDOW_CLASSES) 
+	window.Device = Disjunction.Core.Device;

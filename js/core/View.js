@@ -1,4 +1,4 @@
-disjunction.core.View = function(app, model)
+Disjunction.Core.View = function(app, model)
 {
 	this.id = undefined;
 	this.app = app;
@@ -23,7 +23,7 @@ disjunction.core.View = function(app, model)
 	}
 	
 	/** Used to clean up resources or reset values for this View, if it is no longer needed and can be released. */ 
-	this.finish = function()
+	this.stop = function()
 	{
 		/* ABSTRACT: OVERRIDE */
 	}
@@ -210,9 +210,9 @@ disjunction.core.View = function(app, model)
 		this.start(); //create from bottom up
 	}
 	
-	this.finishRecurse = function(deltaSec) //final
+	this.stopRecurse = function(deltaSec) //final
 	{
-		this.finish();
+		this.stop();
 	
 		var children = this.children;
 		if (children)
@@ -221,7 +221,7 @@ disjunction.core.View = function(app, model)
 			for (var i = 0; i < length; i++)
 			{
 				var child = children[i];
-				child.finishRecurse();
+				child.stopRecurse();
 			}
 		}
 	}
@@ -375,3 +375,5 @@ disjunction.core.View = function(app, model)
 	}
 };
 
+if (disjunction.WINDOW_CLASSES) 
+	window.View = Disjunction.Core.View;

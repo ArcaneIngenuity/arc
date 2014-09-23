@@ -1,4 +1,4 @@
-disjunction.core.ServiceHub = function()
+Disjunction.Core.ServiceHub = function()
 {
 	this.array = [];
 	
@@ -24,3 +24,6 @@ disjunction.core.ServiceHub = function()
 		}
 	}
 };
+
+if (disjunction.WINDOW_CLASSES) 
+	window.ServiceHub = Disjunction.Core.ServiceHub;

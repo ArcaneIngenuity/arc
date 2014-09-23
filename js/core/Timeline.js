@@ -1,6 +1,6 @@
 /** Timeline groups the lifetime of an operation in one class while respecting MVC and synchronisation boundaries within the framework. */
 
-disjunction.core.Timeline = function(app, phase, model, view, ctrl) //abstract
+Disjunction.Core.Timeline = function(app, phase, model, view, ctrl) //abstract
 {
 	this.app = app;
 	this.phase = phase;
@@ -16,7 +16,7 @@ disjunction.core.Timeline = function(app, phase, model, view, ctrl) //abstract
 		//abstract
 	}
 	
-	/** (call in View.input, Ctrl.update) Lets framework know whether this Task is due to finish running; typically a check on model, input devices, Pointer.
+	/** (call in View.input, Ctrl.update) Lets framework know whether this Task is due to stop running; typically a check on model, input devices, Pointer.
 	* @return {Boolean}
 	*/ 
 	this.isToFinish = function()
@@ -31,21 +31,24 @@ disjunction.core.Timeline = function(app, phase, model, view, ctrl) //abstract
 	}
 	
 	/** (call in View.input, Ctrl.update) Finishes this Task -- user code to perform one off tasks such as Model member destruction or reset, or View state change. */ 
-	this.finish = function()
+	this.stop = function()
 	{
 		//abstract
 	}
 	
-	/** (call in View.input ONLY) Update Model and/or View based on input, on every frame from start()ed till finish()ed (including the former, but excluding the global update on which the latter occurred). */ 
+	/** (call in View.input ONLY) Update Model and/or View based on input, on every frame from start()ed till stop()ed (including the former, but excluding the global update on which the latter occurred). */ 
 	this.input = function(deltaSec)
 	{
 		//abstract
 	}
 	
 	//TODO remove, redundant when considering the presence of inputUpdate()?
-	/** (call in Ctrl.update ONLY) Update Model based on other Model values (incl. input), on every frame from start()ed till finish()ed (including the former, but excluding the global update on which the latter occurred). */ 
+	/** (call in Ctrl.update ONLY) Update Model based on other Model values (incl. input), on every frame from start()ed till stop()ed (including the former, but excluding the global update on which the latter occurred). */ 
 	this.simulate = function(deltaSec)
 	{
 		//abstract
 	}
 };
+
+if (disjunction.WINDOW_CLASSES) 
+	window.Timeline = Disjunction.Core.Timeline;

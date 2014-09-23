@@ -1,4 +1,4 @@
-disjunction.extensions.RAFTimer = function()
+Disjunction.Extensions.RAFTimer = function()
 {
 	//check whether RAF is supported in user agent.
 	if ( !window.requestAnimationFrame )
@@ -29,5 +29,8 @@ disjunction.extensions.RAFTimer = function()
 	}
 }
 
-disjunction.extensions.RAFTimer.prototype = Object.create(disjunction.core.Timer.prototype);
-disjunction.extensions.RAFTimer.prototype.constructor = disjunction.extensions.RAFTimer;
+Disjunction.Extensions.RAFTimer.prototype = Object.create(Disjunction.Core.Timer.prototype);
+Disjunction.Extensions.RAFTimer.prototype.constructor = Disjunction.Extensions.RAFTimer;
+
+if (disjunction.WINDOW_CLASSES) 
+	window.RAFTimer = Disjunction.Extensions.RAFTimer;

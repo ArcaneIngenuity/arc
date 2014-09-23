@@ -1,31 +1,35 @@
-Disjunction = function()
+//"use strict";
+
+Disjunction = DJ = {Core: {}, Extensions: {}/*, Constants: {X:0, Y:1, Z:2}*/}; //namespace for class defs
+
+disjunction = dj =
 {
+	WINDOW_CLASSES: true,
+	WINDOW_CONSTANTS: true,
+	PREFIXED_MARKUP: false,
+	
 	//constants
-	this.constants =
+	constants:
 	{
 		X: 0,
-		Y: 0,
-		Z: 0
-	};
+		Y: 1,
+		Z: 2
+	},
 
-	//classes
-	var core = this.core = { Disjunction: this };
-	var extn = this.extn = this.extensions = {};
-	
 	//instances
-	this.apps = {}; //anything not in this map will not be updated by timer.
+	apps: {}, //anything not in this map will not be updated by timer.
 	
-	this.pointer = undefined;
-	this.setPointer = function(deviceIndex, xChannelIndex, yChannelIndex, selectChannelIndex) //final
+	pointer: undefined,
+	setPointer: function(deviceIndex, xChannelIndex, yChannelIndex, selectChannelIndex) //final
 	{
-		var pointer = this.pointer = new core.Pointer();
+		var pointer = this.pointer = new Disjunction.Core.Pointer();
 		pointer.device = this.devices.array[deviceIndex];
 		pointer.xChannel = pointer.device.channels[xChannelIndex];
 		pointer.yChannel = pointer.device.channels[yChannelIndex];
 		pointer.selectChannel = pointer.device.channels[selectChannelIndex];
-	}
+	},
 	
-	this.update = function(deltaSec)
+	update: function(deltaSec)
 	{
 		this.devices.poll();
 		
@@ -36,46 +40,46 @@ Disjunction = function()
 		}
 		
 		this.devices.flush();
-	}
+	},
 
-	this.start = function() //public
+	start: function() //public
 	{
 		this.timer.callback = this.update.bind(this);
 		this.timer.start();
-	}
+	},
 
 	//we can't run all init logic at construction as first the classes to be instantiated must be declared in the disjunction object's class packages.
-	this.initialise = function()
+	initialise: function()
 	{
-		this.builder = new core.Builder(this.apps);
-		this.services = new core.ServiceHub(this);
-		this.devices = new core.DeviceHub(this);
-	}
-	
-	this.go = function(dom, usePrefixedMarkup, useInternalConstantsOnly, useInternalClassesOnly)
-	{
-		this.initialise();
-
-		if (!useInternalClassesOnly) //copy classes onto window if desired
+		if (this.WINDOW_CLASSES)
 		{
-			for (var c in this.core) //copy
+			for (var c in Disjunction.Core) //recopy, this time include all inputs
 			{
-				window[c] = this.core[c];
+				window[c] = Disjunction.Core[c];
 			}
-			
-			for (var e in this.extensions) //copy
+			for (var e in Disjunction.Extensions) //recopy, this time include all inputs
 			{
-				window[e] = this.extensions[e];
+				window[e] = Disjunction.Extensions[e];
 			}
 		}
-
-		this.builder.useInternalConstantsOnly(useInternalConstantsOnly);
-		this.builder.usePrefixedMarkup(usePrefixedMarkup);
-		this.builder.buildAll(dom || document, this);
+		if (this.WINDOW_CONSTANTS)
+		{
+			for (var c in this.constants) //recopy, this time include all inputs
+			{
+				window[c] = this.constants[c];
+			}
+		}
+		this.builder 	= new Disjunction.Core.Builder(this.apps);
+		this.services 	= new Disjunction.Core.ServiceHub(this);
+		this.devices 	= new Disjunction.Core.DeviceHub(this);
+	},
+	
+	go: function(dom)
+	{
 		
+		this.initialise();
+		this.builder.buildAll(dom || document, this);
+		console.log('go', this.pointer);
 		this.start();
 	}
 };
-
-dj = disjunction = new Disjunction();
-delete window[Disjunction]; //remove class now that's its ref'ed from disjunction.core.Disjunction.

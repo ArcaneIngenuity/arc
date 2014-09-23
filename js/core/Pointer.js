@@ -5,7 +5,7 @@
 //knows (by proxy) the focus 
 //abstracts concepts of pointer to be device-agnostic
 
-disjunction.core.Pointer = function() //ABSTRACT / INTERFACE
+Disjunction.Core.Pointer = function() //ABSTRACT / INTERFACE
 {
 	this.device = undefined;
 	//this.xChannelIndex = undefined;
@@ -19,7 +19,7 @@ disjunction.core.Pointer = function() //ABSTRACT / INTERFACE
 	this.targetSelected = undefined;
 	this.targetReleased = undefined;
 	this.positionInTarget;// = new Point2(); //local position of pointer within pointed element
-	this.position = new disjunction.core.Point2(); //world position of pointer within pointed element
+	this.position = new Disjunction.Core.Point2(); //world position of pointer within pointed element
 	this.entered = undefined;
 	this.exited = undefined;
 	
@@ -105,8 +105,11 @@ disjunction.core.Pointer = function() //ABSTRACT / INTERFACE
 			this.target = intersectedViews.length > 0 ? intersectedViews[intersectedViews.length-1] : undefined;
 			
 			//3. get position of pointer within target
-			this.positionInTarget = this.position.clone();
-			this.target.fromWorld(this.positionInTarget);
+			if (this.target)
+			{
+				this.positionInTarget = this.position.clone();
+				this.target.fromWorld(this.positionInTarget);
+			}
 		}
 	}
 	
@@ -156,3 +159,6 @@ disjunction.core.Pointer = function() //ABSTRACT / INTERFACE
 		return view === this.target;
 	}
 };
+
+if (disjunction.WINDOW_CLASSES) 
+	window.Pointer = Disjunction.Core.Pointer;

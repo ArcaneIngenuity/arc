@@ -1,5 +1,5 @@
 //TODO listen for connecting / disconnecting devices
-disjunction.core.DeviceHub = function(dom)
+Disjunction.Core.DeviceHub = function(dom)
 {
 	//TODO actually in C we should simply realloc when devices are added, and in JS just use array length after pushes.
 	//use sufficiently large number for devices
@@ -56,3 +56,5 @@ disjunction.core.DeviceHub = function(dom)
 		}
 	}
 };
+if (disjunction.WINDOW_CLASSES) 
+	window.DeviceHub = Disjunction.Core.DeviceHub;

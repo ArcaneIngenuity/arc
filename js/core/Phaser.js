@@ -1,4 +1,4 @@
-disjunction.core.Phaser = function(app) //final
+Disjunction.Core.Phaser = function(app) //final
 {
 	/** Must be defined before it can be set into the manager's map. */
 	var array = {};
@@ -26,7 +26,7 @@ disjunction.core.Phaser = function(app) //final
 	{
 		if (this.phase)
 		{
-			this.phase.finish();
+			this.phase.stop();
 			this.phase.view.disable();
 		}	
 		this.phase = array[name];
@@ -47,3 +47,5 @@ disjunction.core.Phaser = function(app) //final
 		}
 	}
 };
+if (disjunction.WINDOW_CLASSES) 
+	window.Phaser = Disjunction.Core.Phaser;
