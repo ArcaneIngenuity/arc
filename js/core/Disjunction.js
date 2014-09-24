@@ -18,8 +18,12 @@ disjunction = dj =
 
 	//instances
 	apps: {}, //anything not in this map will not be updated by timer.
-	
+	devices: undefined,
+	services: undefined,
 	pointer: undefined,
+	builder: undefined,
+	
+	//functions
 	setPointer: function(deviceIndex, xChannelIndex, yChannelIndex, selectChannelIndex) //final
 	{
 		var pointer = this.pointer = new Disjunction.Core.Pointer();
@@ -30,7 +34,7 @@ disjunction = dj =
 	},
 	
 	update: function(deltaSec)
-	{
+	{	
 		this.devices.poll();
 		
 		for (var id in this.apps)
@@ -40,6 +44,12 @@ disjunction = dj =
 		}
 		
 		this.devices.flush();
+		
+		for (var i = 0; i < this.services.array.length; i++)
+		{
+			var service = this.services.array[i];
+			service.updateJournals();
+		}
 	},
 
 	start: function() //public
@@ -49,7 +59,7 @@ disjunction = dj =
 	},
 
 	//we can't run all init logic at construction as first the classes to be instantiated must be declared in the disjunction object's class packages.
-	initialise: function()
+	initialise: function(useMarkupPrefix)
 	{
 		if (this.WINDOW_CLASSES)
 		{
@@ -70,16 +80,17 @@ disjunction = dj =
 			}
 		}
 		this.builder 	= new Disjunction.Core.Builder(this.apps);
+		this.builder.setTagNames(useMarkupPrefix);
 		this.services 	= new Disjunction.Core.ServiceHub(this);
 		this.devices 	= new Disjunction.Core.DeviceHub(this);
+		
+		
 	},
 	
-	go: function(dom)
+	go: function(useMarkupPrefix)
 	{
-		
-		this.initialise();
-		this.builder.buildAll(dom || document, this);
-		console.log('go', this.pointer);
+		this.initialise(useMarkupPrefix);
+		this.builder.buildAll(document, this);
 		this.start();
 	}
 };

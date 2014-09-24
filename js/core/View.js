@@ -356,7 +356,7 @@ Disjunction.Core.View = function(app, model)
 		}
 	}
 
-	this.takeFocus = function()
+	this.focus = function()
 	{
 		disjunction.pointer.focus = this;
 	}

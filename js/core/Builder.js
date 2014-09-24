@@ -1,22 +1,38 @@
 Disjunction.Core.Builder = function(apps)
 {
-	var prefix			= disjunction.PREFIXED_MARKUP ? 'dj-' : '';
+	var DOMPhase = undefined;
+	var prefix;
+	var commonTagName;
+	var appTagName;
+	var devicesTagName;
+	var deviceTagName;
+	var servicesTagName;
+	var serviceTagName;
+	var phasesTagName;
+	var phaseTagName; //sadly necessary due to the fact that custom element need hyphens.
+	var pointerTagName;
+	var timerTagName;
 		
-	var commonTagName 	= prefix + 'common';
-	var appTagName 		= prefix + 'app';
-	var devicesTagName 	= prefix + 'devices';
-	var deviceTagName 	= prefix + 'device';
-	var servicesTagName = prefix + 'services';
-	var serviceTagName 	= prefix + 'service';
-	var phasesTagName 	= prefix + 'phases';
-	var phaseTagName 	= prefix + 'phase' + (prefix === '' ? '-' : ''); //sadly necessary due to the fact that custom element need hyphens.
-	var pointerTagName 	= prefix + 'pointer';
-	var timerTagName 	= prefix + 'timer';
-	
-	var DOMPhase = document.registerElement(phaseTagName, {
-	  prototype: Object.create(HTMLDivElement.prototype),
-	  extends: 'div'
-	});
+	this.setTagNames = function(usePrefix)
+	{
+		prefix			= usePrefix ? 'dj-' : '';
+			
+		commonTagName 	= prefix + 'common';
+		appTagName 		= prefix + 'app';
+		devicesTagName 	= prefix + 'devices';
+		deviceTagName 	= prefix + 'device';
+		servicesTagName = prefix + 'services';
+		serviceTagName 	= prefix + 'service';
+		phasesTagName 	= prefix + 'phases';
+		phaseTagName 	= prefix + 'phase' + (prefix === '' ? '-' : ''); //sadly necessary due to the fact that custom element need hyphens.
+		pointerTagName 	= prefix + 'pointer';
+		timerTagName 	= prefix + 'timer';
+		
+		DOMPhase = document.registerElement(phaseTagName, {
+		  prototype: Object.create(HTMLDivElement.prototype),
+		  extends: 'div'
+		});
+	}
 	
 	this.tabIndex = undefined;
 
@@ -27,7 +43,7 @@ Disjunction.Core.Builder = function(apps)
 	
 	this.buildCommon = function(containerDOM, disjunction)
 	{
-		var commonDOM = containerDOM.getElementsByTagName(commonTagName)[0];	console.log(commonTagName, commonDOM, containerDOM)
+		var commonDOM = containerDOM.getElementsByTagName(commonTagName)[0];
 		var commonServicesDOM = commonDOM.getElementsByTagName(servicesTagName)[0];
 	
 		//var commonServiceDOMs = commonServicesDOM.getElementsByTagName(serviceTagName);
@@ -375,8 +391,7 @@ Disjunction.Core.Builder = function(apps)
 		element.view = view; // bind the view
 		element.onfocus = function()
 		{
-			//console.log('onfocus', element);
-			this.view.takeFocus();
+			this.view.focus();
 		}
 		//element.onblur = function() {this.view.wasFocused = this.view.isFocused; this.view.isFocused = false;};
 	}

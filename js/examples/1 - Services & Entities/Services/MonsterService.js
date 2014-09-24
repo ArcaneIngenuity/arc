@@ -1,6 +1,8 @@
 //Assists us in retrieving a random, transparent background, Gravatar monster image for use in MainView.
 MonsterService = function()
 {
+	Service.call(this);
+
 	var index = 0;
 	
 	this.generateIndex = function()
@@ -19,3 +21,6 @@ MonsterService = function()
 		return "http://www.gravatar.com/avatar/"+md5Hash+"?d=monsterid";
 	}
 }
+
+MonsterService.prototype = Object.create(Service.prototype);
+MonsterService.prototype.constructor = MonsterService;

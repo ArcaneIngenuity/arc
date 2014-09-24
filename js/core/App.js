@@ -8,7 +8,9 @@ Disjunction.Core.App = function(id, disjunction) //final
 	var phaser = this.phaser = new Disjunction.Core.Phaser(this);
 	var services = this.services = new Disjunction.Core.ServiceHub(this);
 
-	this.model = undefined; //optional app-wide model
+	var model = this.model = undefined; //optional app-wide model
+	
+	//TODO remove?
 	this.view = undefined; //used when individual disjunction apps are used as modules
 	//abstraction of the device used to perform screen pointing - encapsulates hierarchical transformation of device coordinates to focused view's own coordinate system
 	
@@ -21,7 +23,16 @@ Disjunction.Core.App = function(id, disjunction) //final
 	
 	this.update = function(deltaSec) //final
 	{
+		if (model)
+			model.updateJournals();
+		
 		phaser.update(deltaSec);
+		
+		for (var i = 0; i < services.array.length; i++)
+		{
+			var service = services.array[i];
+			service.updateJournals();
+		}
 	}
 };
 

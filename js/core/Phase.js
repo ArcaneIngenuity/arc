@@ -42,6 +42,10 @@ Disjunction.Core.Phase = function(name, model, view, ctrl) //abstract
 	{
 		this.ctrl.start();
 		this.view.startRecurse();
+		
+		
+		this.view.dom.focus(); //triggers View.focus() which changes pointer focus (see Builder) -- necessary as in DOM JS we cannot control focus events due to mouse or tabbing.
+		//this.view.focus(); //the expected version... outside DOM JS this will work.
 	}
 	
 	this.stop = function() //final
@@ -81,15 +85,21 @@ Disjunction.Core.Phase = function(name, model, view, ctrl) //abstract
 		//TODO same for global / app model
 		//TODO in C, we would just provide a list of pairs of 32-bit pointers to the model elements -- new / old -- after model had been fully allocated.
 		
-		model.updateJournals();
+		if (model)
+			model.updateJournals();
 		
 		//global update: view.input, ctrl.update, view.output
 		var focus = disjunction.pointer.focus;
-		var bubble = focus;
-		//while (bubble)
-		if (bubble)
+		//console.log(focus, document.activeElement);
+		
+		
+		var bubble = view.input(deltaSec); //always do root
+		while (bubble)
+		{
 			bubble = bubble.input(deltaSec); //focus returns next ancestor, and so on... or not. this is the logical opposite of stopPropagation -- instead we propagate if appropriate.
-		//....TODO  either this, or we simply set certain views which ALWAYS update input. Or maybe both approaches.
+		}
+		
+		//....TODO  either this, or we simply set certain views which ALWAYS update input/output. Or maybe both approaches.
 		
 		//TODO put dragging in as feature of View
 		//if (pointer)
