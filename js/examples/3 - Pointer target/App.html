@@ -1,0 +1,98 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>3 - Pointer target</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	
+	<!-- framework prequisite polyfills -->
+	<script src="../../polyfills/x-tag-core.min.js"></script>
+	<script src="../../polyfills/ES5.js"></script>
+ 
+	<!-- framework core -->
+	<script src="../../core/Disjunction.js"></script>
+	<script src="../../core/Builder.js"></script>
+	<script src="../../core/Journal.js"></script>
+	<script src="../../core/JournalKeeper.js"></script>
+	<script src="../../core/Service.js"></script>
+	<script src="../../core/App.js"></script>
+	<script src="../../core/Phaser.js"></script>
+	<script src="../../core/Phase.js"></script>
+	<script src="../../core/Model.js"></script>
+	<script src="../../core/View.js"></script>
+	<script src="../../core/Ctrl.js"></script>
+	<script src="../../core/ServiceHub.js"></script>
+	<script src="../../core/DeviceHub.js"></script>
+	<script src="../../core/Device.js"></script>
+	<script src="../../core/DeviceChannel.js"></script>
+	<script src="../../core/Timer.js"></script>
+	<script src="../../core/Timeline.js"></script>
+	<script src="../../core/Pointer.js"></script>
+	<script src="../../core/Point2.js"></script>
+
+
+	<!-- framework extensions -->
+	<script src="../../extensions/RAFTimer.js"></script>
+	<script src="../../extensions/Mouse.js"></script>
+	<script src="../../extensions/Keyboard.js"></script>
+	<script src="../../extensions/Box2.js"></script>
+	<script src="../../extensions/Math.js"></script>
+
+	<!-- App-related implementations -->
+	<!-- NOTE directory structures and and file separations are arbitrary -- you could keep everything in the root, even in a single file. -->
+	<link  href="./App.css" rel="stylesheet">
+	<script src="./AppModel.js"></script>
+
+	<!-- Phase-related implementations -->
+	<link  href="./Phases/Main/Main.css" rel="stylesheet">
+	<script src="./Phases/Main/MainModel.js"></script>
+	<script src="./Phases/Main/MainView.js"></script>
+	<script src="./Phases/Main/MainCtrl.js"></script>
+	
+	<script src="./Views/BlockView.js"></script>
+</head>
+<body onload="disjunction.go();">
+	<common>
+		<timer class="RAF" period=""></timer>
+		<devices>
+			<device class="Mouse"></device>
+			<device class="Keyboard"></device>
+		</devices>
+		<pointer device="DEVICE_MOUSE" x="MOUSE_X" y="MOUSE_Y" select="MOUSE_BUTTON_LEFT"></pointer>
+	</common>
+	<app class="App" id="App" oncontextmenu="return false">
+		<services>
+		</services>
+		<phases>
+			<phase- class="Main" current tabindex="0" autofocus>
+				<div class="Block b">
+					<div class="Block a">
+						<div class="Block a">
+							a
+						</div>
+						<div class="Block b">
+							b
+						</div>
+						<div class="Block c">
+							c
+						</div>
+					</div>
+					<div class="Block b">
+						<div class="Block a">
+							a
+						</div>
+						<div class="Block b">
+							b
+						</div>
+						<div class="Block c">
+							c
+						</div>				
+					</div>
+				</div>
+			</phase->
+		</phases>
+	</app>
+</body>
+</html>
