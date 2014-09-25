@@ -11,6 +11,8 @@ Disjunction.Core.Phase = function(name, model, view, ctrl) //abstract
 	this.ctrl.model = model;
 	
 	this.app = undefined;
+	
+	this.focus = view;
                        
 	this.setApp = function(app)
 	{
@@ -44,7 +46,7 @@ Disjunction.Core.Phase = function(name, model, view, ctrl) //abstract
 		this.view.startRecurse();
 		
 		
-		this.view.dom.focus(); //triggers View.focus() which changes pointer focus (see Builder) -- necessary as in DOM JS we cannot control focus events due to mouse or tabbing.
+		this.focus.dom.focus(); //triggers View.focus() which changes pointer focus (see Builder) -- necessary as in DOM JS we cannot control focus events due to mouse or tabbing.
 		//this.view.focus(); //the expected version... outside DOM JS this will work.
 	}
 	
@@ -73,48 +75,23 @@ Disjunction.Core.Phase = function(name, model, view, ctrl) //abstract
 			if (view.enabled) //root enabled
 			{
 				pointer.findTarget(view);
-				pointer.updateSelectedness();
+				pointer.updateSelected();
 			}
 		}
 		//check whether focus has changed
-		//this may occur externally via an event-based system like the DOM writing pointer.focus, or be done here, internally, for all views. 
-		if (pointer.pollFocus)
-			pointer.pollFocus();
-		//console.log(focus);
-		//update last state for each bound value in this phase's model so we know what has changed for binding purposes
-		//TODO same for global / app model
-		//TODO in C, we would just provide a list of pairs of 32-bit pointers to the model elements -- new / old -- after model had been fully allocated.
+		//this may occur externally from DOM onfocus event handler, or be done internally based on pointer / input events. 
+		//if (this.pollFocus)
+		//	this.pollFocus();
+		if (pointer.target && pointer.isSelected)
+			pointer.target.focus();
+		
 		
 		if (model)
 			model.updateJournals();
 		
 		//global update: view.input, ctrl.update, view.output
-		var focus = disjunction.pointer.focus;
-		//console.log(focus, document.activeElement);
-		
-		
-		var bubble = view.input(deltaSec); //always do root
-		while (bubble)
-		{
-			bubble = bubble.input(deltaSec); //focus returns next ancestor, and so on... or not. this is the logical opposite of stopPropagation -- instead we propagate if appropriate.
-		}
-		
-		//....TODO  either this, or we simply set certain views which ALWAYS update input/output. Or maybe both approaches.
-		
-		//TODO put dragging in as feature of View
-		//if (pointer)
-		//	if (pointer.dragging)
-		//		pointer.progressDrag();
+		this.focus.input(deltaSec);
 		ctrl.simulate(deltaSec);
-		/*
-		//TODO not sure about this part; it really only caches whether a change was made, as a boolean. useful or not useful?
-		for (var i = 0; i < this.bindings.length; i++)
-		{
-			var binding = this.bindings[i];
-			binding.markDirtyIfChanged();
-		} //now current is fresh
-		*/
-		//view.updateBindings();
 		view.outputRecurse(deltaSec); //render all views from root
 	}
 };

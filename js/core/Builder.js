@@ -294,6 +294,7 @@ Disjunction.Core.Builder = function(apps)
 					childView = new Class();
 					childView.dom = childElement;
 					childView.id = id;
+					childView.phase = view.phase;
 					view.addChild(childView);
 					this.prepareElement(childElement, childView);
 				}

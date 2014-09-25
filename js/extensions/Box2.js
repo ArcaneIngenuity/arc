@@ -23,13 +23,22 @@ Disjunction.Extensions.Box2 = function(x0, y0, x1, y1)
 		}
 	}
 	
-	this.contains = function(other)
+	this.containsLocal = function(other)
 	{
-		//console.log('/', other instanceof Point2)
 		if (other instanceof Point2)
 		{
 			return (0 <= other.x && other.x < this.getWidth() &&
 					0 <= other.y && other.y < this.getHeight());
+		}
+		return undefined;
+	}
+	
+	this.containsWorld = function(other)
+	{
+		if (other instanceof Point2)
+		{
+			return (this.x0 <= other.x && other.x < this.x1 &&
+					this.y0 <= other.y && other.y < this.y1);
 		}
 		return undefined;
 	}

@@ -358,7 +358,7 @@ Disjunction.Core.View = function(app, model)
 
 	this.focus = function()
 	{
-		disjunction.pointer.focus = this;
+		this.phase.focus = this;
 	}
 	
 	//JS - should be in extensions?
