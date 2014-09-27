@@ -47,7 +47,20 @@ Disjunction.Extensions.Mouse = function()
 			}
 			if (inputType === 'wh') //wheel
 			{
-				//TODO
+				var channel = this.channels[disjunction.constants.MOUSE_WHEEL];
+			
+				var d = 0;
+				if (event.wheelDelta)   								d = event.wheelDelta;
+				if (event.detail)       								d = -event.detail; //FF
+				if (event.originalEvent)
+				{
+					if (event.originalEvent.detail)							d = -event.originalEvent.detail; //FF
+					if (event.originalEvent && event.originalEvent.wheelDelta)	d = event.originalEvent.wheelDelta;
+				}
+				if (d == 0) return 0;
+				var sign = d >= 0 ? -1 : 1;
+
+				channel.delta = sign;
 			}
 		}
 		/*

@@ -185,6 +185,7 @@ Disjunction.Core.Builder = function(apps)
 		appDOM.addEventListener('mousedown', 	ES5.bind(mouse, mouse.receive));
 		appDOM.addEventListener('mouseup',		ES5.bind(mouse, mouse.receive));
 		appDOM.addEventListener('mousemove',	ES5.bind(mouse, mouse.receive));
+		appDOM.addEventListener('mousewheel',	ES5.bind(mouse, mouse.receive));
 		appDOM.addEventListener('keydown', 		ES5.bind(keyboard, keyboard.receive));
 		appDOM.addEventListener('keyup',		ES5.bind(keyboard, keyboard.receive));
 		
