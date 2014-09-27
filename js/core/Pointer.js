@@ -60,6 +60,11 @@ Disjunction.Core.Pointer = function() //ABSTRACT / INTERFACE
 		return this.isSelected != this.wasSelected;
 	}
 	
+	this.hasMoved = function()
+	{
+		return this.xChannel.delta != 0 || this.yChannel.delta != 0;
+	}
+	
 	//see whether target we released over is same we selected over
 	this.isReleasedSelectedTarget = function()
 	{
