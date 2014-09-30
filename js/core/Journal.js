@@ -38,6 +38,15 @@ Disjunction.Core.Journal.prototype.set = function(value)
 }
 
 /**
+ *	Set all the Journal's values.
+ */
+Disjunction.Core.Journal.prototype.setAll = function(value)
+{
+	for (var i = 0; i < length; i++)
+		this[i] = value;
+}
+
+/**
  *	Check whether the Journal has changed between current value and most recent historical value.
  */
 Disjunction.Core.Journal.prototype.changed = function()
@@ -55,6 +64,9 @@ Disjunction.Core.Journal.prototype.changedBetween = function(i, j)
 	return this[i] != this[j];
 }
 
+/**
+ *	Get the current value.
+ */
 Disjunction.Core.Journal.prototype.current = function()
 {
 	return this[0];
