@@ -1,38 +1,69 @@
 Disjunction.Core.App = function(id, disjunction) //final
 {
-	this.DEBUG = true;
-
-	this.disjunction = disjunction;
 	this.id = id; //for compound apps
+	this.disjunction = disjunction;
 	
-	var phaser = this.phaser = new Disjunction.Core.Phaser(this);
-	var services = this.services = new Disjunction.Core.ServiceHub(this);
-
-	var model = this.model = undefined; //optional app-wide model
+	this.services = new Disjunction.Core.ServiceHub(this);
+	this.model = undefined;
+	this.view = undefined;
+	this.ctrl = undefined;
 	
-	//TODO remove?
-	this.view = undefined; //used when individual disjunction apps are used as modules
-	//abstraction of the device used to perform screen pointing - encapsulates hierarchical transformation of device coordinates to focused view's own coordinate system
 	
-	this.dispose = function() //final
+	
+	this.start = function() //final
 	{
-		phaser.dispose();
-		input.dispose();
-		services.dispose();
+		console.log('app start');
+		this.ctrl.start();
+		this.view.startRecurse();
+		this.focus = this.view;
+		
+		this.focus.dom.focus(); //triggers View.focus() which changes pointer focus (see Builder) -- necessary as in DOM JS we cannot control focus events due to mouse or tabbing.
+		//this.view.focus(); //the expected version... outside DOM JS this will work.
 	}
 	
-	this.update = function(deltaSec) //final
+	this.update = function() //final
 	{
+		var model = this.model;
 		if (model)
 			model.updateJournals();
-		
-		phaser.update(deltaSec);
-		
+			
+		var services = this.services;
 		for (var i = 0; i < services.array.length; i++)
 		{
 			var service = services.array[i];
 			service.updateJournals();
 		}
+		
+		var view = this.view;
+		var pointer = disjunction.pointer;
+		if (pointer) 
+		{
+			if (view.enabled) //root enabled
+			{
+				pointer.findTarget(view);
+				pointer.updateSelected();
+			}
+		}
+		
+		//check whether focus has changed
+		//this may occur externally from DOM onfocus event handler, or be done internally based on pointer / input events. 
+		//if (this.pollFocus)
+		//	this.pollFocus();
+		if (pointer.target && pointer.isSelected)
+			pointer.target.focus();
+		
+		var ctrl = this.ctrl;
+		ctrl.input		(this, model, view);
+		ctrl.simulate	(this, model);
+		ctrl.output		(this, model, view);
+	}
+	
+	
+	this.dispose = function() //final
+	{
+		ctrl.stop(); //if not already stopped
+		services.dispose();
+		view.dispose();
 	}
 };
 

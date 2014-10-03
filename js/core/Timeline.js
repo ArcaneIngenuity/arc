@@ -1,54 +1,42 @@
 /** Timeline groups the lifetime of an operation in one class while respecting MVC and synchronisation boundaries within the framework. */
 
-Disjunction.Core.Timeline = function(app, phase, model, view, ctrl) //abstract
+Disjunction.Core.Timeline = function(model) //abstract
 {
-	this.app = app;
-	this.phase = phase;
-	this.model = model;
-	this.view = view;
-	this.ctrl = ctrl;
+	Disjunction.Core.Update.call();
+
+	/** Tells whether this Task is due to start running; typically a check on model, input devices, Pointer. 
+	 * 	@return {Boolean}
+	 */ 
+	this.isToStart = function(model, timer, services, devices)
+	{
+		//abstract
+		//check model and input to see whether to start
+	}
 	
-	/** (call in View.input, Ctrl.update) Lets framework know whether this Task is due to start running; typically a check on model, input devices, Pointer. 
-	* @return {Boolean}
-	*/ 
-	this.isToStart = function()
+	/** Tells whether this Task is due to stop running; typically a check on model, input devices, Pointer.
+	 * 	@return {Boolean}
+	 */
+	this.isToStop = function(model, timer, services, devices)
+	{
+		//abstract
+		//check model and input to see whether to stop
+	}
+	
+	/** Start this Timeline -- user code to perform one off tasks such as Model member construction, or View state change. */ 
+	this.start = function(model, timer, services)
 	{
 		//abstract
 	}
 	
-	/** (call in View.input, Ctrl.update) Lets framework know whether this Task is due to stop running; typically a check on model, input devices, Pointer.
-	* @return {Boolean}
-	*/ 
-	this.isToFinish = function()
-	{
-		//abstract
-	}
-	
-	/** (call in View.input, Ctrl.update) Starts this Task -- user code to perform one off tasks such as Model member construction, or View state change. */ 
-	this.start = function()
-	{
-		//abstract
-	}
-	
-	/** (call in View.input, Ctrl.update) Finishes this Task -- user code to perform one off tasks such as Model member destruction or reset, or View state change. */ 
-	this.stop = function()
-	{
-		//abstract
-	}
-	
-	/** (call in View.input ONLY) Update Model and/or View based on input, on every frame from start()ed till stop()ed (including the former, but excluding the global update on which the latter occurred). */ 
-	this.input = function(deltaSec)
-	{
-		//abstract
-	}
-	
-	//TODO remove, redundant when considering the presence of inputUpdate()?
-	/** (call in Ctrl.update ONLY) Update Model based on other Model values (incl. input), on every frame from start()ed till stop()ed (including the former, but excluding the global update on which the latter occurred). */ 
-	this.simulate = function(deltaSec)
+	/** Stop this Timeline -- user code to perform one off tasks such as Model member destruction or reset, or View state change. */ 
+	this.stop = function(model, timer, services)
 	{
 		//abstract
 	}
 };
+
+Disjunction.Core.App.prototype = new Disjunction.Core.Update();
+Disjunction.Core.App.prototype.constructor = Disjunction.Core.App;
 
 if (disjunction.WINDOW_CLASSES) 
 	window.Timeline = Disjunction.Core.Timeline;

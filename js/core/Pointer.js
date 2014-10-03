@@ -89,32 +89,35 @@ Disjunction.Core.Pointer = function() //ABSTRACT / INTERFACE
 		var device = this.device;
 		this.position.x = this.xChannel.value;
 		this.position.y = this.yChannel.value;
-
+//debugger;
 		//TODO implement for 3 dimensions as well as 2.
 		if (this.position.x !== undefined && this.position.y !== undefined) //often undefined for touch interfaces
 		{
 			if (this.intersectsView(view))
 				this.target = view;
 			
-			while (this.target.children.length > 0)
+			if (this.target)
 			{
-				var children = this.target.children;
+				while (this.target.children.length > 0)
+				{
+					var children = this.target.children;
 
-				var targetCandidates = [];
-				for (var i = 0; i < children.length; i++)
-				{
-					var child = children[i];
-					if (this.intersectsView(child))
-						targetCandidates.push(child);
+					var targetCandidates = [];
+					for (var i = 0; i < children.length; i++)
+					{
+						var child = children[i];
+						if (this.intersectsView(child))
+							targetCandidates.push(child);
+					}
+					
+					//break ties by selecting the highest index (last rendered)
+					if (targetCandidates.length > 0)
+					{
+						this.target = targetCandidates[targetCandidates.length - 1];
+					}
+					else
+						break;
 				}
-				
-				//break ties by selecting the highest index (last rendered)
-				if (targetCandidates.length > 0)
-				{
-					this.target = targetCandidates[targetCandidates.length - 1];
-				}
-				else
-					break;
 			}
 			
 			this.setTargetLast();

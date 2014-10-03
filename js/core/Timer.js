@@ -2,6 +2,7 @@ Disjunction.Core.Timer = function()
 {	
 	this.lastUpdateSec = undefined;
 	this.callback = undefined;
+	this.deltaSec = undefined;
 	
 	this.start = function()
 	{
@@ -19,11 +20,11 @@ Disjunction.Core.Timer = function()
 		var thisUpdateSec = new Date().getTime();
 		var lastUpdateSec = this.lastUpdateSec;
 		this.lastUpdateSec = thisUpdateSec;
-        var deltaSec = (thisUpdateSec - (lastUpdateSec || thisUpdateSec)) / 1000;
+        var deltaSec = this.deltaSec = (thisUpdateSec - (lastUpdateSec || thisUpdateSec)) / 1000;
 		
 		if (this.callback)
 		{
-			this.callback(deltaSec);
+			this.callback(deltaSec); //TODO remove param, no longer used
 		}
 	}
 };
