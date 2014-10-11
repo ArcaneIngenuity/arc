@@ -23,12 +23,13 @@ Disjunction.Core.View = function()
 	}
 	
 	/** (When focused) Process all input into this View and modify model and View state (if using a persistent / retained mode display list) accordingly, if View enabled. **/
+	/*
 	this.input = function()//app, model)
 	{
 		//ABSTRACT: OVERRIDE
 		//-run only for the currently focused view in a given global update
 	}
-
+*/
 	/** Render all output for this View based on model state, on View tree walk-down, if View enabled. **/
 	this.output = function()//app, model)
 	{

@@ -8,6 +8,7 @@ Disjunction.Core.App = function(id, disjunction) //final
 	this.view = undefined;
 	this.ctrl = undefined;
 	
+	this.focus = undefined; //focus may be reached in many ways -- not just pointer. it's just the active view used for input.
 	
 	
 	this.start = function() //final
@@ -49,13 +50,20 @@ Disjunction.Core.App = function(id, disjunction) //final
 		//this may occur externally from DOM onfocus event handler, or be done internally based on pointer / input events. 
 		//if (this.pollFocus)
 		//	this.pollFocus();
+		
+		//TODO set focus through *user-defined* approaches 
 		if (pointer.target && pointer.isSelected)
 			pointer.target.focus();
+			
+		var focus = this.focus;
 		
+		//root ctrl operates on root model and focused view
 		var ctrl = this.ctrl;
-		ctrl.input		(this, model, view);
+		//note we do not pass Pointer in -- we need the focused View for its input, which exists irrespective of whether there is a Pointer available or not
+		ctrl.input		(this, model, focus); //TODO should only be the input along with view name - not the whole View. Ctrl should not have access to View.
 		ctrl.simulate	(this, model);
-		ctrl.output		(this, model, view);
+		
+		view.outputRecurse(this, model); //root view, recurse
 	}
 	
 	

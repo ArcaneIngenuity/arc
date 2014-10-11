@@ -11,12 +11,6 @@ Disjunction.Core.Updater = function(model) //abstract
 	{
 		//abstract
 	}
-	
-	/** Update View based on model, on every frame from start()ed till stop()ed (including the former, but excluding the global update on which the latter occurred). Read model to write view. */ 
-	this.output = function(app, model, view)
-	{
-		//abstract
-	}
 };
 
 if (disjunction.WINDOW_CLASSES) 
