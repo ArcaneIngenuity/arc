@@ -1,8 +1,6 @@
-Disjunction.Core.Ctrl = function()
+Disjunction.Core.Ctrl = function(app)
 {
-	Disjunction.Core.Updater.call();
-	
-	this.app = undefined;
+	this.app = app;
 	this.model = undefined;
 	
 	this.parent = undefined;
@@ -11,7 +9,7 @@ Disjunction.Core.Ctrl = function()
 	/** Tells whether this Task is due to start running; typically a check on model, input devices, Pointer. 
 	 * 	@return {Boolean}
 	 */ 
-	this.isToStart = function(app, model)
+	this.isToStart = function()
 	{
 		//abstract
 		//check model and input to see whether to start
@@ -20,23 +18,31 @@ Disjunction.Core.Ctrl = function()
 	/** Tells whether this Task is due to stop running; typically a check on model, input devices, Pointer.
 	 * 	@return {Boolean}
 	 */
-	this.isToStop = function(app, model)
+	this.isToStop = function()
 	{
 		//abstract
 		//check model and input to see whether to stop
 	}
 	
 	/** Start this Timeline -- user code to perform one off tasks such as Model member construction, or View state change. */ 
-	this.start = function(app, model, view)
+	this.start = function()
 	{
 		//abstract
 	}
 	
 	/** Stop this Timeline -- user code to perform one off tasks such as Model member destruction or reset, or View state change. */ 
-	this.stop = function(app, model, view)
+	this.stop = function()
 	{
 		//abstract
 	}
+	
+	/** Update Model based on other Model values, on every frame from start()ed till stop()ed (including during the former, but excluding during the latter). */ 
+	this.simulate = function(focus)
+	{
+		//abstract
+	}
+	
+	//*** FINAL METHODS ***//
 	
 	this.addChild = function(child) //final
 	{
@@ -45,7 +51,8 @@ Disjunction.Core.Ctrl = function()
 		//this.childrenById[child.id] = child;
 	}
 	
-	this.getChildById = function(id) //final
+	//There will never be multiple Ctrls of same type (as child of a single parent), so we need not use ID.
+	this.getChildByClassName = function(className) //final
 	{
 		//return this.childrenByName[id];
 		var children = this.children;
@@ -53,7 +60,7 @@ Disjunction.Core.Ctrl = function()
 		for (var i = 0; i < length; i++)
 		{
 			var child = children[i];
-			if (child.id === id)
+			if (child.className === className)
 			{
 				return child;
 			}
@@ -63,9 +70,5 @@ Disjunction.Core.Ctrl = function()
 	}
 };
 
-Disjunction.Core.Ctrl.prototype = new Disjunction.Core.Updater();
-Disjunction.Core.Ctrl.prototype.constructor = Disjunction.Core.Ctrl;
-
 if (disjunction.WINDOW_CLASSES) 
 	window.Ctrl = Disjunction.Core.Ctrl;
-

@@ -13,7 +13,6 @@ Disjunction.Core.App = function(id, disjunction) //final
 	
 	this.start = function() //final
 	{
-		console.log('app start');
 		this.ctrl.start();
 		this.view.startRecurse();
 		this.focus = this.view;
@@ -23,17 +22,8 @@ Disjunction.Core.App = function(id, disjunction) //final
 	}
 	
 	this.update = function() //final
-	{
-		var model = this.model;
-		if (model)
-			model.updateJournals();
-			
-		var services = this.services;
-		for (var i = 0; i < services.array.length; i++)
-		{
-			var service = services.array[i];
-			service.updateJournals();
-		}
+	{	
+
 		
 		var view = this.view;
 		var pointer = disjunction.pointer;
@@ -60,16 +50,28 @@ Disjunction.Core.App = function(id, disjunction) //final
 		//root ctrl operates on root model and focused view
 		var ctrl = this.ctrl;
 		//note we do not pass Pointer in -- we need the focused View for its input, which exists irrespective of whether there is a Pointer available or not
-		ctrl.input		(this, model, focus); //TODO should only be the input along with view name - not the whole View. Ctrl should not have access to View.
-		ctrl.simulate	(this, model);
+		/*var input = */focus.input(this, model); //for cases where input is not DOM- or Pointer-based.
+		ctrl.simulate();//TODO should only accept the input along with view name - not the whole View that produced the input. Ctrl should not have access to View.
 		
 		view.outputRecurse(this, model); //root view, recurse
+		
+		//to see difference in value between start() and first simulate(), these need to come *after* the calls above
+		var model = this.model;
+		if (model)
+			model.updateJournals();
+			
+		var services = this.services;
+		for (var i = 0; i < services.array.length; i++)
+		{
+			var service = services.array[i];
+			service.updateJournals();
+		}
 	}
 	
-	
+	//TODO figure out how to handle distinction between stop and dispose, at every level (dj object downward)
 	this.dispose = function() //final
 	{
-		ctrl.stop(); //if not already stopped
+		ctrl.stop(); //TODO if not already stopped
 		services.dispose();
 		view.dispose();
 	}

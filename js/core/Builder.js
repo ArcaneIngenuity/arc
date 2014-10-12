@@ -1,3 +1,4 @@
+//TODO rename all dom/DOM to element/Element
 Disjunction.Core.Builder = function(apps)
 {
 	var prefix;
@@ -135,11 +136,6 @@ Disjunction.Core.Builder = function(apps)
 		//app
 		var id = appDOM.id;
 		app = new Disjunction.Core.App(id, disjunction);
-		
-		//services
-		var domServices = appDOM.getElementsByTagName(servicesTagName)[0];
-		if (domServices)
-			this.addServices(domServices, app.services);
 
 		//model
 		var domModels = appDOM.getElementsByTagName(modelTagName);
@@ -147,7 +143,12 @@ Disjunction.Core.Builder = function(apps)
 		if (domModels.length != 1)
 			throw "Error: There can be only one <"+modelTagName+"> per <"+appTagName+">.";
 		else
-			app.model = this.addModel(domModel);	
+			app.model = this.addModel(domModel);
+			
+		//services - after model for injection, but before ctrl / view so may be accessed in constructor
+		var domServices = appDOM.getElementsByTagName(servicesTagName)[0];
+		if (domServices)
+			this.addServices(domServices, app.services, app.model);
 
 		//view
 		var domViewRoots = appDOM.getElementsByTagName(viewTagName);
@@ -163,7 +164,7 @@ Disjunction.Core.Builder = function(apps)
 		if (domViewRoots.length != 1)
 			throw "Error: There can be only one root <"+viewTagName+"> per <"+appTagName+">. All <"+viewTagName+">s must be specified under this root.";
 		else
-			app.view = this.addView(domViewRoots[0]); //, app.model);
+			app.view = this.addView(domViewRoots[0], app.model);
 		
 		app.view.app = app;
 		
@@ -223,10 +224,10 @@ Disjunction.Core.Builder = function(apps)
 	{
 		for (var i = 0; i < containerDOM.children.length; i++)
 		{
-			var element = containerDOM.children[i];
-			if (element.tagName.toLowerCase() === deviceTagName)
+			var dom = containerDOM.children[i];
+			if (dom.tagName.toLowerCase() === deviceTagName)
 			{
-				var className = element.className;
+				var className = dom.className;
 				var Class = Disjunction.Extensions[className];
 				if (Class)
 				{
@@ -241,20 +242,27 @@ Disjunction.Core.Builder = function(apps)
 		}
 	}
 	
-	this.addServices = function(containerDOM, services)//, parentDomRect)
+	this.addServices = function(containerDOM, services, model)//, parentDomRect)
 	{
 		for (var i = 0; i < containerDOM.children.length; i++)
 		{
-			var element = containerDOM.children[i];
-			if (element.tagName.toLowerCase() === serviceTagName)
+			var dom = containerDOM.children[i];
+			if (dom.tagName.toLowerCase() === serviceTagName)
 			{
-				var shortServiceName = element.className;
-				var longServiceName = element.className + 'Service';
+				var shortServiceName = dom.className;
+				var longServiceName = dom.className + 'Service';
 				var Class = window[longServiceName]; //TODO make the object on which to put this, optional by parameter
 				if (Class)
 				{
 					var serviceConstantName = 'SERVICE_'+shortServiceName.toUpperCase();
 					var service = services.add(new Class());
+					
+					//set model
+					if (dom.hasAttribute('model'))
+					{
+						var pathJoined = dom.getAttribute('model');
+						service.model = this.getModelFromPathString(model, pathJoined);
+					}
 					
 					disjunction.constants[serviceConstantName] = service;
 					if (disjunction.WINDOW_CONSTANTS)
@@ -285,7 +293,7 @@ Disjunction.Core.Builder = function(apps)
 	
 	this.addCtrl = function(dom, model, view)
 	{
-		console.log('model', model);
+		//console.log('model', model);
 		var ctrl;
 		
 		var classNamesJoined = dom.className;
@@ -293,6 +301,7 @@ Disjunction.Core.Builder = function(apps)
 		{		
 			var classNames = classNamesJoined.split(' ');
 			var className = classNames[0];
+			var classNameShort = className;
 			var firstChar = className[0];
 			
 			if (isNaN(firstChar)) //if first character is a letter...
@@ -304,9 +313,9 @@ Disjunction.Core.Builder = function(apps)
 					var Class = window[className]; //TODO make object where this is found, optional.
 					if (Class)
 					{
-						ctrl = new Class();
+						ctrl = new Class(app);
 						dom.ctrl = ctrl; //useful for debugging, mirrors View approach
-						console.log(ctrl);
+						ctrl.className = classNameShort;
 						ctrl.model = model; //by default, set to what was passed in; elaborate (below) if necessary
 						
 						//set model
@@ -326,14 +335,13 @@ Disjunction.Core.Builder = function(apps)
 						}
 						
 						//recurse children
-						console.log(dom.children.length);
 						for (var a = 0; a < dom.children.length; a++)
 						{
 							var childDOM = dom.children[a];
 							var childCtrl = this.addCtrl(childDOM, ctrl.model);
 							if (childCtrl)
 								ctrl.addChild(childCtrl);
-							console.log(childDOM);
+							//console.log(childDOM);
 							//TODO inheritance of view/model from parent ctrl
 						}
 					}
@@ -352,7 +360,7 @@ Disjunction.Core.Builder = function(apps)
 	 * however their descendants will still be processed and will set the last ancestral View as their parent.
 	 * @return The {Disjunction.Core.View} if one was added; otherwise undefined.
 	 */
-	this.addView = function(dom)
+	this.addView = function(dom, model)
 	{
 		var view;
 	
@@ -372,7 +380,16 @@ Disjunction.Core.Builder = function(apps)
 					var Class = window[className]; //TODO make object where this is found, optional.
 					if (Class)
 					{
-						view = new Class();
+						view = new Class(app);
+						view.model = model; //by default, set to what was passed in; elaborate (below) if necessary
+						
+						//set model
+						if (dom.hasAttribute('model'))
+						{
+							var pathJoined = dom.getAttribute('model');
+							view.model = this.getModelFromPathString(view.model, pathJoined);
+						}
+						console.log(view, view.model);
 
 						//any DOM element with a View attached, needs this
 						dom.onfocus = function()
@@ -402,7 +419,7 @@ Disjunction.Core.Builder = function(apps)
 		for (var a = 0; a < dom.children.length; a++)
 		{
 			var childDOM = dom.children[a];
-			var childView = this.addView(childDOM);
+			var childView = this.addView(childDOM, view.model);
 			view.addChild(childView);
 			
 			//TODO inheritance from parent view
@@ -414,9 +431,9 @@ Disjunction.Core.Builder = function(apps)
 	
 	this.getModelFromPathString = function(model, pathJoined)
 	{
-		console.log(model);
 		var path = pathJoined.split('.');
 		if (path[0] === "") path.shift();
+		if (path[path.length-1] === "") path.pop();
 		//console.log(path);
 		var pathIncremental = "model";
 		//walk down the model tree to the appropriate property
