@@ -1,5 +1,7 @@
-Disjunction.Core.View = function()
+Disjunction.Core.View = function(app)
 {
+	this.app = app;
+
 	this.enabled = true; //used by timing mechanism to know whether to update or not
 	this.parent = undefined;
 	this.children = []; //in draw order!

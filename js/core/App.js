@@ -23,7 +23,7 @@ Disjunction.Core.App = function(id, disjunction) //final
 	
 	this.update = function() //final
 	{	
-
+		//console.log('------A');
 		
 		var view = this.view;
 		var pointer = disjunction.pointer;
@@ -52,20 +52,25 @@ Disjunction.Core.App = function(id, disjunction) //final
 		//note we do not pass Pointer in -- we need the focused View for its input, which exists irrespective of whether there is a Pointer available or not
 		/*var input = */focus.input(this, model); //for cases where input is not DOM- or Pointer-based.
 		ctrl.simulate();//TODO should only accept the input along with view name - not the whole View that produced the input. Ctrl should not have access to View.
-		
+
 		view.outputRecurse(this, model); //root view, recurse
 		
 		//to see difference in value between start() and first simulate(), these need to come *after* the calls above
 		var model = this.model;
+		
 		if (model)
-			model.updateJournals();
-			
+		{
+			model.regulateJournals();
+		}
+		
 		var services = this.services;
 		for (var i = 0; i < services.array.length; i++)
 		{
 			var service = services.array[i];
-			service.updateJournals();
+			service.regulateJournals();
 		}
+		
+		//console.log('------B');
 	}
 	
 	//TODO figure out how to handle distinction between stop and dispose, at every level (dj object downward)

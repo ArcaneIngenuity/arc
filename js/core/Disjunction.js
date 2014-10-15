@@ -18,10 +18,12 @@ disjunction = dj =
 
 	//instances
 	apps: {}, //anything not in this map will not be updated by timer.
+	timer:	undefined,
 	devices: undefined,
 	services: undefined,
 	pointer: undefined,
 	builder: undefined,
+	
 	
 	//functions
 	setPointer: function(deviceIndex, xChannelIndex, yChannelIndex, selectChannelIndex) //final

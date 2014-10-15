@@ -1,6 +1,9 @@
 //TODO as constructor length doesn't work, consider benefit of alternative approach for Journals http://www.bennadel.com/blog/2292-extending-javascript-arrays-while-keeping-native-bracket-notation-functionality.htm 
-Disjunction.Core.Journal = function(length)
+Disjunction.Core.Journal = function(length, regulate)
 {
+	this.regulate = regulate;
+	this.locked = false;
+	
 	if (!length)
 		length = 2;
 		
@@ -14,10 +17,33 @@ Disjunction.Core.Journal = function(length)
 };
 Disjunction.Core.Journal.prototype = new Array;
 
+Disjunction.Core.Journal.prototype.update = function(value)
+{
+	if (this.locked)
+		throw "Error: Journals set to lockOnUpdate may only be updated once before locks clear (on App.update()).";
+	else
+		if (this.regulate)
+			this.locked = true;
+
+	var length = this.length;
+	
+	//set all later values by shifting forward
+	for (var i = 1; i < length - 1; i++)
+	{
+		this[i+1] = this[i];
+	}
+	this[0] = value;
+}
+
+Disjunction.Core.Journal.prototype.unlock = function() //framework use only!
+{
+	this.locked = false;
+}
+
 /**
  *	Set the Journal's older values.
  */
-Disjunction.Core.Journal.prototype.update = function()
+Disjunction.Core.Journal.prototype.postUpdate = function()
 {
 	var length = this.length;
 	//console.log('jl', length);
@@ -71,3 +97,12 @@ Disjunction.Core.Journal.prototype.current = function()
 {
 	return this[0];
 }
+
+/**
+ *	Get the last value.
+ */
+Disjunction.Core.Journal.prototype.last = function()
+{
+	return this[1];
+}
+

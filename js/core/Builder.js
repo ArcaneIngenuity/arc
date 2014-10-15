@@ -166,8 +166,6 @@ Disjunction.Core.Builder = function(apps)
 		else
 			app.view = this.addView(domViewRoots[0], app.model);
 		
-		app.view.app = app;
-		
 		//ctrl
 		var domCtrlRoots = appDOM.getElementsByTagName(ctrlTagName);
 		var temp = [];
