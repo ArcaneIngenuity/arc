@@ -1,20 +1,16 @@
-Disjunction.Core.View = function(app, model)
+Disjunction.Core.View = function(app)
 {
-	this.id = undefined;
 	this.app = app;
-	this.model = model;
-	this.phase = undefined; //set by Phase on injection thereinto
-	
+
 	this.enabled = true; //used by timing mechanism to know whether to update or not
 	this.parent = undefined;
 	this.children = []; //in draw order!
 	//this.childrenByName = {}; //should be private
+	this.childrenByClassName = {}; //should be private
 	this.root = undefined; //TODO remove?
 	this.body = undefined; //pixel or 3D geometry, typically Box2 or 3 - explicitly injected after view construction... could be bitmap or arbitrary tri mesh
 	this.bounds = undefined; //always necessary for first pass pointer detection, and pointer transformations -- may be defined by body
-	this.interactor = undefined;
-	this.interactors = [];
-	
+
 	//ABSTRACT METHODS
 	/** Used to set up resources or values specific to this View. */ 
 	this.start = function()
@@ -29,39 +25,23 @@ Disjunction.Core.View = function(app, model)
 	}
 	
 	/** (When focused) Process all input into this View and modify model and View state (if using a persistent / retained mode display list) accordingly, if View enabled. **/
-	this.input = function(deltaSec)
+	this.input = function()//app, model)
 	{
 		//ABSTRACT: OVERRIDE
 		//-run only for the currently focused view in a given global update
-		//-runTasks() can be called by user during this function (typically at start) for when Tasks have been registered with this View.
-		
 	}
 
 	/** Render all output for this View based on model state, on View tree walk-down, if View enabled. **/
-	this.output = function(deltaSec)
+	this.output = function()//app, model)
 	{
 		//ABSTRACT: OVERRIDE
 	}
 
 	/** Render all output for this View based on model state, on View tree walk-up, if View enabled. **/
 	/** Occurs after recursive, collective update of subviews. Use this if you used update(pre) to gather information onto a single canvas, and want to render that canvas in retrospect. **/
-	this.outputPost = function(deltaSec)
+	this.outputPost = function(app, model)
 	{
 		//ABSTRACT: OVERRIDE
-	}
-	
-	//re-enables view processing.
-	this.enable = function()
-	{
-		this.enabled = true;
-		this.show();
-	}
-	
-	//stops view processing altogether.
-	this.disable = function()
-	{
-		this.enabled = false;
-		this.hide();
 	}
 	
 	//restores visibility.
@@ -76,7 +56,26 @@ Disjunction.Core.View = function(app, model)
 		/* ABSTRACT: OVERRIDE */
 	}
 	
+	this.dispose = function()
+	{
+		//ABSTRACT
+	}
+	
 	//FINAL METHODS
+	//re-enables view processing.
+	this.enable = function()
+	{
+		this.enabled = true;
+		this.show();
+	}
+	
+	//stops view processing altogether.
+	this.disable = function()
+	{
+		this.enabled = false;
+		this.hide();
+	}
+	
 	this.outputRecurse = function(deltaSec) //final
 	{
 		this.output(deltaSec);
@@ -95,42 +94,6 @@ Disjunction.Core.View = function(app, model)
 		
 		this.outputPost(deltaSec);
 	}
-	
-	//TODO Interactors from markup?
-	//TODO View to register interaction modes via method which binds Interactor to View and vice versa
-	/*
-	THIS IS NOT A GOOD PATTERN. It necessarily assumes exclusion of other Tasks/Interactors if one is already running. This should be a user choice.
-	this.runInteractors = function(deltaSec)
-	{
-		if (!this.interactor) //seek entry into an interactive state
-		{
-			for (var i = 0; i < this.interactors.length; i++)
-			{
-				var interactor = this.interactors[i];
-				if (interactor.hasInputStarted())
-				{
-					interactor.inputStart();
-					this.interactor = interactor;
-					break; //interactors are checked in array order of precedence
-				}
-			}
-		}
-		else
-		{
-			if (this.interactor.hasInputFinished())
-			{
-				this.interactor.inputFinish();
-				this.interactor = undefined;
-			}
-		}
-		//as this.mode may have just changed, check condition again for update.
-		if (this.interactor) //do processing on that mode
-		{
-			this.interactor.inputUpdate(deltaSec);
-			this.interactor.ctrlUpdate(deltaSec);
-		}
-	}
-	*/
 	
 	//only focus must be able to change order!
 	this.bringToFore = function(child)
@@ -153,6 +116,21 @@ Disjunction.Core.View = function(app, model)
 	{
 		this.children.push(childView);
 		//this.childrenById[childView.id] = childView;
+		var classNamesJoined = childView.dom.className;
+		if (classNamesJoined.length > 0)
+		{
+			var classNames = classNamesJoined.split(' ');
+			var className = classNames[0];
+			
+			//create array in map, if it doesn't already exist.
+			if (!this.childrenByClassName.hasOwnProperty(className))
+				this.childrenByClassName[className] = [];
+				
+			var array = this.childrenByClassName[className];
+			
+			array.push(childView);
+		}
+		
 		childView.parent = this;
 		childView.root = this.root;
 		childView.app = this.app;
@@ -187,6 +165,11 @@ Disjunction.Core.View = function(app, model)
 		}
 		
 		return undefined;
+	}
+	
+	this.getChildrenByClassName = function(className)
+	{
+		return this.childrenByClassName[className];
 	}
 	
 	this.hasChildren = function()
@@ -281,11 +264,6 @@ Disjunction.Core.View = function(app, model)
 		return leaves;
 	}
 	
-	this.makeLeaf = function()
-	{
-		this.children = undefined;
-	}
-	
 	this.isLeaf = function()
 	{
 		return this.children == undefined;
@@ -358,7 +336,7 @@ Disjunction.Core.View = function(app, model)
 
 	this.focus = function()
 	{
-		this.phase.focus = this;
+		this.app.focus = this;
 	}
 	
 	//JS - should be in extensions?

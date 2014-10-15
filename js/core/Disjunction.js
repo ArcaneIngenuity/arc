@@ -18,10 +18,12 @@ disjunction = dj =
 
 	//instances
 	apps: {}, //anything not in this map will not be updated by timer.
+	timer:	undefined,
 	devices: undefined,
 	services: undefined,
 	pointer: undefined,
 	builder: undefined,
+	
 	
 	//functions
 	setPointer: function(deviceIndex, xChannelIndex, yChannelIndex, selectChannelIndex) //final
@@ -33,14 +35,14 @@ disjunction = dj =
 		pointer.selectChannel = pointer.device.channels[selectChannelIndex];
 	},
 	
-	update: function(deltaSec)
+	update: function()
 	{	
 		this.devices.poll();
 		
 		for (var id in this.apps)
 		{	
 			var app = this.apps[id];
-			app.update(deltaSec);
+			app.update();
 		}
 		
 		this.devices.flush();
@@ -54,6 +56,12 @@ disjunction = dj =
 
 	start: function() //public
 	{
+		for (var id in this.apps)
+		{
+			var app = this.apps[id];
+			app.start();
+		}
+		
 		this.timer.callback = this.update.bind(this);
 		this.timer.start();
 	},
@@ -92,5 +100,22 @@ disjunction = dj =
 		this.initialise(useMarkupPrefix);
 		this.builder.buildAll(document, this);
 		this.start();
+	},
+	
+	dispose: function()
+	{
+		this.services.dispose();
+		this.devices.dispose();
+	},
+	
+	addApp: function(id, app)
+	{
+		this.apps[id] = app;
+	},
+	
+	removeApp: function(id)
+	{
+		this.apps[id].dispose();
+		delete this.apps[id];
 	}
 };

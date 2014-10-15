@@ -1,53 +1,53 @@
+//TODO rename all dom/DOM to element/Element
 Disjunction.Core.Builder = function(apps)
 {
-	var DOMPhase = undefined;
 	var prefix;
 	var commonTagName;
 	var appTagName;
+	var modelTagName;
+	var viewTagName;
+	var ctrlTagName;
 	var devicesTagName;
 	var deviceTagName;
 	var servicesTagName;
 	var serviceTagName;
-	var phasesTagName;
-	var phaseTagName; //sadly necessary due to the fact that custom element need hyphens.
 	var pointerTagName;
 	var timerTagName;
 		
 	this.setTagNames = function(usePrefix)
 	{
 		prefix			= usePrefix ? 'dj-' : '';
-			
+		
 		commonTagName 	= prefix + 'common';
 		appTagName 		= prefix + 'app';
+		modelTagName 	= prefix + 'model';
+		viewTagName 	= prefix + 'view' + (prefix === '' ? '-' : ''); //sadly necessary due to the fact that custom element need hyphens.
+		ctrlTagName		= prefix + 'ctrl';
 		devicesTagName 	= prefix + 'devices';
 		deviceTagName 	= prefix + 'device';
 		servicesTagName = prefix + 'services';
 		serviceTagName 	= prefix + 'service';
-		phasesTagName 	= prefix + 'phases';
-		phaseTagName 	= prefix + 'phase' + (prefix === '' ? '-' : ''); //sadly necessary due to the fact that custom element need hyphens.
 		pointerTagName 	= prefix + 'pointer';
 		timerTagName 	= prefix + 'timer';
 		
-		DOMPhase = document.registerElement(phaseTagName, {
-		  prototype: Object.create(HTMLDivElement.prototype),
-		  extends: 'div'
+		document.registerElement(viewTagName, {
+			prototype: Object.create(HTMLDivElement.prototype),
+			extends: 'div'
 		});
 	}
 	
 	this.tabIndex = undefined;
 
 	var app;
-	var currentPhaseName;
 	
 	var viewIDs = {};
+	var ctrlIDs = {}; //we need to treat Ctrl IDs separately as in C we will not have the global DOM search, but rather ID search within <view> root and <ctrl> root
 	
 	this.buildCommon = function(containerDOM, disjunction)
 	{
 		var commonDOM = containerDOM.getElementsByTagName(commonTagName)[0];
-		var commonServicesDOM = commonDOM.getElementsByTagName(servicesTagName)[0];
-	
-		//var commonServiceDOMs = commonServicesDOM.getElementsByTagName(serviceTagName);
 		
+		var commonServicesDOM = commonDOM.getElementsByTagName(servicesTagName)[0];
 		if (commonServicesDOM) //NOT always true
 			this.addServices(commonServicesDOM, disjunction.services);
 			
@@ -55,7 +55,7 @@ Disjunction.Core.Builder = function(apps)
 		if (commonDevicesDOM) //should always be true
 			this.addDevices(commonDevicesDOM, disjunction.devices);
 		else
-			throw "Error: <devices> must be specified, containing at least one <device>.";
+			throw "Error: <"+devicesTagName+"> must be specified, containing at least one <"+deviceTagName+">.";
 			
 		var domPointer = commonDOM.getElementsByTagName(pointerTagName)[0];
 		if (domPointer)
@@ -69,7 +69,6 @@ Disjunction.Core.Builder = function(apps)
 				var xChannelIndexName = domPointer.getAttribute('x');
 				var yChannelIndexName = domPointer.getAttribute('y');
 				var selectChannelIndexName = domPointer.getAttribute('select');
-			
 				
 				var deviceIndex = disjunction.constants[deviceIndexName];
 				var xChannelIndex = disjunction.constants[xChannelIndexName];
@@ -103,8 +102,12 @@ Disjunction.Core.Builder = function(apps)
 	
 	this.buildAll = function(dom, disjunction)
 	{
+		
 		this.buildCommon(dom, disjunction);
 		this.buildApps(dom, disjunction);
+		
+		viewIDs = {};
+		ctrlIDs = {};
 	}
 	
 	this.buildApps = function(containerDOM, disjunction)
@@ -115,70 +118,73 @@ Disjunction.Core.Builder = function(apps)
 		for (var i = 0; i < length; i++)
 		{
 			var appDOM = appDOMs[i];
-			if (appDOM.id === "" || appDOM.className === "") //not a zero-length string
+			if (appDOM.id === "") //not a zero-length string
 			{
-				throw "Error: All <app> elements must have id and class attributes.";
+				throw "Error: All <"+appTagName+"> elements must have an id attribute.";
 			}
 			
 			var app = this.buildApp(appDOM, disjunction);
 			apps[app.id] = app;
 		}
+		
+		app = undefined; //clear member
 	}
 	
 	//build. usage: <body onload="(new Builder()).buildApp(document.getElementById('Tagger'));">
 	this.buildApp = function(appDOM, disjunction)
 	{
+		//app
 		var id = appDOM.id;
-		var className = appDOM.className;
 		app = new Disjunction.Core.App(id, disjunction);
-		app.className = className; //TODO put in constructor
-		
-		var appModelClassName = className+'Model';
-		var AppModelClass = window[appModelClassName];
-		if (AppModelClass)
-		{
-			app.model = new AppModelClass();
-		}
-		/*
-		var domDevices = appDOM.getElementsByTagName(devicesTagName)[0];
-		if (domDevices) //should always be true
-			this.addDevices(domDevices, app.devices);
+
+		//model
+		var domModels = appDOM.getElementsByTagName(modelTagName);
+		var domModel = domModels[0];
+		if (domModels.length != 1)
+			throw "Error: There can be only one <"+modelTagName+"> per <"+appTagName+">.";
 		else
-			throw "Error: <devices> must be specified, containing at least one <device>.";
-		
-		var domPointer = appDOM.getElementsByTagName(pointerTagName)[0];
-		if (domPointer)
-		{
-			if (domPointer.hasAttribute('device') &&
-				domPointer.hasAttribute('x') &&
-				domPointer.hasAttribute('y') &&
-				domPointer.hasAttribute('select'))
-			{
-				var device = domPointer.getAttribute('device');
-				var x = domPointer.getAttribute('x');
-				var y = domPointer.getAttribute('y');
-				var select = domPointer.getAttribute('select');
+			app.model = this.addModel(domModel);
 			
-				app.setPointer(window[device], window[x], window[y], window[select]);
-			}
-			else
-				throw "Error: <pointer> must have attributes 'device', 'x', 'y', 'select'.";
-		}
-		else
-			throw "Error: <pointer> must be specified, referencing at least one device as found in <devices>.";
-		*/
-		
+		//services - after model for injection, but before ctrl / view so may be accessed in constructor
 		var domServices = appDOM.getElementsByTagName(servicesTagName)[0];
 		if (domServices)
-			this.addServices(domServices, app.services);
+			this.addServices(domServices, app.services, app.model);
 
-		var domPhases = appDOM.getElementsByTagName(phasesTagName)[0];
-		if (domPhases)
-			this.addPhases(domPhases);
+		//view
+		var domViewRoots = appDOM.getElementsByTagName(viewTagName);
+		var temp = [];
+		//make sure only one exists at root depth!
+		for (var i = 0 ; i < domViewRoots.length; i++)
+		{
+			var domView = domViewRoots[i];
+			if (domView.parentNode.tagName.toLowerCase() === appTagName)
+				temp.push(domView);
+		}
+		domViewRoots = temp;
+		if (domViewRoots.length != 1)
+			throw "Error: There can be only one root <"+viewTagName+"> per <"+appTagName+">. All <"+viewTagName+">s must be specified under this root.";
 		else
-			throw "Error: <phases> must be specified, containing at least one <phase>.";
-			
-		//special case devices for DOM JS
+			app.view = this.addView(domViewRoots[0], app.model);
+		
+		//ctrl
+		var domCtrlRoots = appDOM.getElementsByTagName(ctrlTagName);
+		var temp = [];
+		//make sure only one exists at root depth!
+		for (var i = 0 ; i < domCtrlRoots.length; i++)
+		{
+			var domCtrl = domCtrlRoots[i];
+			if (domCtrl.parentNode.tagName.toLowerCase() === appTagName)
+				temp.push(domCtrl);
+		}
+		domCtrlRoots = temp;
+		if (domCtrlRoots.length != 1)
+			throw "Error: There can be only one root <"+ctrlTagName+"> per <"+appTagName+">. All other <"+ctrlTagName+">s must be specified under this root.";
+		else
+			app.ctrl = this.addCtrl(domCtrlRoots[0], app.model, app.view);
+		
+		app.ctrl.app = app;
+		
+		//input: special case devices for DOM JS
 		var mouse = disjunction.devices.array[disjunction.constants.DEVICE_MOUSE];
 		var keyboard = disjunction.devices.array[disjunction.constants.DEVICE_KEYBOARD];
 		//TODO should these be specified on body vs. appDOM? they are shared between all apps.
@@ -189,10 +195,8 @@ Disjunction.Core.Builder = function(apps)
 		appDOM.addEventListener('keydown', 		ES5.bind(keyboard, keyboard.receive));
 		appDOM.addEventListener('keyup',		ES5.bind(keyboard, keyboard.receive));
 		
-		app.phaser.change(currentPhaseName);
-		
+		//store / return app
 		apps[app.id] = app;
-		
 		return app;
 	}
 	
@@ -218,10 +222,10 @@ Disjunction.Core.Builder = function(apps)
 	{
 		for (var i = 0; i < containerDOM.children.length; i++)
 		{
-			var element = containerDOM.children[i];
-			if (element.tagName.toLowerCase() === deviceTagName)
+			var dom = containerDOM.children[i];
+			if (dom.tagName.toLowerCase() === deviceTagName)
 			{
-				var className = element.className;
+				var className = dom.className;
 				var Class = Disjunction.Extensions[className];
 				if (Class)
 				{
@@ -230,172 +234,266 @@ Disjunction.Core.Builder = function(apps)
 					
 					disjunction.constants[deviceConstantName] = device;
 					if (disjunction.WINDOW_CONSTANTS)
-						window[deviceConstantName] = device; //TODO make the object on which to put this, optional, via "internalConstantsOn"
+						window[deviceConstantName] = device; //TODO make the object on which to put this, optional by parameter
 				}
 			}
 		}
 	}
 	
-	this.addServices = function(containerDOM, services)//, parentDomRect)
+	this.addServices = function(containerDOM, services, model)//, parentDomRect)
 	{
 		for (var i = 0; i < containerDOM.children.length; i++)
 		{
-			var element = containerDOM.children[i];
-			if (element.tagName.toLowerCase() === serviceTagName)
+			var dom = containerDOM.children[i];
+			if (dom.tagName.toLowerCase() === serviceTagName)
 			{
-				var shortServiceName = element.className;
-				var longServiceName = element.className + 'Service';
-				var Class = window[longServiceName];
+				var shortServiceName = dom.className;
+				var longServiceName = dom.className + 'Service';
+				var Class = window[longServiceName]; //TODO make the object on which to put this, optional by parameter
 				if (Class)
 				{
 					var serviceConstantName = 'SERVICE_'+shortServiceName.toUpperCase();
 					var service = services.add(new Class());
 					
+					//set model
+					if (dom.hasAttribute('model'))
+					{
+						var pathJoined = dom.getAttribute('model');
+						service.model = this.getModelFromPathString(model, pathJoined);
+					}
+					
 					disjunction.constants[serviceConstantName] = service;
 					if (disjunction.WINDOW_CONSTANTS)
-						window[serviceConstantName] = service; //TODO make the object on which to put this, optional, via "internalConstantsOn"
+						window[serviceConstantName] = service; //TODO make the object on which to put this, optional by parameter
 				}	
 			}
 		}
 	}
 	
-	//construct View tree (roughly) by DOM layout - do not include anything that does not have a classname
-	this.addChildViews = function(view, element)//, parentDomRect)
+	this.addModel = function(dom)
 	{
-		for (var a = 0; a < element.children.length; a++)
-		{
-			var childElement = element.children[a];
-			var id = childElement.id;
-			id = id.length > 0 ? id : undefined;
-			
-			if (id) //if item is not anonymous / has valid id
+		var model;
+		var classNamesJoined = dom.className;
+		if (classNamesJoined.length > 0)
+		{		
+			var classNames = classNamesJoined.split(' ');
+			var className = classNames[0];
+			className += 'Model';
+			var Class = window[className];
+			if (Class)
 			{
-				//TODO this should be controlled on a Phase-by-Phase or more likely App basis -- anytime we add a View, something should check that the ID / name is unique.
-				if (viewIDs.hasOwnProperty(id))
-				{
-					throw "Multiple Views may not have the same name / ID. '"+id+"' already exists.";
-				}
-				else
-				{
-					viewIDs[id] = true; //set id as used
-				}
+				model = new Class();
 			}
-			
-			var classNamesJoined = childElement.className;
-			
-			var childView;
-			if (classNamesJoined.length > 0)
-			{
-				var classNames = classNamesJoined.split(' ');
-				var className = classNames[0];//[b];
-				
-				var Class = window[className+'View'];
-				if (Class)
-				{
-					childView = new Class();
-					childView.dom = childElement;
-					childView.id = id;
-					childView.phase = view.phase;
-					view.addChild(childView);
-					this.prepareElement(childElement, childView);
-				}
-			}
-			
-			/*
-			var domRect = childElement.getBoundingClientRect();
-			
-			childView.bounds = new Disjunction.Extensions.Box2();
-			childView.bounds.x0 = Math.floor(domRect.left - parentDomRect.left);
-			childView.bounds.y0 = Math.floor(domRect.top - parentDomRect.top);
-			childView.bounds.setWidth(domRect.width);
-			childView.bounds.setHeight(domRect.height);
-			*/
-			//recurse
-			if (childElement.children.length > 0)
-				this.addChildViews(childView ? childView : view, childElement);//, domRect); //conditional will skip DOM tree levels that don't have a related View
-			else
-				this.prepareElement(childElement, view);
-			//else	
-			//	childView.makeLeaf(); //if no DOM children, set View children array undefined
-			
 		}
+		
+		return model;
 	}
 	
-	//TODO allow use of <phase> elements containing a single <div> which then becomes the Phase.view.dom.
-	//It's either that or <view-div> in <phase> which seems pointless... the idea of <view> element in the DOM(!) is a non sequitur.
-	this.addPhases = function(containerDOM)
+	this.addCtrl = function(dom, model, view)
 	{
-		//validate - JS only
-		var elements = containerDOM.getElementsByTagName('phase');
-		if (elements.length)
-			throw "Error: In DOM JS, use <"+phaseTagName+"> rather than <phase>.";
-	
-		for (var a = 0; a < containerDOM.children.length; a++)
-		{
-			var element = containerDOM.children[a];
-			if (element.tagName.toLowerCase() === phaseTagName)
+		//console.log('model', model);
+		var ctrl;
+		
+		var classNamesJoined = dom.className;
+		if (classNamesJoined.length > 0)
+		{		
+			var classNames = classNamesJoined.split(' ');
+			var className = classNames[0];
+			var classNameShort = className;
+			var firstChar = className[0];
+			
+			if (isNaN(firstChar)) //if first character is a letter...
 			{
-				//assume phase
-				this.tabIndex = 0;
-				
-				var classNamesJoined = element.className;
-				if (classNamesJoined.length > 0)
+				if (firstChar === firstChar.toUpperCase()) //and it's uppercase...
 				{
-					var classNames = classNamesJoined.split(' ');
-				
-					//first classname for use as the phase name 
-					var className = classNames[0];
-					var model, view, ctrl;
-				
-					var ModelClass = window[className+'Model'];
-					if (ModelClass)
-						model = new ModelClass();
-						
-					var ViewClass = window[className+'View'];
-					if (ViewClass)
-						view = new ViewClass(app, model);
-						
-					var CtrlClass = window[className+'Ctrl'];
-					if (CtrlClass)
-						ctrl = new CtrlClass(app, model);
-
-					
-					
-					this.prepareElement(element, view);
-
-					//console.log(className);
-					view.dom = element;
-					var domRect = element.getBoundingClientRect();
-					view.bounds.x0 = Math.floor(domRect.left);
-					view.bounds.y0 = Math.floor(domRect.top);
-					view.bounds.setWidth(domRect.width);
-					view.bounds.setHeight(domRect.height);
-					
-					var shortPhaseName = className.replace('Phase','');
-					var phase = new Disjunction.Core.Phase(shortPhaseName, model, view, ctrl);
-					app.phaser.add(phase);
-					if (element.children.length > 0)
-						this.addChildViews(view, element, domRect);
-					//else	
-					//	view.makeLeaf(); //if no DOM children, set View children array undefined
-
-					if (element.current || element.hasAttribute('current')) //WARNING: this could break if there ever emerge a standard property on elements called "current" which is truthy by default
+					//...it's a classname
+					className += 'Ctrl';
+					var Class = window[className]; //TODO make object where this is found, optional.
+					if (Class)
 					{
-						currentPhaseName = className;
+						ctrl = new Class(app);
+						dom.ctrl = ctrl; //useful for debugging, mirrors View approach
+						ctrl.className = classNameShort;
+						ctrl.model = model; //by default, set to what was passed in; elaborate (below) if necessary
+						
+						//set model
+						if (dom.hasAttribute('model'))
+						{
+							var pathJoined = dom.getAttribute('model');
+							ctrl.model = this.getModelFromPathString(ctrl.model, pathJoined);
+						}
+						
+						//set view
+						if (dom.hasAttribute('view'))
+						{
+							var pathJoined = dom.getAttribute('view');
+							ctrl.view = this.getViewFromPathString(ctrl.view, pathJoined);
+							
+							//TODO inheritance of view/model from parent ctrl
+						}
+						
+						//recurse children
+						for (var a = 0; a < dom.children.length; a++)
+						{
+							var childDOM = dom.children[a];
+							var childCtrl = this.addCtrl(childDOM, ctrl.model);
+							if (childCtrl)
+								ctrl.addChild(childCtrl);
+							//console.log(childDOM);
+							//TODO inheritance of view/model from parent ctrl
+						}
 					}
 				}
 			}
 		}
+		
+		if (!ctrl)
+			throw "Error: Cannot find class '"+className+"'.";
+		
+		return ctrl;
 	}
 	
-	this.prepareElement = function(element, view)
+	/**
+	 * Creates a View hierarchy. If certain elements do not have a class with which to instantiate a View, they will be skipped;
+	 * however their descendants will still be processed and will set the last ancestral View as their parent.
+	 * @return The {Disjunction.Core.View} if one was added; otherwise undefined.
+	 */
+	this.addView = function(dom, model)
 	{
-		element.view = view; // bind the view
-		element.onfocus = function()
-		{
-			this.view.focus();
+		var view;
+	
+		var classNamesJoined = dom.className;
+		if (classNamesJoined.length > 0)
+		{		
+			var classNames = classNamesJoined.split(' ');
+			var className = classNames[0];
+			var firstChar = className[0];
+			
+			if (isNaN(firstChar)) //if first character is a letter...
+			{
+				if (firstChar === firstChar.toUpperCase()) //and it's uppercase...
+				{
+					//...it's a classname
+					className += 'View';
+					var Class = window[className]; //TODO make object where this is found, optional.
+					if (Class)
+					{
+						view = new Class(app);
+						view.model = model; //by default, set to what was passed in; elaborate (below) if necessary
+						
+						//set model
+						if (dom.hasAttribute('model'))
+						{
+							var pathJoined = dom.getAttribute('model');
+							view.model = this.getModelFromPathString(view.model, pathJoined);
+						}
+						console.log(view, view.model);
+
+						//any DOM element with a View attached, needs this
+						dom.onfocus = function()
+						{
+							this.view.focus();
+						}
+						//dom.onblur = function()
+						//{this.view.wasFocused = this.view.isFocused;
+						//this.view.isFocused = false;};
+					}
+					else
+						throw "Error: Cannot find class '"+className+"'.";
+				}
+			}
 		}
-		//element.onblur = function() {this.view.wasFocused = this.view.isFocused; this.view.isFocused = false;};
+		
+		if (!view)
+		{
+			view = new Disjunction.Core.NullView(); //null / flyweight
+		}
+		
+		//view.id = id;
+		view.dom = dom;
+		dom.view = view;
+		
+		//recurse children
+		for (var a = 0; a < dom.children.length; a++)
+		{
+			var childDOM = dom.children[a];
+			var childView = this.addView(childDOM, view.model);
+			view.addChild(childView);
+			
+			//TODO inheritance from parent view
+		}
+		
+
+		return view;
+	}
+	
+	this.getModelFromPathString = function(model, pathJoined)
+	{
+		var path = pathJoined.split('.');
+		if (path[0] === "") path.shift();
+		if (path[path.length-1] === "") path.pop();
+		//console.log(path);
+		var pathIncremental = "model";
+		//walk down the model tree to the appropriate property
+		while (path.length > 0)
+		{
+			var property = path.shift();
+			//console.log(model, pathIncremental);
+			if (model.hasOwnProperty(property))
+			{
+				model = model[property];
+				pathIncremental += '.' + property;
+			}
+			else
+				throw "Error: "+pathIncremental+" does not have property '"+property+"'.";
+		}
+		//console.log(model);
+		return model;
+	}
+	
+	//TODO access from either an array in the attribute, or a series of <viewref>s in each <ctrl>.
+	//TODO possibly remove altogether.
+	this.getViewFromPathString = function(view, pathJoined)
+	{
+		console.log(view);
+	
+		var path = pathJoined.split('.');
+		if (path[0] === "") path.shift();
+		var pathIncremental = "view";
+		//walk down the view tree to the appropriate property
+		
+		while (path.length > 0)
+		{
+			var section = path.shift();
+			var className;
+			var index;
+			
+			var elements = section.split('[');
+			if (elements.length > 1) //there were indexing brackets
+			{
+				className = elements[0];
+				
+				index = parseInt(elements[1].split(']')[0]); //just keep the number
+				if (isNaN(index))
+					throw "Error: A numeric index must appear between square brackets.";
+			}
+			else
+			{
+				className = section;
+				index = 0;
+			}
+			
+			var childrenByClassName = view.getChildrenByClassName(className);
+			
+			if (!childrenByClassName)
+				throw "Error: "+pathIncremental+" does not have children with class name '"+className+"'.";
+			else
+				view = childrenByClassName[index];
+			
+			pathIncremental += '.' + section;
+		}
+		
+		return view;
 	}
 };
 if (disjunction.WINDOW_CLASSES) 
