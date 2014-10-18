@@ -1,4 +1,4 @@
-Service = function()
+Disjunction.Core.Service = function()
 {
 	Disjunction.Core.JournalKeeper.call(this);
 	
@@ -8,5 +8,8 @@ Service = function()
 	}
 }
 
-Service.prototype = Object.create(Disjunction.Core.JournalKeeper.prototype);
-Service.prototype.constructor = Service;
+Disjunction.Core.Service.prototype = Object.create(Disjunction.Core.JournalKeeper.prototype);
+Disjunction.Core.Service.prototype.constructor = Disjunction.Core.Service;
+
+if (disjunction.WINDOW_CLASSES) 
+	window.Service = Disjunction.Core.Service;

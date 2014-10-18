@@ -4,7 +4,7 @@ Disjunction.Core.View = function(app)
 
 	this.enabled = true; //used by timing mechanism to know whether to update or not
 	this.parent = undefined;
-	this.children = []; //in draw order!
+	this.children = []; //Does NOT represent draw order unless user renderer specifically does so.
 	//this.childrenByName = {}; //should be private
 	this.childrenByClassName = {}; //should be private
 	this.root = undefined; //TODO remove?
@@ -95,7 +95,9 @@ Disjunction.Core.View = function(app)
 		this.outputPost(deltaSec);
 	}
 	
-	//only focus must be able to change order!
+	//TODO Remove this. Remember that DOM render order works on zIndex. The below is an immediate-mode rendering solution. We cannot assume either in generalised framework code.
+	//NB http://philipwalton.com/articles/what-no-one-told-you-about-z-index/ ... there is no simple way to manage global DOM depths, and it's safer to leave this within the domain of user code.
+	/*
 	this.bringToFore = function(child)
 	{
 		var index = this.children.indexOf(child);
@@ -106,6 +108,7 @@ Disjunction.Core.View = function(app)
 			children[j] = temp;
 		}
 	}
+	*/
 	
 	this.isRoot = function() //final
 	{
@@ -134,9 +137,11 @@ Disjunction.Core.View = function(app)
 		childView.parent = this;
 		childView.root = this.root;
 		childView.app = this.app;
-		childView.model = this.model;
+		//childView.model = this.model;
 	}
+	
 	/*
+	//since Views are typically only added at compile/build time, and may be enabled / disabled, we don't need to remove any.
 	this.removeChild = function(childView) //final
 	{
 		this.children.push(childView);
