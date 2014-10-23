@@ -1,6 +1,6 @@
-Disjunction.Core.NullView = function()
+Disjunction.Core.NullView = function(app, model)
 {
-	Disjunction.Core.View.call(this); //extend base framework class
+	Disjunction.Core.View.call(this, app, model); //extend base framework class
 	
 	this.bounds = new Box2();
 	
