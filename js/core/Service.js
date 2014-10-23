@@ -1,6 +1,8 @@
-Disjunction.Core.Service = function()
+Disjunction.Core.Service = function(model)
 {
 	Disjunction.Core.JournalKeeper.call(this);
+	
+	this.model = model;
 	
 	this.dispose = function()
 	{

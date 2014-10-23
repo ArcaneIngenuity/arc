@@ -7,11 +7,14 @@ Disjunction.Core.ServiceHub = function()
 		return this.array[i];
 	}
 	
+	/**
+	 *	Add the Service to this hub.
+	 *	@return The newly-allocated index of the Service.
+	 */
 	this.add = function(service)
 	{
 		var array = this.array;
 		array.push(service);
-		
 		return array.length - 1;
 	}
 	

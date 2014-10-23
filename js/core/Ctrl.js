@@ -1,7 +1,7 @@
-Disjunction.Core.Ctrl = function(app)
+Disjunction.Core.Ctrl = function(app, model)
 {
 	this.app = app;
-	this.model = undefined;
+	this.model = model;
 	
 	this.parent = undefined;
 	this.children = []; //processing order, if not accessed individually by ids

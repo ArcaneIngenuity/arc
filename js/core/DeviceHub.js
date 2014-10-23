@@ -38,13 +38,15 @@ Disjunction.Core.DeviceHub = function(dom)
 		}
 	}
 	
-	//add device as reader and let function create the associate map in a single exclusive array. (This makes passing the map array alone, to the View hierarchy, simpler.)
-	//return the newly assigned index.
+	/**
+	 *	Add the Device to this hub.
+	 *	@return The newly-allocated index of the Device.
+	 */
 	this.add = function(device)
 	{
-		this.array.push(device);
-		
-		return this.array.length - 1;
+		var array = this.array;
+		array.push(device);
+		return array.length - 1;
 	}
 	
 	this.dispose = function()

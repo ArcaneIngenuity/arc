@@ -207,7 +207,7 @@ Disjunction.Core.Builder = function(apps, options)
 		if (domCtrlRoots.length != 1)
 			throw "Error: There can be only one root <"+ctrlTagName+"> per <"+appTagName+">. All other <"+ctrlTagName+">s must be specified under this root.";
 		else
-			app.ctrl = this.addCtrl(domCtrlRoots[0], app.model, app.view);
+			app.ctrl = this.addCtrl(domCtrlRoots[0], app.model);//, app.view);
 		
 		app.ctrl.app = app;
 		
@@ -268,32 +268,51 @@ Disjunction.Core.Builder = function(apps, options)
 		}
 	}
 	
-	this.addServices = function(containerDOM, services, model)//, parentDomRect)
+	this.addServices = function(domContainer, services, model)
 	{
-		for (var i = 0; i < containerDOM.children.length; i++)
+		for (var i = 0; i < domContainer.children.length; i++)
 		{
-			var dom = containerDOM.children[i];
-			if (dom.tagName.toLowerCase() === serviceTagName)
+			var dom = domContainer.children[i];
+			this.addService(dom, services, model);
+		}
+	}
+	
+	this.addService = function(dom, services, model)//, parentDomRect)
+	{
+		//get model
+		if (dom.hasAttribute('model'))
+		{
+			var pathJoined = dom.getAttribute('model');
+			model = this.getModelFromPathString(model, pathJoined);
+			console.log(service, model);
+		}
+		
+		var service;
+		var className;
+		
+		if (dom.tagName.toLowerCase() === serviceTagName)
+		{
+			var shortServiceName = dom.className;
+			var longServiceName = dom.className + 'Service';
+			className = longServiceName;
+			var Class = appClassContext[longServiceName]; //TODO make the object on which to put this, optional by parameter
+			if (Class)
 			{
-				var shortServiceName = dom.className;
-				var longServiceName = dom.className + 'Service';
-				var Class = appClassContext[longServiceName]; //TODO make the object on which to put this, optional by parameter
-				if (Class)
-				{
-					var serviceConstantName = 'SERVICE_'+shortServiceName.toUpperCase();
-					var service = services.add(new Class());
-					
-					//set model
-					if (dom.hasAttribute('model'))
-					{
-						var pathJoined = dom.getAttribute('model');
-						service.model = this.getModelFromPathString(model, pathJoined);
-					}
-					
-					appConstantsContext[serviceConstantName] = service;
-				}	
+				//construct service
+				var serviceConstantName = 'SERVICE_'+shortServiceName.toUpperCase();
+				service = new Class(model);
+				service.className = shortServiceName;
+				serviceIndex = services.add(service);
+				
+				console.log(service);
+				
+				//assign by constant identifier
+				appConstantsContext[serviceConstantName] = serviceIndex;
 			}
 		}
+		
+		if (!service)
+			throw "Error: Cannot find class '"+className+"'.";
 	}
 	
 	this.addModel = function(dom)
@@ -305,7 +324,6 @@ Disjunction.Core.Builder = function(apps, options)
 			var classNames = classNamesJoined.split(' ');
 			var className = options.modelPrefix + classNames[0] + options.modelSuffix;
 			var Class = appClassContext[className];
-			console.log('/#/#/#/',Class);
 			if (Class)
 			{
 				model = new Class();
@@ -315,9 +333,15 @@ Disjunction.Core.Builder = function(apps, options)
 		return model;
 	}
 	
-	this.addCtrl = function(dom, model, view)
+	this.addCtrl = function(dom, model)//, view)
 	{
-		//console.log('model', model);
+		//get model
+		if (dom.hasAttribute('model'))
+		{
+			var pathJoined = dom.getAttribute('model');
+			model = this.getModelFromPathString(model, pathJoined);
+		}
+						
 		var ctrl;
 		
 		var classNamesJoined = dom.className;
@@ -336,18 +360,16 @@ Disjunction.Core.Builder = function(apps, options)
 					var Class = appClassContext[className]; //TODO make object where this is found, optional.
 					if (Class)
 					{
-						ctrl = new Class(app);
+
+
+					
+						//construct ctrl
+						ctrl = new Class(app, model);
 						dom.ctrl = ctrl; //useful for debugging, mirrors View approach
 						ctrl.className = classNameShort;
 						ctrl.model = model; //by default, set to what was passed in; elaborate (below) if necessary
 						
-						//set model
-						if (dom.hasAttribute('model'))
-						{
-							var pathJoined = dom.getAttribute('model');
-							ctrl.model = this.getModelFromPathString(ctrl.model, pathJoined);
-						}
-						console.log(ctrl, ' model is', ctrl.model);
+						/*
 						//set view
 						if (dom.hasAttribute('view'))
 						{
@@ -356,6 +378,7 @@ Disjunction.Core.Builder = function(apps, options)
 							
 							//TODO inheritance of view/model from parent ctrl
 						}
+						*/
 						
 						//recurse children
 						for (var a = 0; a < dom.children.length; a++)
@@ -385,6 +408,14 @@ Disjunction.Core.Builder = function(apps, options)
 	 */
 	this.addView = function(dom, model)
 	{
+		//get model
+		if (dom.hasAttribute('model'))
+		{
+			//console.log(dom, dom.getAttribute('model'));
+			var pathJoined = dom.getAttribute('model');
+			model = this.getModelFromPathString(model, pathJoined);
+		}
+		
 		var view;
 	
 		var classNamesJoined = dom.className;
@@ -402,7 +433,7 @@ Disjunction.Core.Builder = function(apps, options)
 					var Class = appClassContext[className]; //TODO make object where this is found, optional.
 					if (Class)
 					{
-						view = new Class(app);
+						view = new Class(app, model);
 
 						//any DOM element with a legitimate View attached, needs this
 						dom.onfocus = function()
@@ -421,23 +452,12 @@ Disjunction.Core.Builder = function(apps, options)
 		
 		if (!view)
 		{
-			view = new Disjunction.Core.NullView(app); //null / flyweight
+			view = new Disjunction.Core.NullView(app, model); //null / flyweight
 		}
 
 		view.dom = dom;
 		dom.view = view;
-		
-		//set model
-		
-		if (dom.hasAttribute('model'))
-		{
-			//console.log(dom, dom.getAttribute('model'));
-			var pathJoined = dom.getAttribute('model');
-			view.model = this.getModelFromPathString(model, pathJoined);
-		}
-		else
-			view.model = model; //by default, set to what was passed in
-		
+		//view.model = model; //by default, set to what was passed into this function
 		//console.log('model for ',dom,' is', view.model);
 		//view.id = id;
 		
