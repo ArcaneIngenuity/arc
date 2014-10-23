@@ -14,22 +14,22 @@ Selector = function(array, journal)
 	
 	this.start = function()
 	{
-		return this.selectByIndex(0);
+		return this.select(0);
 	}
 	
 	this.end = function()
 	{
-		return this.selectByIndex(this.array.length - 1);
+		return this.select(this.array.length - 1);
 	}
 	
 	this.last = function()
 	{
-		return this.selectByIndex(this.journal.last());
+		return this.select(this.journal.last());
 	}
 	
 	this.current = function()
 	{
-		return this.selectByIndex(this.journal.current());
+		return this.select(this.journal.current());
 	}
 	
 	this.setArray = function(value)
