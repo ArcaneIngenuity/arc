@@ -8,8 +8,7 @@ Selector = function(array, journal)
 	
 	this.invalidate = function()
 	{
-		this.journal.indexLast = this.journal.index;
-		index = -1;
+		this.journal.index.update(-1);
 	}
 	
 	this.start = function()

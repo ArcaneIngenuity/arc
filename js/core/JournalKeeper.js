@@ -9,11 +9,7 @@ Disjunction.Core.JournalKeeper = function()
 		for (var i = 0; i < length; i++)
 		{
 			var journal = journals[i];
-			
-			//NB strictly there should only be regulated journals herein. TODO make an addJournal method which only adds journals with regulate==true to this keeper's list; use this in Builder.
-			if (!journal.locked) //give kept journal a tick if it hasn't had one done in user code
-				journal.postUpdate();
-				
+			journal.copy();
 			journal.unlock();
 		}
 	}

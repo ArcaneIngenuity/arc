@@ -14,8 +14,8 @@ Disjunction.Core.Pointer = function() //ABSTRACT / INTERFACE
 	this.targetLast = undefined;
 	this.targetSelected = undefined;
 	this.targetReleased = undefined;
-	this.positionInTarget;// = new Point2(); //local position of pointer within pointed element
-	this.position = new Disjunction.Core.Point2(); //world position of pointer within pointed element
+	this.positionInTarget;// = new Point2(); //local position of pointer within pointed element //TODO rename to positionLocal
+	this.position = new Disjunction.Core.Point2(); //world position of pointer within pointed element //TODO rename to positionWorld
 	this.entered = undefined;
 	this.exited = undefined;
 	

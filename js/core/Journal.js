@@ -17,21 +17,20 @@ Disjunction.Core.Journal = function(length, regulate)
 };
 Disjunction.Core.Journal.prototype = new Array;
 
+/**
+ *	Update the Journal's current value.
+ */
 Disjunction.Core.Journal.prototype.update = function(value)
 {
 	if (this.locked)
 		throw "Error: Journals set to lockOnUpdate may only be updated once before locks clear (on App.update()).";
 	else
 		if (this.regulate)
+		{
+			if (this.name === 'load') console.log('?');
 			this.locked = true;
-
-	var length = this.length;
-	
-	//set all later values by shifting forward
-	for (var i = 1; i < length - 1; i++)
-	{
-		this[i+1] = this[i];
-	}
+		}
+		
 	this[0] = value;
 }
 
@@ -41,17 +40,16 @@ Disjunction.Core.Journal.prototype.unlock = function() //framework use only!
 }
 
 /**
- *	Set the Journal's older values.
+ *	Update the Journal's non-current values.
  */
-Disjunction.Core.Journal.prototype.postUpdate = function()
+Disjunction.Core.Journal.prototype.copy = function()
 {
 	var length = this.length;
-	//console.log('jl', length);
+	
 	//set all later values by shifting forward
 	for (var i = 0; i < length - 1; i++)
 	{
 		this[i+1] = this[i];
-		//console.log('i', this[i+1], this[i]);
 	}
 }
 
@@ -77,7 +75,7 @@ Disjunction.Core.Journal.prototype.setAll = function(value)
  */
 Disjunction.Core.Journal.prototype.changed = function()
 {
-	return this[0] != this[1];
+	return this[0] !== this[1];
 }
 
 /**
@@ -87,7 +85,7 @@ Disjunction.Core.Journal.prototype.changedBetween = function(i, j)
 {
 	if (j === undefined)
 		j = i + 1; //we will check against the immediately preceding value
-	return this[i] != this[j];
+	return this[i] !== this[j];
 }
 
 /**
