@@ -60,15 +60,19 @@ Disjunction.Core.App = function(id, disjunction) //final
 		
 		if (model)
 		{
-			model.regulateJournals();
+			model.progressJournals();
 		}
 		
-		var services = this.services;
-		for (var i = 0; i < services.array.length; i++)
-		{
-			var service = services.array[i];
-			service.regulateJournals();
-		}
+        var services = this.services;
+        for (var i = 0; i < services.array.length; i++)
+        {
+            var service = services.array[i];
+			for (var j = 0; j < service.models.length; j++)
+			{
+				var serviceModel = service.models[j];
+				serviceModel.progressJournals();
+			}
+        }
 		
 		//console.log('------B');
 	}

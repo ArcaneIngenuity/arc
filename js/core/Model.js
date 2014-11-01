@@ -1,20 +1,32 @@
 Disjunction.Core.Model = function()
 {
-	Disjunction.Core.JournalKeeper.call(this); 
+	this.journals = []; //array of arrays TODO array of Journal (inheriting from Array for faster internal access) to support offsets into an existing, large (typed) array
+
+	this.progressJournals = function()
+	{
+		var journals = this.journals;
+		var length = journals.length;
+		for (var i = 0; i < length; i++)
+		{
+			var journal = journals[i];
+			
+			//journal.shiftStates();
+			//journal.shiftDeltas();
+			journal.shiftEntries(); //allows combining of state and delta shift loops for fewer conditionals
+			journal.unlock();
+		}
+	}
+	
+	//Abstract methods
 	
 	this.serialise = this.serialize = function()
 	{
-		//ABSTRACT
 	}
 	
 	this.deserialise = this.deserialize = function(serialised)
 	{
-		//ABSTRACT
 	}
 };
-
-Disjunction.Core.Model.prototype = Object.create(Disjunction.Core.JournalKeeper.prototype);
-Disjunction.Core.Model.prototype.constructor = Disjunction.Core.Model;
 
 if (disjunction.WINDOW_CLASSES) 
 	window.Model = Disjunction.Core.Model;

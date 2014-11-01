@@ -1,17 +1,14 @@
 Disjunction.Core.Service = function(model)
 {
-	Disjunction.Core.JournalKeeper.call(this);
-	
 	this.model = model;
+	
+	this.models = []; /** Models belonging exclusively to this Service, to allow for their Journals to be updated. DO NOT add the injected model to this or it will be updated twice! */
 	
 	this.dispose = function()
 	{
 		//ABSTRACT
 	}
 }
-
-Disjunction.Core.Service.prototype = Object.create(Disjunction.Core.JournalKeeper.prototype);
-Disjunction.Core.Service.prototype.constructor = Disjunction.Core.Service;
 
 if (disjunction.WINDOW_CLASSES) 
 	window.Service = Disjunction.Core.Service;

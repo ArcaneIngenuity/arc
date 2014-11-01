@@ -1,106 +1,218 @@
-//TODO as constructor length doesn't work, consider benefit of alternative approach for Journals http://www.bennadel.com/blog/2292-extending-javascript-arrays-while-keeping-native-bracket-notation-functionality.htm 
-Disjunction.Core.Journal = function(length, regulate)
+/**
+ *	@const @function @constructs Disjunction.Core.Journal
+ *	@param {Array} states The states array.
+ *	@param {Array} deltas The deltas array.
+ */
+Disjunction.Core.Journal = function(states, deltas)
 {
-	this.regulate = regulate;
-	this.locked = false;
+	this.states = states;
+	this.deltas = deltas;
 	
-	if (!length)
-		length = 2;
-		
-	Array.call(this, length); //doesn't work for setting length
-	
-	//HACK for length
-	for (var i = 0; i < length; i++)
-	{
-		this.push(null);
-	}
+	this.stateLocked = false;
+	this.deltaLocked = false;
 };
-Disjunction.Core.Journal.prototype = new Array;
 
 /**
- *	Update the Journal's current value.
+ *	Unlock the Journal.
+ *	@const @function
  */
-Disjunction.Core.Journal.prototype.update = function(value)
-{
-	if (this.locked)
-		throw "Error: Journals set to lockOnUpdate may only be updated once before locks clear (on App.update()).";
-	else
-		if (this.regulate)
-		{
-			if (this.name === 'load') console.log('?');
-			this.locked = true;
-		}
-		
-	this[0] = value;
-}
-
 Disjunction.Core.Journal.prototype.unlock = function() //framework use only!
 {
-	this.locked = false;
+	this.stateLocked = this.deltaLocked = false;
+}
+
+//TODO use accessors once they get a boost in performance http://jsperf.com/defineproperties-vs-prototype, https://bugzilla.mozilla.org/show_bug.cgi?id=772334
+
+/**
+ *	Get the current state.
+ *  @const @function
+ */
+Disjunction.Core.Journal.prototype.state = function()
+{
+	var states = this.states;
+	return states[0];
 }
 
 /**
- *	Update the Journal's non-current values.
+ *	Get the current delta.
+ *	@const @function
  */
-Disjunction.Core.Journal.prototype.copy = function()
+Disjunction.Core.Journal.prototype.delta = function()
 {
-	var length = this.length;
-	
-	//set all later values by shifting forward
-	for (var i = 0; i < length - 1; i++)
-	{
-		this[i+1] = this[i];
-	}
+	var deltas = this.deltas;
+	return deltas[0];
 }
 
 /**
- *	Set the Journal's current value.
+ *	Get the last state.
+ *	@const @function
  */
-Disjunction.Core.Journal.prototype.set = function(value)
+Disjunction.Core.Journal.prototype.stateLast = function()
 {
-	this[0] = value;
+	var states = this.states;
+	return states[1];
 }
 
 /**
- *	Set all the Journal's values.
+ *	Get the last delta.
+ *	@const @function
  */
-Disjunction.Core.Journal.prototype.setAll = function(value)
+Disjunction.Core.Journal.prototype.deltaLast = function()
 {
-	for (var i = 0; i < length; i++)
-		this[i] = value;
+	var deltas = this.deltas;
+	return deltas[1];
+}
+
+/**
+ *	Get the state at the specified index.
+ *	@const @function
+ *	@param {Number} index The index into the states array.
+ *	@returns {*} The specified state.
+ */
+Disjunction.Core.Journal.prototype.stateAt = function(index)
+{
+	var states = this.states;
+	return states[index];
+}
+
+/**
+ *	Get the delta at the specified index.
+ *	@const @function
+ *	@param {Number} index The index into the deltas array.
+ *	@returns {*} The specified delta.
+ */
+Disjunction.Core.Journal.prototype.deltaAt = function(index)
+{
+	var deltas = this.deltas;
+	return deltas[index];
+}
+
+/**
+ *	Set a state.
+ *	@const @function
+ *	@param {*} value The value to set as current.
+ *	@param {Number} [index=0] The index to set to the specified value.
+ */
+Disjunction.Core.Journal.prototype.setState = function(value, index)
+{
+	if (this.stateLocked)
+		throw "Error: Journals set to lockOnUpdate may only be updated once before locks clear (on App.update()).";
+	else
+		this.stateLocked = true;
+
+	index = index || 0;
+	var states = this.states;
+	states[index] = value;
+}
+
+/**
+ *	Set a delta.
+ *	@const @function
+ *	@param {*} value The value to set as current.
+ *	@param {Number} [index=0] The index to set to the specified value.
+ */
+Disjunction.Core.Journal.prototype.setDelta = function(value, index)
+{
+	if (this.deltaLocked)
+		throw "Error: Journals set to lockOnUpdate may only be updated once before locks clear (on App.update()).";
+	else
+		this.deltaLocked = true;
+
+	index = index || 0;
+	var deltas = this.deltas;
+	deltas[index] = value;
+}
+
+/**
+ *	Set all the Journal's states.
+ *	@const @function
+ *	@param {Number} [index=0] value The value to set all elements to.
+ */
+Disjunction.Core.Journal.prototype.setStates = function(value)
+{
+	var states = this.states;
+	for (var i = 0; i < states.length; i++)
+		states[i] = value;
+}
+
+/**
+ *	Set all the Journal's deltas.
+ *	@const @function
+ *	@param {*} value The value to set all elements to.
+ */
+Disjunction.Core.Journal.prototype.setDeltas = function(value)
+{
+	var deltas = this.deltas;
+	for (var i = 0; i < deltas.length; i++)
+		deltas[i] = value;
 }
 
 /**
  *	Check whether the Journal has changed between current value and most recent historical value.
+ *	@const @function
  */
-Disjunction.Core.Journal.prototype.changed = function()
+Disjunction.Core.Journal.prototype.justChangedState = function()
 {
-	return this[0] !== this[1];
+	return this.changedState(0, 1);
 }
 
 /**
- *	Check whether the Journal has changed between two designated indices.
+ *	Update the Journal's non-current values.
+ *	@const @function
  */
-Disjunction.Core.Journal.prototype.changedBetween = function(i, j)
+Disjunction.Core.Journal.prototype.shiftEntries = function()
 {
-	if (j === undefined)
-		j = i + 1; //we will check against the immediately preceding value
-	return this[i] !== this[j];
+	var length = this.length;
+	
+	//TODO one loop would work here if the two arrays were known to be of equal length... could this be made an option?
+	
+	//set all later values by shifting forward
+	var states = this.states;
+	for (var i = 0; i < states.length - 1; i++)
+	{
+		this.shiftState(i+1, i);
+	}
+	
+	//set all later values by shifting forward
+	var deltas = this.deltas;
+	for (var i = 0; i < deltas.length - 1; i++)
+	{
+		this.shiftDelta(i+1, i);
+	}
 }
+
+//VIRTUAL / OVERRIDABLE
+//TODO have default implementations in separate files
 
 /**
- *	Get the current value.
+ *	Copy array elements in the appropriate manner for "shifting" the Journal. Override to change the way copying is performed.
+ *	@abstract @function
+ *	@param {Number} from The index from which to shift.
+ *	@param {Number} to The index to which to shift.
  */
-Disjunction.Core.Journal.prototype.current = function()
-{
-	return this[0];
-}
+Disjunction.Core.Journal.prototype.shiftState = function(from, to){}
 
 /**
- *	Get the last value.
+ *	Copy array elements in the appropriate manner for "shifting" the Journal. Override to change the way copying is performed.
+ *	@abstract @function
+ *	@param {Number} from The index from which to shift.
+ *	@param {Number} to The index to which to shift.
  */
-Disjunction.Core.Journal.prototype.last = function()
-{
-	return this[1];
-}
+Disjunction.Core.Journal.prototype.shiftDelta = function(from, to){}
 
+/**
+ *	Check whether the Journal has changed between two designated indices.  Override to change the way equality checking is performed.
+ *	@abstract @function
+ *	@param {Number} from The index from which to shift.
+ *	@param {Number} to The index to which to shift.
+ */
+Disjunction.Core.Journal.prototype.changedState = function(from, to){}
+
+/**
+ *	Use state to derive deltas, or vice versa.
+ *	@abstract @function
+ */
+Disjunction.Core.Journal.prototype.derive = function(){}
+
+if (disjunction.WINDOW_CLASSES) 
+	window.Journal = Disjunction.Core.Journal;
