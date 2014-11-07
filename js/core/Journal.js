@@ -95,11 +95,15 @@ Disjunction.Core.Journal.prototype.deltaAt = function(index)
  */
 Disjunction.Core.Journal.prototype.setState = function(value, index)
 {
+	console.log('setState', value);
+	/*
 	if (this.stateLocked)
-		throw "Error: Journals set to lockOnUpdate may only be updated once before locks clear (on App.update()).";
+	{
+		throw "Error: Journals may only be updated once per App.update().";
+	}
 	else
 		this.stateLocked = true;
-
+	*/
 	index = index || 0;
 	var states = this.states;
 	states[index] = value;
@@ -156,49 +160,14 @@ Disjunction.Core.Journal.prototype.justChangedState = function()
 	return this.changedState(0, 1);
 }
 
-/**
- *	Update the Journal's non-current values.
- *	@const @function
- */
-Disjunction.Core.Journal.prototype.shiftEntries = function()
-{
-	var length = this.length;
-	
-	//TODO one loop would work here if the two arrays were known to be of equal length... could this be made an option?
-	
-	//set all later values by shifting forward
-	var states = this.states;
-	for (var i = 0; i < states.length - 1; i++)
-	{
-		this.shiftState(i+1, i);
-	}
-	
-	//set all later values by shifting forward
-	var deltas = this.deltas;
-	for (var i = 0; i < deltas.length - 1; i++)
-	{
-		this.shiftDelta(i+1, i);
-	}
-}
 
 //VIRTUAL / OVERRIDABLE
 //TODO have default implementations in separate files
-
 /**
- *	Copy array elements in the appropriate manner for "shifting" the Journal. Override to change the way copying is performed.
+ *	Update the Journal's non-current values, and calculate new delta from newest states, or new state from last state + current delta.
  *	@abstract @function
- *	@param {Number} from The index from which to shift.
- *	@param {Number} to The index to which to shift.
  */
-Disjunction.Core.Journal.prototype.shiftState = function(from, to){}
-
-/**
- *	Copy array elements in the appropriate manner for "shifting" the Journal. Override to change the way copying is performed.
- *	@abstract @function
- *	@param {Number} from The index from which to shift.
- *	@param {Number} to The index to which to shift.
- */
-Disjunction.Core.Journal.prototype.shiftDelta = function(from, to){}
+Disjunction.Core.Journal.prototype.shift = function() {}
 
 /**
  *	Check whether the Journal has changed between two designated indices.  Override to change the way equality checking is performed.
@@ -208,11 +177,6 @@ Disjunction.Core.Journal.prototype.shiftDelta = function(from, to){}
  */
 Disjunction.Core.Journal.prototype.changedState = function(from, to){}
 
-/**
- *	Use state to derive deltas, or vice versa.
- *	@abstract @function
- */
-Disjunction.Core.Journal.prototype.derive = function(){}
 
 if (disjunction.WINDOW_CLASSES) 
 	window.Journal = Disjunction.Core.Journal;

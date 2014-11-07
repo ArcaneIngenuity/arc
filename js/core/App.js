@@ -58,10 +58,8 @@ Disjunction.Core.App = function(id, disjunction) //final
 		//to see difference in value between start() and first simulate(), these need to come *after* the calls above
 		var model = this.model;
 		
-		if (model)
-		{
-			model.progressJournals();
-		}
+
+		model.progressJournals();
 		
         var services = this.services;
         for (var i = 0; i < services.array.length; i++)
@@ -73,6 +71,10 @@ Disjunction.Core.App = function(id, disjunction) //final
 				serviceModel.progressJournals();
 			}
         }
+		
+		
+		//DEV
+		model.commands.splice(0);
 		
 		//console.log('------B');
 	}

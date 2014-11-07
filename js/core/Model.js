@@ -12,7 +12,8 @@ Disjunction.Core.Model = function()
 			
 			//journal.shiftStates();
 			//journal.shiftDeltas();
-			journal.shiftEntries(); //allows combining of state and delta shift loops for fewer conditionals
+			journal.shift(); //allows combining of state and delta shift loops for fewer conditionals
+			//journal.clear();
 			journal.unlock();
 		}
 	}
