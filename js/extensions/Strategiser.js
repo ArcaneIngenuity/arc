@@ -14,13 +14,13 @@ Disjunction.Extensions.Strategiser = function(numChannels)
 			strategy = channels[i];
 			if (strategy) //if no strategy running on this channel
 			{
-				//strategy.simulate(); //includes run on the final update before stop.
+				//strategy.update(); //includes run on the final update before stop.
 				if (strategy.isToStop())
 				{
 					strategy.stop();
-					justStopped.push(strategy); //to prevent immediate restart of strategy in same simulate
+					justStopped.push(strategy); //to prevent immediate restart of strategy in same update
 					channels[i] = undefined;
-					strategy = undefined; //to prevent simulate below
+					strategy = undefined; //to prevent update below
 				}
 			}
 			
@@ -38,13 +38,13 @@ Disjunction.Extensions.Strategiser = function(numChannels)
 							strategy.start();
 						}
 						else
-							strategy = undefined; //to prevent simulate below
+							strategy = undefined; //to prevent update below
 					}
 				}
 			}
 			
 			if (strategy)
-				strategy.simulate();
+				strategy.update();
 		}
 	}
 }

@@ -23,8 +23,8 @@ Disjunction.Core.App = function(id, disjunction) //final
 	
 	this.update = function() //final
 	{	
-		//console.log('------A');
-		
+		console.log('------A');
+		var model = this.model;
 		var view = this.view;
 		var pointer = disjunction.pointer;
 		if (pointer) 
@@ -51,11 +51,13 @@ Disjunction.Core.App = function(id, disjunction) //final
 		var ctrl = this.ctrl;
 		//note we do not pass Pointer in -- we need the focused View for its input, which exists irrespective of whether there is a Pointer available or not
 		/*var input = */focus.input(this, model); //for cases where input is not DOM- or Pointer-based.
-		ctrl.simulate();//TODO should only accept the input along with view name - not the whole View that produced the input. Ctrl should not have access to View.
+		ctrl.update();//TODO should only accept the input along with view name - not the whole View that produced the input. Ctrl should not have access to View.
 
 		view.outputRecurse(this, model); //root view, recurse
 		
-		//to see difference in value between start() and first simulate(), these need to come *after* the calls above
+		ctrl.refresh();
+		/*
+		//to see difference in value between start() and first update(), these need to come *after* the calls above
 		var model = this.model;
 		
 
@@ -72,9 +74,11 @@ Disjunction.Core.App = function(id, disjunction) //final
 			}
         }
 		
+		model.commands.splice(0);
+		*/
 		
 		//DEV
-		model.commands.splice(0);
+
 		
 		//console.log('------B');
 	}

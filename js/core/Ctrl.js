@@ -37,7 +37,13 @@ Disjunction.Core.Ctrl = function(app, model)
 	}
 	
 	/** Update Model based on other Model values, on every frame from start()ed till stop()ed (including during the former, but excluding during the latter). */ 
-	this.simulate = function(focus)
+	this.update = function(focus)
+	{
+		//abstract
+	}
+	
+	/** Cleanse the model of any ephemeral values (usually deltas affecting View outputs), before the next global update. */ 
+	this.refresh = function(focus)
 	{
 		//abstract
 	}
