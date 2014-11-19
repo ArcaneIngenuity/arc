@@ -29,7 +29,7 @@ Disjunction.Extensions.Strategiser = function(numChannels)
 				var candidates = this.candidatesByChannel[i];
 				for (var c = 0; c < candidates.length; c++)
 				{	
-					var strategy = candidates[c];
+					strategy = candidates[c];
 					if (justStopped.indexOf(strategy) == -1) //we cannot immediately restart a strategy that has just stopped -- wait till after journals have been updated
 					{
 						if (strategy.isToStart())
@@ -40,6 +40,8 @@ Disjunction.Extensions.Strategiser = function(numChannels)
 						else
 							strategy = undefined; //to prevent update below
 					}
+					else
+						strategy = undefined;
 				}
 			}
 			
