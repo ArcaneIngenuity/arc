@@ -48,7 +48,7 @@ Disjunction.Core.Builder = function(apps, options)
 	this.tabIndex = undefined;
 
 	var app = '123';
-	var appClassContext  = undefined; //the object on which an app's classes may be found
+	var baseContext  = undefined; //the object on which an app's classes may be found
 	var appConstantsContext = undefined; //the object one which to put constant device & service indexing properties
 	//var djClassContext; //the object on which dj's classes may be found
 	
@@ -57,18 +57,23 @@ Disjunction.Core.Builder = function(apps, options)
 	
 	this.buildCommon = function(containerDOM, disjunction)
 	{
+		baseContext = window;
+		
 		var commonDOM = containerDOM.getElementsByTagName(commonTagName)[0];
 		
+		//Services
 		var commonServicesDOM = commonDOM.getElementsByTagName(servicesTagName)[0];
 		if (commonServicesDOM) //NOT always true
 			this.addServices(commonServicesDOM, disjunction.services);
 			
+		//Devices
 		var commonDevicesDOM = commonDOM.getElementsByTagName(devicesTagName)[0];
 		if (commonDevicesDOM) //should always be true
 			this.addDevices(commonDevicesDOM, disjunction.devices);
 		else
 			throw "Error: <"+devicesTagName+"> must be specified, containing at least one <"+deviceTagName+">.";
 			
+		//Pointer
 		var domPointer = commonDOM.getElementsByTagName(pointerTagName)[0];
 		if (domPointer)
 		{
@@ -96,6 +101,7 @@ Disjunction.Core.Builder = function(apps, options)
 		else
 			throw "Error: <pointer> must be specified, referencing a valid <device>.";
 			
+		//Timer
 		var timerDOM = commonDOM.getElementsByTagName(timerTagName)[0];
 		var classNamesJoined = timerDOM.className;
 		var periodSec = parseFloat(timerDOM.getAttribute('period'));
@@ -104,10 +110,10 @@ Disjunction.Core.Builder = function(apps, options)
 			var classNames = classNamesJoined.split(' ');
 			var className = classNames[0];
 			
-			var TimerClass = Disjunction.Extensions[className+'Timer']; //TODO fix Timer not to be in extensions, or fix className to allow a dot-separated name (less likely)
-			if (TimerClass)
+			var Class = this.getObjectFromPathString(baseContext, className+'Timer');
+			if (Class)
 			{
-				disjunction.timer = new TimerClass(periodSec);
+				disjunction.timer = new Class(periodSec);
 			}
 		}
 	}
@@ -161,8 +167,8 @@ Disjunction.Core.Builder = function(apps, options)
 		else
 			throw "Error: App must have a class attribute set.";
 		
-		appClassContext = window[className] || window; //TODO allow dot-separated package name?
-		appConstantsContext = window;//appClassContext; //for now, use same.
+		baseContext = window[className] || window; //TODO allow dot-separated package name?
+		appConstantsContext = window;//baseContext; //for now, use same.
 
 		//model
 		var domModels = appDOM.getElementsByTagName(modelTagName);
@@ -253,7 +259,7 @@ Disjunction.Core.Builder = function(apps, options)
 			if (dom.tagName.toLowerCase() === deviceTagName)
 			{
 				var className = dom.className;
-				var Class = Disjunction.Extensions[className]; //TODO make this path to device class, optional
+				var Class = /*Disjunction.Extensions[className];*/ this.getObjectFromPathString(baseContext, className/*+'Device'*/);
 				if (Class)
 				{
 					var deviceConstantName = 'DEVICE_'+className.replace('Device','').toUpperCase();
@@ -283,7 +289,7 @@ Disjunction.Core.Builder = function(apps, options)
 		if (dom.hasAttribute('model'))
 		{
 			var pathJoined = dom.getAttribute('model');
-			model = this.getModelFromPathString(model, pathJoined);
+			model = this.getObjectFromPathString(model, pathJoined);
 			console.log(service, model);
 		}
 		
@@ -295,7 +301,7 @@ Disjunction.Core.Builder = function(apps, options)
 			var shortServiceName = dom.className;
 			var longServiceName = dom.className + 'Service';
 			className = longServiceName;
-			var Class = appClassContext[longServiceName]; //TODO make the object on which to put this, optional by parameter
+			var Class = this.getObjectFromPathString(baseContext, longServiceName); //TODO make the object on which to put this, optional by parameter
 			if (Class)
 			{
 				//construct service
@@ -323,7 +329,7 @@ Disjunction.Core.Builder = function(apps, options)
 		{		
 			var classNames = classNamesJoined.split(' ');
 			var className = options.modelPrefix + classNames[0] + options.modelSuffix;
-			var Class = appClassContext[className];
+			var Class = this.getObjectFromPathString(baseContext, className);
 			if (Class)
 			{
 				model = new Class();
@@ -339,7 +345,7 @@ Disjunction.Core.Builder = function(apps, options)
 		if (dom.hasAttribute('model'))
 		{
 			var pathJoined = dom.getAttribute('model');
-			model = this.getModelFromPathString(model, pathJoined);
+			model = this.getObjectFromPathString(model, pathJoined);
 		}
 						
 		var ctrl;
@@ -356,29 +362,15 @@ Disjunction.Core.Builder = function(apps, options)
 			{
 				if (firstChar === firstChar.toUpperCase()) //and it's uppercase...
 				{
-					//...it's a classname
-					var Class = appClassContext[className]; //TODO make object where this is found, optional.
+					//...then it's a classname
+					var Class = this.getObjectFromPathString(baseContext, className);
 					if (Class)
 					{
-
-
-					
 						//construct ctrl
 						ctrl = new Class(app, model);
 						dom.ctrl = ctrl; //useful for debugging, mirrors View approach
 						ctrl.className = classNameShort;
 						ctrl.model = model; //by default, set to what was passed in; elaborate (below) if necessary
-						
-						/*
-						//set view
-						if (dom.hasAttribute('view'))
-						{
-							var pathJoined = dom.getAttribute('view');
-							ctrl.view = this.getViewFromPathString(ctrl.view, pathJoined);
-							
-							//TODO inheritance of view/model from parent ctrl
-						}
-						*/
 						
 						//recurse children
 						for (var a = 0; a < dom.children.length; a++)
@@ -387,7 +379,7 @@ Disjunction.Core.Builder = function(apps, options)
 							var childCtrl = this.addCtrl(childDOM, ctrl.model);
 							if (childCtrl)
 								ctrl.addChild(childCtrl);
-							//console.log(childDOM);
+							
 							//TODO inheritance of view/model from parent ctrl
 						}
 					}
@@ -411,9 +403,8 @@ Disjunction.Core.Builder = function(apps, options)
 		//get model
 		if (dom.hasAttribute('model'))
 		{
-			//console.log(dom, dom.getAttribute('model'));
 			var pathJoined = dom.getAttribute('model');
-			model = this.getModelFromPathString(model, pathJoined);
+			model = this.getObjectFromPathString(model, pathJoined);
 		}
 		
 		var view;
@@ -429,8 +420,8 @@ Disjunction.Core.Builder = function(apps, options)
 			{
 				if (firstChar === firstChar.toUpperCase()) //and it's uppercase...
 				{
-					//...it's a classname
-					var Class = appClassContext[className]; //TODO make object where this is found, optional.
+					//...then it's a classname
+					var Class = this.getObjectFromPathString(baseContext, className); //TODO make object where this is found, optional.
 					if (Class)
 					{
 						view = new Class(app, model);
@@ -457,9 +448,6 @@ Disjunction.Core.Builder = function(apps, options)
 
 		view.dom = dom;
 		dom.view = view;
-		//view.model = model; //by default, set to what was passed into this function
-		//console.log('model for ',dom,' is', view.model);
-		//view.id = id;
 		
 		//recurse children
 		for (var a = 0; a < dom.children.length; a++)
@@ -470,79 +458,30 @@ Disjunction.Core.Builder = function(apps, options)
 			
 			//TODO inheritance from parent view
 		}
-		
 
 		return view;
 	}
 	
-	this.getModelFromPathString = function(model, pathJoined)
+	this.getObjectFromPathString = function(object, pathJoined)
 	{
 		var path = pathJoined.split('.');
 		if (path[0] === "") path.shift();
 		if (path[path.length-1] === "") path.pop();
-		//console.log(path);
-		var pathIncremental = "model";
-		//walk down the model tree to the appropriate property
+		var pathIncremental = ""; //for error throw only
+		
+		//walk down the object tree to the appropriate property
 		while (path.length > 0)
 		{
 			var property = path.shift();
-			//console.log('//', model, pathIncremental, property);
-			if (model.hasOwnProperty(property))
+			if (object.hasOwnProperty(property))
 			{
-			//console.log('OK');
-				model = model[property];
+				object = object[property];
 				pathIncremental += '.' + property;
 			}
 			else
-				throw "Error: "+pathIncremental+" does not have property '"+property+"'.";
+				throw "Error: "+object+pathIncremental+" does not have property '"+property+"'.";
 		}
-		//console.log(model);
-		return model;
-	}
-	
-	//TODO access from either an array in the attribute, or a series of <viewref>s in each <ctrl>.
-	//TODO possibly remove altogether.
-	this.getViewFromPathString = function(view, pathJoined)
-	{
-		console.log(view);
-	
-		var path = pathJoined.split('.');
-		if (path[0] === "") path.shift();
-		var pathIncremental = "view";
-		//walk down the view tree to the appropriate property
-		
-		while (path.length > 0)
-		{
-			var section = path.shift();
-			var className;
-			var index;
-			
-			var elements = section.split('[');
-			if (elements.length > 1) //there were indexing brackets
-			{
-				className = elements[0];
-				
-				index = parseInt(elements[1].split(']')[0]); //just keep the number
-				if (isNaN(index))
-					throw "Error: A numeric index must appear between square brackets.";
-			}
-			else
-			{
-				className = section;
-				index = 0;
-			}
-			
-			var childrenByClassName = view.getChildrenByClassName(className);
-			
-			if (!childrenByClassName)
-				throw "Error: "+pathIncremental+" does not have children with class name '"+className+"'.";
-			else
-				view = childrenByClassName[index];
-			
-			pathIncremental += '.' + section;
-		}
-		
-		return view;
+		return object;
 	}
 };
 if (disjunction.WINDOW_CLASSES) 
