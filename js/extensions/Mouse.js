@@ -70,6 +70,14 @@ Disjunction.Extensions.Mouse = function()
 		}
 		*/
 	}
+	
+	this.bindToDOM = function(dom)
+	{
+		dom.addEventListener('mousedown', 	ES5.bind(this, this.receive));
+		dom.addEventListener('mouseup',		ES5.bind(this, this.receive));
+		dom.addEventListener('mousemove',	ES5.bind(this, this.receive));
+		dom.addEventListener('mousewheel',	ES5.bind(this, this.receive));
+	}
 }
 
 Disjunction.Extensions.Mouse.prototype = new Disjunction.Core.Device();

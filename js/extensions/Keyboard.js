@@ -29,6 +29,12 @@ Disjunction.Extensions.Keyboard = function()
 			}
 		}
 	}
+	
+	this.bindToDOM = function(dom)
+	{
+		dom.addEventListener('keydown', 	ES5.bind(this, this.receive));
+		dom.addEventListener('keyup',		ES5.bind(this, this.receive));
+	}
 }
 
 Disjunction.Extensions.Keyboard.prototype = new Disjunction.Core.Device();

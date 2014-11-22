@@ -217,16 +217,13 @@ Disjunction.Core.Builder = function(apps, options)
 		
 		app.ctrl.app = app;
 		
-		//input: special case devices for DOM JS
-		var mouse = disjunction.devices.array[disjunction.constants.DEVICE_MOUSE];
-		var keyboard = disjunction.devices.array[disjunction.constants.DEVICE_KEYBOARD];
-		//TODO should these be specified on body vs. appDOM? they are shared between all apps.
-		appDOM.addEventListener('mousedown', 	ES5.bind(mouse, mouse.receive));
-		appDOM.addEventListener('mouseup',		ES5.bind(mouse, mouse.receive));
-		appDOM.addEventListener('mousemove',	ES5.bind(mouse, mouse.receive));
-		appDOM.addEventListener('mousewheel',	ES5.bind(mouse, mouse.receive));
-		appDOM.addEventListener('keydown', 		ES5.bind(keyboard, keyboard.receive));
-		appDOM.addEventListener('keyup',		ES5.bind(keyboard, keyboard.receive));
+		//input bindings (per app)
+		//TODO should these be specified on body vs. appDOM? they are shared between all apps.		
+		for (var i = 0; i < disjunction.devices.array.length; i++)
+		{
+			var device = disjunction.devices.array[i];
+			device.bindToDOM(appDOM); //null method if the given device does not work with DOM
+		}
 		
 		//store / return app
 		apps[app.id] = app;

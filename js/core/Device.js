@@ -22,6 +22,11 @@ Disjunction.Core.Device = function(numChannels) //ABSTRACT / INTERFACE
 		//ABSTRACT
 	}
 	
+	this.bindToDOM = function(dom)
+	{
+		//ABSTRACT
+	}
+	
 	this.dispose = function()
 	{
 		//ABSTRACT
