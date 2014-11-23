@@ -23,7 +23,7 @@ Disjunction.Core.App = function(id, disjunction) //final
 	
 	this.update = function() //final
 	{	
-		console.log('------A');
+		//console.log('------A');
 		var model = this.model;
 		var view = this.view;
 		var pointer = disjunction.pointer;
@@ -56,30 +56,6 @@ Disjunction.Core.App = function(id, disjunction) //final
 		view.outputRecurse(this, model); //root view, recurse
 		
 		ctrl.refresh();
-		/*
-		//to see difference in value between start() and first update(), these need to come *after* the calls above
-		var model = this.model;
-		
-
-		model.progressJournals();
-		
-        var services = this.services;
-        for (var i = 0; i < services.array.length; i++)
-        {
-            var service = services.array[i];
-			for (var j = 0; j < service.models.length; j++)
-			{
-				var serviceModel = service.models[j];
-				serviceModel.progressJournals();
-			}
-        }
-		
-		model.commands.splice(0);
-		*/
-		
-		//DEV
-
-		
 		//console.log('------B');
 	}
 	

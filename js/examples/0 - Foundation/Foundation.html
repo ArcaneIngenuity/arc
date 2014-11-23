@@ -1,0 +1,76 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Example 0 - Foundation</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	
+	<!-- framework prequisite polyfills -->
+	<script src="../../polyfills/x-tag-core.min.js"></script>
+	<script src="../../polyfills/ES5.js"></script>
+ 
+	<!-- framework core -->
+	<script src="../../core/Disjunction.js"></script>
+	<script src="../../core/Builder.js"></script>
+	<script src="../../core/Journal.js"></script>
+	<script src="../../core/Service.js"></script>
+	<script src="../../core/ServiceHub.js"></script>
+	<script src="../../core/DeviceHub.js"></script>
+	<script src="../../core/Device.js"></script>
+	<script src="../../core/DeviceChannel.js"></script>
+	<script src="../../core/App.js"></script>
+	<script src="../../core/Model.js"></script>
+	<script src="../../core/View.js"></script>
+	<script src="../../core/Ctrl.js"></script>
+	<script src="../../core/Timer.js"></script>
+	<script src="../../core/Pointer.js"></script>
+	<script src="../../core/Point2.js"></script>
+	<script src="../../core/NullView.js"></script>
+
+	<!-- framework extensions -->
+	<script src="../../extensions/RAFTimer.js"></script>
+	<script src="../../extensions/Keyboard.js"></script>
+	<script src="../../extensions/Mouse.js"></script>
+	<script src="../../extensions/Box2.js"></script>
+	<script src="../../extensions/Math.js"></script>
+
+	<!-- 3rd party libraries -->
+
+	<!-- App-related implementations -->
+	<link  href="./Foundation.css" rel="stylesheet">
+	<script src="./Foundation.js"></script>
+	<script src="./Models/RootModel.js"></script>
+	<script src="./Views/RootView.js"></script>
+	<script src="./Ctrls/RootCtrl.js"></script>	
+
+</head>
+<body onload="disjunction.go();">
+	<common>
+		<timer class="RAF" period=""></timer>
+		<devices>
+			<device class="Mouse"></device>
+			<device class="Keyboard"></device>
+		</devices>
+		<services>
+		</services>
+		<pointer device="DEVICE_MOUSE" x="MOUSE_X" y="MOUSE_Y" select="MOUSE_BUTTON_LEFT"></pointer>
+	</common>
+	<app class="Foundation" id="Foundation">
+		<services>
+		</services>
+		<model class="Root"></model>
+		<view- class="Root" tabindex="0" autofocus oncontextmenu="return false">
+			<!--sub-Views here-->
+			<div>
+				<p>Press spacebar or left mouse button to demonstrate basic MVC.</p>
+				<p class="input"></p>
+			</div>
+		</view->
+		<ctrl class="Root">
+			<!--sub-Ctrls here-->
+		</ctrl>
+	</app>
+</body>
+</html>

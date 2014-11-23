@@ -1,0 +1,1 @@
+Place user-defined enumeration objects here.
