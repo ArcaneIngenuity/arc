@@ -47,7 +47,7 @@ Disjunction.Core.Builder = function(apps, options)
 	
 	this.tabIndex = undefined;
 
-	var app = '123';
+	var app = undefined;
 	var baseContext  = undefined; //the object on which an app's classes may be found
 	var appConstantsContext = undefined; //the object one which to put constant device & service indexing properties
 	//var djClassContext; //the object on which dj's classes may be found
@@ -303,7 +303,7 @@ Disjunction.Core.Builder = function(apps, options)
 			{
 				//construct service
 				var serviceConstantName = 'SERVICE_'+shortServiceName.toUpperCase();
-				service = new Class(model);
+				service = new Class(app, model);
 				service.className = shortServiceName;
 				serviceIndex = services.add(service);
 				

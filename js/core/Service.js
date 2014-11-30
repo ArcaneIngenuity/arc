@@ -1,5 +1,6 @@
-Disjunction.Core.Service = function(model)
+Disjunction.Core.Service = function(app, model)
 {
+	this.app = app;
 	this.model = model;
 	
 	this.models = []; /** Models belonging exclusively to this Service, to allow for their Journals to be updated. DO NOT add the injected model to this or it will be updated twice! */
