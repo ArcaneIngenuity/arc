@@ -21,7 +21,7 @@ Timer * const Timer_constructor(float period)
 	return timer;
 }
 
-void Timer_consumeDeltaSec(Timer * const this)
+void Timer_getDeltaSec(Timer * const this)
 {
 	this->counter2 = this->counter1;
 	
@@ -40,14 +40,14 @@ void Timer_accumulate(Timer * const this)
 int Timer_canConsume(Timer * const this)
 {
 	return this->running &&
-		(this->period <= this->accumulatorSec);
+		(this->accumulatorSec >= this->period);
 }
 
 void Timer_consume(Timer * const this)
 {
 	//printf("update: accumulatorSec was %.10f\n", this->accumulatorSec); 
 	this->accumulatorSec -= this->period; //consume
-	printf("update: accumulatorSec is  %.10f\n", this->accumulatorSec); 
+	//printf("update: accumulatorSec is  %.10f\n", this->accumulatorSec); 
 }
 
 void Timer_start(Timer * const this)
@@ -64,12 +64,13 @@ void Timer_start(Timer * const this)
 
 void Timer_stop(Timer * const this)
 {
+	//TODO !!
 	QueryPerformanceFrequency((LARGE_INTEGER *)&(this->counterFrequency)); //calculate frequency just once, guaranteed to stay same thereafter.
 	QueryPerformanceCounter((LARGE_INTEGER *)&(this->counter1)); //ensures we don't have a negative delta to start
-	printf("QPCTimer_start %i\n", this->counter1);
+	//printf("QPCTimer_start %i\n", this->counter1);
 	
 	this->counterPeriod = 1.0 / (double)this->counterFrequency;
-	printf("f/t is %.10f / %.10f\n", (double)this->counterFrequency, this->counterPeriod);
+	//printf("f/t is %.10f / %.10f\n", (double)this->counterFrequency, this->counterPeriod);
 	
 	this->running = false;
 }
@@ -126,7 +127,8 @@ double Disjunction_getDeltaSec(double counterDelta, double counterFrequency)
 
 void Disjunction_update(Disjunction * const this)
 {
-	printf("Disjunction_update");
+	//printf("Disjunction_update");
+	//printf("Disjunction_update disjunction.timer->deltaSec %f\n",  this->timer->deltaSec);
 	
 	for (int i = 0; i < this->appsCount; i++)
 	{
@@ -195,6 +197,7 @@ void Disjunction_dispose(Disjunction * const this)
 	}
 	
 	this->dispose((void *)this);
+	this->initialised = false;
 	printf ("Disjunction_dispose done."); 
 	//free(this); //disjunction object is not a pointer! it's an automatic global variable allocated on the stack.
 }
@@ -225,10 +228,11 @@ void Disjunction_addApp(Disjunction * const this, App * const app, int index)
 //--------- App ---------//
 void App_update(App * const this)
 {
-	printf("App_update\n");
-	/*
+	//printf("App_update\n");
+	
 	View * view = this->view;
-	Pointer * pointer = this->disjunction->pointer;
+	//Pointer * pointer = this->disjunction->pointer;
+	/*
 	if (pointer)
 	{
 		//if (view->enabled) //root enabled
@@ -254,7 +258,7 @@ void App_update(App * const this)
 	
 	//this->input(this); //abstract
 	//Ctrl_update(ctrl); //abstract
-	//View_updateRecurse(view); //final, though view->output called hereby is abstract
+	View_updateRecurse(view); //final, though view->output called hereby is abstract
 	//Ctrl_updatePost(ctrl); //abstract
 }
 
@@ -426,6 +430,7 @@ void App_start(App * const this)
 		
 		this->running = true;
 		
+		view->initialise((void *)view); //DEV - should be in View_start()
 		ctrl->start((void *)ctrl);
 		view->start((void *)view);
 	}
@@ -451,12 +456,13 @@ void App_dispose(App * const this)
 	View * view = this->view;
 
 	//Ctrl_disposeRecurse(ctrl);
-	//View_disposeRecurse(view);
+	View_disposeRecurse(view);
 	
 	//this->services.dispose();
 	//this->devices.dispose();
 	
 	this->dispose((void *)this);
+	this->initialised = false;
 	free(this);
 }
 
@@ -465,17 +471,19 @@ void Ctrl_disposeRecurse(Ctrl * const this)
 {
 	printf("Ctrl_disposeRecurse\n");
 	//TODO recurse
+	this->dispose(this);
+	this->initialised = false;
 	//free(this);
 };
 
 //dispose removes resources acquired in initialise or updates
 void View_updateRecurse(View * const this)
 {
-/*
-	if (this->enabled)
-	{
-		this->update();//deltaSec
+	//if (this->enabled) //(this->running)
+	//{
+		this->update(this);//deltaSec
 
+		/*
 		View * children = this->children;
 		if (children)
 		{
@@ -487,16 +495,18 @@ void View_updateRecurse(View * const this)
 					View_updateRecurse(child);//deltaSec
 			}
 		}
+		*/
 		
-		this->update();//deltaSec
-	}
-	*/
+		this->updatePost(this);//deltaSec
+	//}
 }
 
 void View_disposeRecurse(View * const this)
 {
 	printf("View_disposeRecurse\n");
 	//TODO recurse
+	this->dispose(this);
+	this->initialised = false;
 	//free(this);
 };
 
@@ -538,4 +548,4 @@ Journal journals[JOURNALS_SIZE];
 }
 */
 
-void NullFunction(void * const this){printf("NullFunction\n");}
+void NullFunction(void * const this){/*printf("NullFunction\n");*/}

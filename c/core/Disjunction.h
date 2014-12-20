@@ -1,3 +1,6 @@
+#ifndef DISJUNCTION_H
+#define DISJUNCTION_H
+
 #define APPS_MAX 4
 #define DEVICES_MAX 16
 #define VIEW_CHILDREN_MAX 16
@@ -48,7 +51,7 @@ typedef struct View
 	struct View * parent;
 	struct View * children[VIEW_CHILDREN_MAX];
 	int childrenCount;
-	
+	bool initialised; //true after first start
 	//bool running; //start/stop
 	
 	void (*start)(void * const this);
@@ -65,6 +68,7 @@ const struct View viewEmpty;
 typedef struct Ctrl
 {
 	//TODO data members
+	bool initialised; //true after first start
 	
 	void (*mustStart)(void * const this);
 	void (*mustStop)(void * const this);
@@ -138,7 +142,7 @@ typedef struct Model
 Timer * const Timer_constructor(float period);
 int Timer_canConsume(Timer * const this);
 void Timer_accumulate(Timer * const this);
-void Timer_consumeDeltaSec(Timer * const this);
+void Timer_getDeltaSec(Timer * const this);
 void Timer_consume(Timer * const this);
 void Timer_start(Timer * const this);
 void Timer_stop(Timer * const this);
@@ -194,3 +198,5 @@ void Disjunction_dispose(Disjunction * const this);
 void Disjunction_addApp(Disjunction * const this, App * const app, int index);
 
 void NullFunction(void * const this);
+
+#endif //DISJUNCTION_H
