@@ -53,6 +53,7 @@ typedef struct View
 	int childrenCount;
 	bool initialised; //true after first start
 	//bool running; //start/stop
+	void * model;
 	
 	void (*start)(void * const this);
 	void (*stop)(void * const this);
@@ -69,6 +70,7 @@ typedef struct Ctrl
 {
 	//TODO data members
 	bool initialised; //true after first start
+	void * model;
 	
 	void (*mustStart)(void * const this);
 	void (*mustStop)(void * const this);

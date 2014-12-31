@@ -430,6 +430,7 @@ void App_start(App * const this)
 		
 		this->running = true;
 		
+		ctrl->initialise((void *)ctrl); //DEV - should be in Ctrl_start()
 		view->initialise((void *)view); //DEV - should be in View_start()
 		ctrl->start((void *)ctrl);
 		view->start((void *)view);
