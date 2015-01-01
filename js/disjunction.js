@@ -908,6 +908,10 @@ Disjunction.Core.DeviceChannel = function()
 {
 	this.value = 0;
 	this.delta = undefined;
+	//JS only...
+	this.blocked = false;
+	this.block = function() {this.blocked = true;};
+	this.unblock = function() {this.blocked = false;};
 };
 if (disjunction.WINDOW_CLASSES) 
 	window.DeviceChannel = Disjunction.Core.DeviceChannel;

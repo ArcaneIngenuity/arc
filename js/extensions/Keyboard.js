@@ -17,14 +17,14 @@ Disjunction.Extensions.Keyboard = function()
 			{
 				var channel = this.channels[event.keyCode];
 				var oldValue = channel.value;
-				channel.value = 1;
+				channel.value = channel.blocked ? 0 : 1;
 				channel.delta = channel.value - oldValue;
 			}
 			if (inputType === 'up')
 			{
 				var channel = this.channels[event.keyCode];
 				var oldValue = channel.value;
-				channel.value = 0;
+				channel.value = channel.blocked ? 1 : 0;
 				channel.delta = channel.value - oldValue;
 			}
 		}

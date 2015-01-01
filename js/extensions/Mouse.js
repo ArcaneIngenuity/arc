@@ -18,7 +18,7 @@ Disjunction.Extensions.Mouse = function()
 				var channel = this.channels[buttonCode];
 				//channel.valueLast = channel.value;
 				valueOld = channel.value;
-				valueNew = channel.value = 1;
+				valueNew = channel.value = channel.blocked ? 0 : 1;
 				channel.delta = valueNew - valueOld;
 			}
 			if (inputType === 'up') //up
@@ -27,7 +27,7 @@ Disjunction.Extensions.Mouse = function()
 				var channel = this.channels[buttonCode];
 				//channel.valueLast = channel.value;
 				valueOld = channel.value;
-				valueNew = channel.value = 0;
+				valueNew = channel.value = channel.blocked ? 1 : 0;
 				channel.delta = valueNew - valueOld;
 				//console.log('channel delta', channel.delta);
 			}
@@ -40,10 +40,16 @@ Disjunction.Extensions.Mouse = function()
 				//yChannel.valueLast = yChannel.value;
 				//console.log(event);
 				//console.log(event.target.getBoundingClientRect());
-				xChannel.delta += event.clientX - xChannel.value;
-				xChannel.value = event.clientX;
-				yChannel.delta += event.clientY - yChannel.value;
-				yChannel.value = event.clientY;
+				if (!xChannel.blocked)
+				{
+					xChannel.delta += event.clientX - xChannel.value;
+					xChannel.value = event.clientX;
+				}
+				if (!yChannel.blocked)
+				{
+					yChannel.delta += event.clientY - yChannel.value;
+					yChannel.value = event.clientY;
+				}
 			}
 			if (inputType === 'wh') //wheel
 			{
@@ -60,7 +66,11 @@ Disjunction.Extensions.Mouse = function()
 				if (d == 0) return 0;
 				var sign = d >= 0 ? -1 : 1;
 
-				channel.delta = sign;
+				if (!channel.blocked)
+				{
+					channel.delta = sign;
+					channel.value += channel.delta;
+				}
 			}
 		}
 		/*
