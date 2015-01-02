@@ -1,0 +1,1 @@
+gcc -o ./glfw ./src/main.c ../../core/disjunction.c -Llib -lglfw3 -lopengl32 -lgdi32 -std=c11

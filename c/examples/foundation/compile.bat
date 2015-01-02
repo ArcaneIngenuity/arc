@@ -1,0 +1,1 @@
+gcc -o ./foundation ./src/main.c ../../core/disjunction.c -Llib -std=c11
