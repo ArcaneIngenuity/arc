@@ -1,2 +1,2 @@
-uglifyjs disjunction.js -o ../js/disjunction-core.min.js
+uglifyjs disjunction.js -o ../js/disjunction.min.js
 REM --source-map ../disjunction-core.min.js.map
