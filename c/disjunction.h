@@ -167,10 +167,10 @@ void Pointer_hasMoved(Pointer * const this);
 //bool Ctrl_mustStop(Ctrl * const this);
 //void Ctrl_start(Ctrl * const this);
 //void Ctrl_stop(Ctrl * const this);
-//void Ctrl_dispose(Ctrl * const this);
-//void Ctrl_update(Ctrl * const this);
-//void Ctrl_updatePost(Ctrl * const this);
 //void Ctrl_initialise(Ctrl * const this);
+void Ctrl_update(Ctrl * const this);
+void Ctrl_updatePost(Ctrl * const this);
+void Ctrl_dispose(Ctrl * const this);
 void Ctrl_disposeRecurse(Ctrl * const this);
 
 //void View_start(View * const this);

@@ -230,6 +230,7 @@ void App_update(App * const this)
 {
 	//printf("App_update\n");
 	
+	Ctrl * ctrl = this->ctrl;
 	View * view = this->view;
 	//Pointer * pointer = this->disjunction->pointer;
 	/*
@@ -257,7 +258,7 @@ void App_update(App * const this)
 	//-custom-calculate pointer position within Views (one, some or all - as desired) - may require top-level processing due to nature of incoming info e.g. framebuffer ids
 	
 	//this->input(this); //abstract
-	//Ctrl_update(ctrl); //abstract
+	Ctrl_update(ctrl); //abstract
 	View_updateRecurse(view); //final, though view->output called hereby is abstract
 	//Ctrl_updatePost(ctrl); //abstract
 }
@@ -456,7 +457,7 @@ void App_dispose(App * const this)
 	Ctrl * ctrl = this->ctrl;
 	View * view = this->view;
 
-	//Ctrl_disposeRecurse(ctrl);
+	Ctrl_disposeRecurse(ctrl);
 	View_disposeRecurse(view);
 	
 	//this->services.dispose();
@@ -467,15 +468,30 @@ void App_dispose(App * const this)
 	free(this);
 }
 
+void Ctrl_update(Ctrl * const this)
+{
+	this->update(this);//deltaSec
+}
+
+void Ctrl_updatePost(Ctrl * const this)
+{
+	this->updatePost(this);//deltaSec
+}
+
+void Ctrl_dispose(Ctrl * const this)
+{
+	this->dispose(this);
+	this->initialised = false;
+}
+
 //dispose removes resources acquired in initialise or updates
 void Ctrl_disposeRecurse(Ctrl * const this)
 {
-	printf("Ctrl_disposeRecurse\n");
 	//TODO recurse
 	this->dispose(this);
 	this->initialised = false;
 	//free(this);
-};
+}
 
 //dispose removes resources acquired in initialise or updates
 void View_updateRecurse(View * const this)
