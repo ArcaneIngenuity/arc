@@ -6,6 +6,8 @@
 #define VIEW_CHILDREN_MAX 16
 #include <stdbool.h>
 
+#include "../../curtmap/src/curtmap.h"
+
 typedef struct Timer
 {
 	//struct Disjunction * disjunction;
@@ -38,12 +40,6 @@ typedef struct Device
 	struct DeviceChannel * channels;
 	bool readEvents;
 } Device;
-/*
-typedef struct DeviceHub
-{
-	Device devices[DEVICES_MAX];
-} DeviceHub;
-*/
 
 //use as base struct for inherited type
 typedef struct View
@@ -85,12 +81,12 @@ const struct Ctrl ctrlEmpty;
 
 typedef struct App
 {
+	char * id; //for compound apps
 	struct Disjunction * disjunction; //in spite of typedef, use struct due to circular ref App->Disjunction TODO remove this ref, and allow Apps to send messages up to DJ?
+	struct CurtMap * services;
 	
 	bool running; //start/stop
 	bool initialised; //true after first start
-	//this.id = id; //for compound apps
-	//this.services = new Disjunction.Core.ServiceHub(this);
 	void * model; //cannot know class / size; struct YourModel must contain void * journals[]
 	struct View * view; //cannot know class / size
 	struct Ctrl * ctrl; //cannot know class / size
@@ -111,21 +107,24 @@ typedef struct Pointer
 	bool selectedLast;
 } Pointer;
 
+typedef struct Service
+{
+	struct App * app;
+	void * models;
+} Service;
+
 typedef struct Disjunction
 {
-	struct App * apps[APPS_MAX];  //in spite of typedef, use struct due to circular ref Disjunction->App
-	int appsCount;
-	//struct Timer * timer;
-	//struct DeviceHub devices;
+	struct CurtMap apps;
+	struct CurtMap devices;
+	//struct CurtMap services;
 	
 	bool initialised; //true after first start
-	//...(new?)...struct Device * devices[DEVICES_MAX];
 	
 	struct Timer * timer; //cannot know class / size
 	
 	struct Pointer pointer;
-	//services: undefined,
-	//builder: undefined,
+	//TODO Builder
 	
 	void * external; //anything we had to externally initialise / dispose of, but need a ref to inside App.
 	//void (*start)(void * const this); 
@@ -135,10 +134,6 @@ typedef struct Disjunction
 	
 } Disjunction;
 const struct Disjunction disjunctionEmpty;
-/*
-typedef struct Model
-{} Model;
-*/
 
 //FINAL/BASE METHODS
 Timer * const Timer_constructor(float period);
@@ -150,13 +145,7 @@ void Timer_start(Timer * const this);
 void Timer_stop(Timer * const this);
 
 void Device_constructor(Device * this, int channelCount);
-/*
-void DeviceHub_get(DeviceHub * this);
-void DeviceHub_add(DeviceHub * this);
-void DeviceHub_poll(DeviceHub * this);
-void DeviceHub_flush(DeviceHub * this);
-void DeviceHub_poll(DeviceHub * this);
-*/
+void DeviceChannel_constructor(Device * this);
 
 void Pointer_updateSelected(Pointer * const this);
 void Pointer_hasChangedTarget(Pointer * const this);
@@ -185,20 +174,26 @@ bool View_isRoot(View * const this);
 void View_addChild(View * const this, View * const child);
 void View_swapChildren(View * const this, int indexFrom, int indexTo);
 
+//void App_initialise(App * const this);
 void App_update(App * const this);
 void App_start(App * const this);
 void App_stop(App * const this);
-//void App_initialise(App * const this);
 void App_dispose(App * const this);
+void App_addService(App * const this, const char * id, Service * service);
+void App_removeService(App * const this, const char * id);
 
+//void Disjunction_initialise(Disjunction * const this);
 void Disjunction_update(Disjunction * const this);
-//void Disjunction_loop(Disjunction * const this); //extra, for C
 void Disjunction_start(Disjunction * const this);
 void Disjunction_stop(Disjunction * const this);
-//void Disjunction_initialise(Disjunction * const this);
 void Disjunction_dispose(Disjunction * const this);
-void Disjunction_addApp(Disjunction * const this, App * const app, int index);
+void Disjunction_addApp(Disjunction * const this, const char * id, App * const app);
+void Disjunction_removeApp(Disjunction * const this, const char * id);
+void Disjunction_addDevice(Disjunction * const this, const char * id, Device * const device);
+void Disjunction_removeDevice(Disjunction * const this, const char * id);
 
 void NullFunction(void * const this);
+
+/*extern*/ Disjunction disjunction;// = {0}; //could use an empty?
 
 #endif //DISJUNCTION_H

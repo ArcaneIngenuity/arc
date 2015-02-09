@@ -5,6 +5,7 @@
 
 #include "Disjunction.h"
 
+
 //--------- Timer ---------------//
 Timer * const Timer_constructor(float period)
 {
@@ -130,9 +131,9 @@ void Disjunction_update(Disjunction * const this)
 	//printf("Disjunction_update");
 	//printf("Disjunction_update disjunction.timer->deltaSec %f\n",  this->timer->deltaSec);
 	
-	for (int i = 0; i < this->appsCount; i++)
+	for (int i = 0; i < this->apps.count; i++)
 	{
-		App * app = this->apps[i];
+		App * app = this->apps.values[i];
 		if (app->running)
 			App_update(app);
 	}
@@ -189,9 +190,9 @@ void Disjunction_stop(Disjunction * const this)
 //dispose removes resources acquired in initialise or updates
 void Disjunction_dispose(Disjunction * const this)
 {
-	for (int i = 0; i < APPS_MAX; i++)
+	for (int i = 0; i < this->apps.count; i++)
 	{
-		App * app = this->apps[i];
+		App * app = this->apps.values[i];
 		if (app)
 			App_dispose(app);
 	}
@@ -202,21 +203,13 @@ void Disjunction_dispose(Disjunction * const this)
 	//free(this); //disjunction object is not a pointer! it's an automatic global variable allocated on the stack.
 }
 
-void Disjunction_addApp(Disjunction * const this, App * const app, int index)
+void Disjunction_addApp(Disjunction * const this, const char * id, App * const app)
 {
 	if (app)
 	{
-		if (0 <= index && index < APPS_MAX)
-		{
-			this->apps[index] = app;
-			this->appsCount++;
-			app->disjunction = this;
-		}
-		else
-		{
-			printf ("Disjunction_addApp - Error: App count must not exceed APPS_MAX.\n"); 
-			exit(1);
-		}
+		printf("app->id? %d\n", app->id == NULL);
+		put(&this->apps, app->id, app);
+		app->disjunction = this;
 	}
 	else
 	{
