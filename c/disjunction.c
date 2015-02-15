@@ -1,10 +1,29 @@
+//collection definitions *before* inclusion of disjunction.h! (definitions in header lead to multiple definitions due to this: http://stackoverflow.com/questions/14425262/why-include-guards-do-not-prevent-multiple-function-definitions)
+
+
+#include "disjunction.h"
+
+#define CURT_SOURCE
+
+#define CURT_ELEMENT_TYPE void
+#define CURT_ELEMENT_PTR *
+#include "../../curt/map.h"
+#undef  CURT_ELEMENT_TYPE
+#undef  CURT_ELEMENT_PTR
+
+#define CURT_ELEMENT_TYPE void
+#define CURT_ELEMENT_PTR *
+#include "../../curt/list.h"
+#undef  CURT_ELEMENT_TYPE
+#undef  CURT_ELEMENT_PTR
+
+#undef  CURT_SOURCE
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h> //for vprintf -- to console
 #include <windows.h>
-
-#include "Disjunction.h"
-
 
 //--------- Timer ---------------//
 Timer * const Timer_constructor(float period)
@@ -133,7 +152,7 @@ void Disjunction_update(Disjunction * const this)
 	
 	for (int i = 0; i < this->apps.count; i++)
 	{
-		App * app = this->apps.values[i];
+		App * app = this->apps.entries[i];
 		if (app->running)
 			App_update(app);
 	}
@@ -192,7 +211,7 @@ void Disjunction_dispose(Disjunction * const this)
 {
 	for (int i = 0; i < this->apps.count; i++)
 	{
-		App * app = this->apps.values[i];
+		App * app = this->apps.entries[i];
 		if (app)
 			App_dispose(app);
 	}
@@ -252,7 +271,8 @@ void App_update(App * const this)
 	
 	//this->input(this); //abstract
 	Ctrl_update(ctrl); //abstract
-	View_updateRecurse(view); //final, though view->output called hereby is abstract
+	if (view != NULL) //JIC user turns off the root view by removing it (since this is the enable/disable mechanism)
+		View_update(view); //final, though view->output called hereby is abstract
 	//Ctrl_updatePost(ctrl); //abstract
 }
 
@@ -477,7 +497,6 @@ void Ctrl_dispose(Ctrl * const this)
 	this->initialised = false;
 }
 
-//dispose removes resources acquired in initialise or updates
 void Ctrl_disposeRecurse(Ctrl * const this)
 {
 	//TODO recurse
@@ -486,26 +505,20 @@ void Ctrl_disposeRecurse(Ctrl * const this)
 	//free(this);
 }
 
-//dispose removes resources acquired in initialise or updates
-void View_updateRecurse(View * const this)
+void View_update(View * const this)
 {
+	//we just remove from the parent's child collections if we don't want a View to run!
 	//if (this->enabled) //(this->running)
 	//{
 		this->update(this);//deltaSec
 
-		/*
-		View * children = this->children;
-		if (children)
+		List childrenByDepth = this->childrenByDepth;
+		int length = childrenByDepth.length;
+		for (int i = length; i > -1; i++)
 		{
-			int count = this->childrenCount;
-			for (int i = 0; i < count; i++)
-			{
-				var child = children[i];
-				if (child.enabled)
-					View_updateRecurse(child);//deltaSec
-			}
+			View * child = (View *)childrenByDepth.entries[i];
+			View_update(child);//deltaSec //only works if enabled
 		}
-		*/
 		
 		this->updatePost(this);//deltaSec
 	//}
@@ -518,18 +531,36 @@ void View_disposeRecurse(View * const this)
 	this->dispose(this);
 	this->initialised = false;
 	//free(this);
+	//_aligned_free(this);
 };
 
 void View_addChild(View * const this, View * const child)
 {
-	if (this->childrenCount < VIEW_CHILDREN_MAX)
+	Map childrenById  = this->childrenById;
+	
+	if (put(&childrenById, (&child->id[0]), child)) //only do the full process if able to add to the map
+	//TODO there are more things to check here... e.g. make sure that capcity of both collections is same (do in init())
 	{
-		this->children[this->childrenCount] = child;
-		this->childrenCount++;
 		child->parent = this;
+		List childrenByDepth = this->childrenByDepth;
+		add(&childrenByDepth, child);
 	}
 }
 
+/*
+void View_removeChild(View * const this, View * const child)
+{
+	Map childrenById  = this->childrenById;
+	
+	if (put(&childrenById, child->id, child)) //only do the full process if able to add to the map
+	//TODO there are more things to check here... e.g. make sure that capcity of both collections is same (do in init())
+	{
+		child->parent = this;
+		List childrenByDepth = this->childrenByDepth;
+		add(&childrenByDepth, child);
+	}
+}
+*/
 void View_swapChildren(View * const this, int indexFrom, int indexTo)
 {
 }
@@ -538,24 +569,5 @@ bool View_isRoot(View * const this)
 {
 	return this->parent == NULL;
 }
-
-//-------- Model --------//
-/*
-void Model_progressJournals(void * model)//(const Journal (*journals)[JOURNALS_SIZE])
-{
-
-	int length = sizeof (model->journals); //Models must always have journals[]
-	
-	for (int i = 0; i < length; i++)
-	{
-		Journal journal = model->journals[i];
-		Journal_shiftEntries(); //allows combining of state and delta shift loops for fewer conditionals
-		Journal_unlock();
-	}
-	
-#define JOURNALS_SIZE 100
-Journal journals[JOURNALS_SIZE];
-}
-*/
 
 void NullFunction(void * const this){/*printf("NullFunction\n");*/}

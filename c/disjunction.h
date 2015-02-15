@@ -1,12 +1,30 @@
 #ifndef DISJUNCTION_H
 #define DISJUNCTION_H
 
-#define APPS_MAX 4
-#define DEVICES_MAX 16
 #define VIEW_CHILDREN_MAX 16
 #include <stdbool.h>
+#include <time.h>
 
-#include "../../curtmap/src/curtmap.h"
+#define CURT_HEADER
+
+#define CURT_ELEMENT_TYPE void
+#define CURT_ELEMENT_PTR *
+#include "../../curt/map.h"
+#undef  CURT_ELEMENT_TYPE
+#undef  CURT_ELEMENT_PTR
+
+#define CURT_ELEMENT_TYPE void
+#define CURT_ELEMENT_PTR *
+#include "../../curt/list.h"
+#undef  CURT_ELEMENT_TYPE
+#undef  CURT_ELEMENT_PTR
+
+#undef  CURT_HEADER
+
+#define List voidPtrList
+#define Map voidPtrMap
+#define add(this, entry) voidPtrList_add(this, entry)
+#define put(this, key, entry) voidPtrMap_put(this, key, entry)
 
 typedef struct Timer
 {
@@ -40,15 +58,18 @@ typedef struct Device
 	struct DeviceChannel * channels;
 	bool readEvents;
 } Device;
-
+//struct ViewPtrList;
+//struct ViewMap;
 //use as base struct for inherited type
 typedef struct View
 {
+	char id[8]; //as per chosen key size
+
 	struct View * parent;
-	struct View * children[VIEW_CHILDREN_MAX];
-	int childrenCount;
+	List childrenByDepth; //we render back to front of course, thus from end to start of this.
+	Map childrenById; //for user convenience, and because builder is a runtime process
+	
 	bool initialised; //true after first start
-	//bool running; //start/stop
 	void * model;
 	
 	void (*start)(void * const this);
@@ -59,6 +80,7 @@ typedef struct View
 	void (*updatePost)(void * const this);
 	//void (*enable)(void * const this); //start
 	//void (*disable)(void * const this); //stop
+	//bool running; //start/stop
 } View;
 const struct View viewEmpty;
 
@@ -83,7 +105,7 @@ typedef struct App
 {
 	char * id; //for compound apps
 	struct Disjunction * disjunction; //in spite of typedef, use struct due to circular ref App->Disjunction TODO remove this ref, and allow Apps to send messages up to DJ?
-	struct CurtMap * services;
+	struct Map services;
 	
 	bool running; //start/stop
 	bool initialised; //true after first start
@@ -115,9 +137,9 @@ typedef struct Service
 
 typedef struct Disjunction
 {
-	struct CurtMap apps;
-	struct CurtMap devices;
-	//struct CurtMap services;
+	struct Map apps;
+	struct Map devices;
+	//struct Map services;
 	
 	bool initialised; //true after first start
 	
@@ -165,13 +187,12 @@ void Ctrl_disposeRecurse(Ctrl * const this);
 //void View_start(View * const this);
 //void View_stop(View * const this);
 //void View_dispose(View * const this);
-//void View_update(View * const this);
-//void View_updatePost(View * const this);
 //void View_initialise(View * const this);
-void View_updateRecurse(View * const this);
+void View_update(View * const this);
 void View_disposeRecurse(View * const this);
 bool View_isRoot(View * const this);
 void View_addChild(View * const this, View * const child);
+//void View_removeChild(View * const this, View * const child); //first get child by ID
 void View_swapChildren(View * const this, int indexFrom, int indexTo);
 
 //void App_initialise(App * const this);
