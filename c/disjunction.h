@@ -2,29 +2,15 @@
 #define DISJUNCTION_H
 
 #define VIEW_CHILDREN_MAX 16
+#define SERVICES_MAX 16
+#define APPS_MAX 4
+#define DEVICES_MAX 16
+
 #include <stdbool.h>
 #include <time.h>
 
-#define CURT_HEADER
-
-#define CURT_ELEMENT_TYPE void
-#define CURT_ELEMENT_PTR *
-#include "../../curt/map.h"
-#undef  CURT_ELEMENT_TYPE
-#undef  CURT_ELEMENT_PTR
-
-#define CURT_ELEMENT_TYPE void
-#define CURT_ELEMENT_PTR *
-#include "../../curt/list.h"
-#undef  CURT_ELEMENT_TYPE
-#undef  CURT_ELEMENT_PTR
-
-#undef  CURT_HEADER
-
-#define List voidPtrList
-#define Map voidPtrMap
-#define add(this, entry) voidPtrList_add(this, entry)
-#define put(this, key, entry) voidPtrMap_put(this, key, entry)
+#include "../../curt/list_generic.h"
+#include "../../curt/map_generic.h"
 
 typedef struct Timer
 {
@@ -66,7 +52,7 @@ typedef struct View
 	char id[8]; //as per chosen key size
 
 	struct View * parent;
-	List childrenByDepth; //we render back to front of course, thus from end to start of this.
+	List childrenByDrawOrder; //we render back to front of course, thus from end to start of this.
 	Map childrenById; //for user convenience, and because builder is a runtime process
 	
 	bool initialised; //true after first start
@@ -139,7 +125,13 @@ typedef struct Disjunction
 {
 	struct Map apps;
 	struct Map devices;
-	//struct Map services;
+	struct App _apps[APPS_MAX];
+	//struct Service _services[SERVICES_MAX];
+	struct Device _devices[DEVICES_MAX];
+	
+	Key _appKeys[APPS_MAX];
+	//Key _serviceKeys[SERVICES_MAX];
+	Key _deviceKeys[DEVICES_MAX];
 	
 	bool initialised; //true after first start
 	
@@ -203,11 +195,11 @@ void App_dispose(App * const this);
 void App_addService(App * const this, const char * id, Service * service);
 void App_removeService(App * const this, const char * id);
 
-//void Disjunction_initialise(Disjunction * const this);
-void Disjunction_update(Disjunction * const this);
+void Disjunction_initialise(Disjunction * const this);
+void Disjunction_dispose(Disjunction * const this);
 void Disjunction_start(Disjunction * const this);
 void Disjunction_stop(Disjunction * const this);
-void Disjunction_dispose(Disjunction * const this);
+void Disjunction_update(Disjunction * const this);
 void Disjunction_addApp(Disjunction * const this, const char * id, App * const app);
 void Disjunction_removeApp(Disjunction * const this, const char * id);
 void Disjunction_addDevice(Disjunction * const this, const char * id, Device * const device);

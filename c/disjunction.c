@@ -1,24 +1,6 @@
 //collection definitions *before* inclusion of disjunction.h! (definitions in header lead to multiple definitions due to this: http://stackoverflow.com/questions/14425262/why-include-guards-do-not-prevent-multiple-function-definitions)
 
-
 #include "disjunction.h"
-
-#define CURT_SOURCE
-
-#define CURT_ELEMENT_TYPE void
-#define CURT_ELEMENT_PTR *
-#include "../../curt/map.h"
-#undef  CURT_ELEMENT_TYPE
-#undef  CURT_ELEMENT_PTR
-
-#define CURT_ELEMENT_TYPE void
-#define CURT_ELEMENT_PTR *
-#include "../../curt/list.h"
-#undef  CURT_ELEMENT_TYPE
-#undef  CURT_ELEMENT_PTR
-
-#undef  CURT_SOURCE
-
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -147,7 +129,7 @@ double Disjunction_getDeltaSec(double counterDelta, double counterFrequency)
 
 void Disjunction_update(Disjunction * const this)
 {
-	//printf("Disjunction_update");
+	//printf("Disjunction_update\n");
 	//printf("Disjunction_update disjunction.timer->deltaSec %f\n",  this->timer->deltaSec);
 	
 	for (int i = 0; i < this->apps.count; i++)
@@ -174,36 +156,37 @@ void Disjunction_update(Disjunction * const this)
 */
 }
 
+void Disjunction_initialise(Disjunction * const this)
+{
+	this->apps.keys = this->_appKeys;
+	this->apps.entries = (void *) &this->_apps;
+	this->apps.capacity = sizeof(this->_apps);
+	this->apps.fail = NULL;
+	
+	this->devices.keys = this->_deviceKeys;
+	this->devices.entries = (void *) &this->_devices;
+	this->devices.capacity = sizeof(this->_devices);
+	this->devices.fail = NULL;
+	
+	//TODO services?
+	
+	if (this->initialise)
+		this->initialise((void *)this);
+		
+	this->initialised = true;
+}
 void Disjunction_start(Disjunction * const this)
 {
-	if (!(this->timer->running))
-	{
-		if (!(this->initialised))
-		{
-			if(!this->initialise)
-			{
-				printf ("Disjunction_start - Error: missing initialise function.\n"); 
-				exit(1);
-			}
-			
-			if(!this->dispose)
-			{
-				printf ("Disjunction_start - Error: missing dispose function.\n"); 
-				exit(1);
-			}
-			
-			this->initialise((void *)this);
-		}	
-		
-		Timer_start(this->timer); //instead of this->running = true;
-	}
+	if (!this->timer->running)
+		Timer_start(this->timer);
 }
 
 void Disjunction_stop(Disjunction * const this)
 {
-	Timer_stop(this->timer);
+	if (this->timer->running)
+		Timer_stop(this->timer);
 	
-	//this->start((void *)this);
+	//this->stop((void *)this);
 }
 
 //dispose removes resources acquired in initialise or updates
@@ -216,7 +199,9 @@ void Disjunction_dispose(Disjunction * const this)
 			App_dispose(app);
 	}
 	
-	this->dispose((void *)this);
+	if (this->dispose)
+		this->dispose((void *)this);
+	
 	this->initialised = false;
 	printf ("Disjunction_dispose done."); 
 	//free(this); //disjunction object is not a pointer! it's an automatic global variable allocated on the stack.
@@ -271,7 +256,7 @@ void App_update(App * const this)
 	
 	//this->input(this); //abstract
 	Ctrl_update(ctrl); //abstract
-	if (view != NULL) //JIC user turns off the root view by removing it (since this is the enable/disable mechanism)
+	//if (view != NULL) //JIC user turns off the root view by removing it (since this is the enable/disable mechanism)
 		View_update(view); //final, though view->output called hereby is abstract
 	//Ctrl_updatePost(ctrl); //abstract
 }
@@ -280,12 +265,12 @@ void App_start(App * const this)
 {
 	printf("App_start\n");
 	
-	if (!(this->running))
+	if (!this->running)
 	{
 		Ctrl * ctrl = this->ctrl;
 		View * view = this->view;
 		
-		if (!(this->initialised))
+		if (!this->initialised)
 		{
 			//for now, check ALL on initialisation (TODO - move to relevant sections and IFDEF DEBUG)
 			if(!this->initialise)
@@ -439,6 +424,7 @@ void App_start(App * const this)
 				}
 			}
 			
+			//initialise app
 			this->initialise((void *)this);
 		}
 		
@@ -512,12 +498,14 @@ void View_update(View * const this)
 	//{
 		this->update(this);//deltaSec
 
-		List childrenByDepth = this->childrenByDepth;
-		int length = childrenByDepth.length;
-		for (int i = length; i > -1; i++)
+		List childrenByDrawOrder = this->childrenByDrawOrder;
+		int length = childrenByDrawOrder.length;
+		for (int i = length - 1; i > -1; i--)
+		//for (int i = 0; i < length; i++)
 		{
-			View * child = (View *)childrenByDepth.entries[i];
+			View * child = (View *)childrenByDrawOrder.entries[i];
 			View_update(child);//deltaSec //only works if enabled
+			
 		}
 		
 		this->updatePost(this);//deltaSec
@@ -542,8 +530,8 @@ void View_addChild(View * const this, View * const child)
 	//TODO there are more things to check here... e.g. make sure that capcity of both collections is same (do in init())
 	{
 		child->parent = this;
-		List childrenByDepth = this->childrenByDepth;
-		add(&childrenByDepth, child);
+		List childrenByDrawOrder = this->childrenByDrawOrder;
+		add(&childrenByDrawOrder, child);
 	}
 }
 
@@ -556,8 +544,8 @@ void View_removeChild(View * const this, View * const child)
 	//TODO there are more things to check here... e.g. make sure that capcity of both collections is same (do in init())
 	{
 		child->parent = this;
-		List childrenByDepth = this->childrenByDepth;
-		add(&childrenByDepth, child);
+		List childrenByDrawOrder = this->childrenByDrawOrder;
+		add(&childrenByDrawOrder, child);
 	}
 }
 */
