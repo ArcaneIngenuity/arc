@@ -185,8 +185,6 @@ void Disjunction_stop(Disjunction * const this)
 {
 	if (this->timer->running)
 		Timer_stop(this->timer);
-	
-	//this->stop((void *)this);
 }
 
 //dispose removes resources acquired in initialise or updates
@@ -429,9 +427,19 @@ void App_start(App * const this)
 		}
 		
 		this->running = true;
+		/*
+		if (!ctrl->initialised)
+		{
+			printf ("App_start - Error: ctrl has not been initialised.\n"); 
+			exit(1);
+		}
 		
-		ctrl->initialise((void *)ctrl); //DEV - should be in Ctrl_start()
-		view->initialise((void *)view); //DEV - should be in View_start()
+		if (!view->initialised)
+		{
+			printf ("App_start - Error: view has not been initialised.\n"); 
+			exit(1);
+		}
+		*/
 		ctrl->start((void *)ctrl);
 		view->start((void *)view);
 	}
@@ -467,6 +475,14 @@ void App_dispose(App * const this)
 	free(this);
 }
 
+void Ctrl_initialise(Ctrl * const this)
+{
+	if (this->initialise)
+		this->initialise(this);
+	
+	this->initialised = true;
+}
+
 void Ctrl_update(Ctrl * const this)
 {
 	this->update(this);//deltaSec
@@ -491,25 +507,41 @@ void Ctrl_disposeRecurse(Ctrl * const this)
 	//free(this);
 }
 
+//this can be called on construction or on first add to parent
+void View_initialise(View * const this)
+{
+	printf("View_initialise %s!\n", this->id);
+	
+	this->childrenById.keys = this->_childrenByIdKeys;
+	this->childrenById.entries = (void *) &this->_childrenById;
+	this->childrenById.capacity = sizeof(this->_childrenById);
+	this->childrenById.fail = NULL;
+	
+	this->childrenByZ.entries = (void *) &this->_childrenByZ;
+	this->childrenByZ.capacity = sizeof(this->_childrenByZ);
+	this->childrenByZ.fail = NULL;
+	
+	if (this->initialise)
+		this->initialise(this);
+	
+	this->initialised = true;
+}
+
 void View_update(View * const this)
 {
-	//we just remove from the parent's child collections if we don't want a View to run!
-	//if (this->enabled) //(this->running)
-	//{
-		this->update(this);//deltaSec
+	this->update(this);//deltaSec
 
-		List childrenByDrawOrder = this->childrenByDrawOrder;
-		int length = childrenByDrawOrder.length;
-		for (int i = length - 1; i > -1; i--)
-		//for (int i = 0; i < length; i++)
-		{
-			View * child = (View *)childrenByDrawOrder.entries[i];
-			View_update(child);//deltaSec //only works if enabled
-			
-		}
-		
-		this->updatePost(this);//deltaSec
-	//}
+	List childrenByZ = this->childrenByZ;
+	int length = childrenByZ.length;
+	printf("try %s %d\n", &this->id, length);
+
+	for (int i = 0; i < length; i++)
+	{
+		View * child = (View *)childrenByZ.entries[i];
+		View_update(child);//deltaSec //only works if enabled
+	}
+	
+	this->updatePost(this);//deltaSec
 }
 
 void View_disposeRecurse(View * const this)
@@ -524,15 +556,13 @@ void View_disposeRecurse(View * const this)
 
 void View_addChild(View * const this, View * const child)
 {
-	Map childrenById  = this->childrenById;
+	Map childrenById = this->childrenById;
+	List childrenByZ = this->childrenByZ;
 	
-	if (put(&childrenById, (&child->id[0]), child)) //only do the full process if able to add to the map
-	//TODO there are more things to check here... e.g. make sure that capcity of both collections is same (do in init())
-	{
-		child->parent = this;
-		List childrenByDrawOrder = this->childrenByDrawOrder;
-		add(&childrenByDrawOrder, child);
-	}
+	//TODO should be if canPut() / canAdd() (both have same capacity)
+	child->parent = this;
+	put(&this->childrenById, &child->id[0], child);
+	add(&this->childrenByZ, child); //just add it at the next available slot, i.e. on top by default
 }
 
 /*
@@ -544,8 +574,8 @@ void View_removeChild(View * const this, View * const child)
 	//TODO there are more things to check here... e.g. make sure that capcity of both collections is same (do in init())
 	{
 		child->parent = this;
-		List childrenByDrawOrder = this->childrenByDrawOrder;
-		add(&childrenByDrawOrder, child);
+		List childrenByZ = this->childrenByZ;
+		add(&childrenByZ, child);
 	}
 }
 */

@@ -1,7 +1,7 @@
 #ifndef DISJUNCTION_H
 #define DISJUNCTION_H
 
-#define VIEW_CHILDREN_MAX 16
+#define VIEW_CHILDREN_MAX 8
 #define SERVICES_MAX 16
 #define APPS_MAX 4
 #define DEVICES_MAX 16
@@ -14,8 +14,6 @@
 
 typedef struct Timer
 {
-	//struct Disjunction * disjunction;
-
 	float baseSec; /** internal */
 	float deltaSec; /** public read / internal write */
 	float accumulatorSec;
@@ -44,16 +42,21 @@ typedef struct Device
 	struct DeviceChannel * channels;
 	bool readEvents;
 } Device;
-//struct ViewPtrList;
-//struct ViewMap;
+
 //use as base struct for inherited type
 typedef struct View
 {
-	char id[8]; //as per chosen key size
+	char id[8+1]; //as per chosen key size plus null terminator
 
 	struct View * parent;
-	List childrenByDrawOrder; //we render back to front of course, thus from end to start of this.
+	
 	Map childrenById; //for user convenience, and because builder is a runtime process
+	List childrenByZ; //we render back to front of course, thus from end to start of this.
+	
+	Key _childrenByIdKeys[VIEW_CHILDREN_MAX];
+	struct View * _childrenById[VIEW_CHILDREN_MAX];
+	
+	struct View * _childrenByZ[VIEW_CHILDREN_MAX];
 	
 	bool initialised; //true after first start
 	void * model;
@@ -125,13 +128,15 @@ typedef struct Disjunction
 {
 	struct Map apps;
 	struct Map devices;
-	struct App _apps[APPS_MAX];
-	//struct Service _services[SERVICES_MAX];
-	struct Device _devices[DEVICES_MAX];
 	
+	struct App _apps[APPS_MAX];
 	Key _appKeys[APPS_MAX];
-	//Key _serviceKeys[SERVICES_MAX];
+	
+	struct Device _devices[DEVICES_MAX];
 	Key _deviceKeys[DEVICES_MAX];
+	
+	//struct Service _services[SERVICES_MAX];
+	//Key _serviceKeys[SERVICES_MAX];
 	
 	bool initialised; //true after first start
 	
@@ -170,20 +175,18 @@ void Pointer_hasMoved(Pointer * const this);
 //bool Ctrl_mustStop(Ctrl * const this);
 //void Ctrl_start(Ctrl * const this);
 //void Ctrl_stop(Ctrl * const this);
-//void Ctrl_initialise(Ctrl * const this);
+void Ctrl_initialise(Ctrl * const this);
 void Ctrl_update(Ctrl * const this);
 void Ctrl_updatePost(Ctrl * const this);
 void Ctrl_dispose(Ctrl * const this);
 void Ctrl_disposeRecurse(Ctrl * const this);
 
-//void View_start(View * const this);
-//void View_stop(View * const this);
-//void View_dispose(View * const this);
-//void View_initialise(View * const this);
+void View_initialise(View * const this);
 void View_update(View * const this);
 void View_disposeRecurse(View * const this);
 bool View_isRoot(View * const this);
 void View_addChild(View * const this, View * const child);
+//TODO...
 //void View_removeChild(View * const this, View * const child); //first get child by ID
 void View_swapChildren(View * const this, int indexFrom, int indexTo);
 
@@ -192,6 +195,7 @@ void App_update(App * const this);
 void App_start(App * const this);
 void App_stop(App * const this);
 void App_dispose(App * const this);
+//TODO...
 void App_addService(App * const this, const char * id, Service * service);
 void App_removeService(App * const this, const char * id);
 
@@ -201,6 +205,7 @@ void Disjunction_start(Disjunction * const this);
 void Disjunction_stop(Disjunction * const this);
 void Disjunction_update(Disjunction * const this);
 void Disjunction_addApp(Disjunction * const this, const char * id, App * const app);
+//TODO...
 void Disjunction_removeApp(Disjunction * const this, const char * id);
 void Disjunction_addDevice(Disjunction * const this, const char * id, Device * const device);
 void Disjunction_removeDevice(Disjunction * const this, const char * id);
