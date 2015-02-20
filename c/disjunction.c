@@ -525,6 +525,15 @@ void View_initialise(View * const this)
 		this->initialise(this);
 	
 	this->initialised = true;
+	
+	List childrenByZ = this->childrenByZ;
+	int length = childrenByZ.length;
+
+	for (int i = 0; i < length; i++)
+	{
+		View * child = (View *)childrenByZ.entries[i];
+		View_initialise(child);//deltaSec //only works if enabled
+	}
 }
 
 void View_update(View * const this)
@@ -533,7 +542,7 @@ void View_update(View * const this)
 
 	List childrenByZ = this->childrenByZ;
 	int length = childrenByZ.length;
-	printf("try %s %d\n", &this->id, length);
+	//printf("try %s %d\n", &this->id, length);
 
 	for (int i = 0; i < length; i++)
 	{
