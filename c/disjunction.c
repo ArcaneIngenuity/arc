@@ -256,7 +256,7 @@ void App_update(App * const this)
 	Ctrl_update(ctrl); //abstract
 	//if (view != NULL) //JIC user turns off the root view by removing it (since this is the enable/disable mechanism)
 		View_update(view); //final, though view->output called hereby is abstract
-	//Ctrl_updatePost(ctrl); //abstract
+	Ctrl_updatePost(ctrl); //abstract
 }
 
 void App_start(App * const this)
