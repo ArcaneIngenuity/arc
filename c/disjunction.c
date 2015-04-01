@@ -7,81 +7,16 @@
 #include <stdarg.h> //for vprintf -- to console
 #include <windows.h>
 
-//--------- Timer ---------------//
-Timer * const Timer_constructor(float period)
-{
-	Timer * timer = malloc(sizeof(Timer));
-	
-	//Timer
-	timer->period = period;
-	timer->accumulatorSec = 0;
-	timer->deltaSec = 0;
-	
-	//QPC
-	timer->counterPeriod = 0;
-	
-	return timer;
-}
-
-void Timer_getDeltaSec(Timer * const this)
-{
-	this->counter2 = this->counter1;
-	
-	QueryPerformanceCounter((LARGE_INTEGER *)&(this->counter1));
-	
-	this->counterDelta = this->counter1 - this->counter2;
-	
-	this->deltaSec = (this->counterDelta * 1.0) / (double) this->counterFrequency;
-}
-
-void Timer_accumulate(Timer * const this)
-{
-	this->accumulatorSec += this->deltaSec;
-}
-
-int Timer_canConsume(Timer * const this)
-{
-	return this->running &&
-		(this->accumulatorSec >= this->period);
-}
-
-void Timer_consume(Timer * const this)
-{
-	//printf("update: accumulatorSec was %.10f\n", this->accumulatorSec); 
-	this->accumulatorSec -= this->period; //consume
-	//printf("update: accumulatorSec is  %.10f\n", this->accumulatorSec); 
-}
-
-void Timer_start(Timer * const this)
-{
-	QueryPerformanceFrequency((LARGE_INTEGER *)&(this->counterFrequency)); //calculate frequency just once, guaranteed to stay same thereafter.
-	QueryPerformanceCounter((LARGE_INTEGER *)&(this->counter1)); //ensures we don't have a negative delta to start
-	printf("QPCTimer_start %i\n", this->counter1);
-	
-	this->counterPeriod = 1.0 / (double)this->counterFrequency;
-	printf("f/t is %.10f / %.10f\n", (double)this->counterFrequency, this->counterPeriod);
-	
-	this->running = true;
-}
-
-void Timer_stop(Timer * const this)
-{
-	//TODO !!
-	QueryPerformanceFrequency((LARGE_INTEGER *)&(this->counterFrequency)); //calculate frequency just once, guaranteed to stay same thereafter.
-	QueryPerformanceCounter((LARGE_INTEGER *)&(this->counter1)); //ensures we don't have a negative delta to start
-	//printf("QPCTimer_start %i\n", this->counter1);
-	
-	this->counterPeriod = 1.0 / (double)this->counterFrequency;
-	//printf("f/t is %.10f / %.10f\n", (double)this->counterFrequency, this->counterPeriod);
-	
-	this->running = false;
-}
-
 //--------- Device --------------//
 void Device_constructor(Device * this, int channelsLength)
 {
 	this->channelsLength = channelsLength;
 	this->channels = malloc(channelsLength * sizeof(Device));
+}
+
+void Device_poll(Device * this)
+{
+	//this->poll(this);//deltaSec
 }
 
 //--------- Pointer -------------//
@@ -90,35 +25,7 @@ void Pointer_updateSelected(Pointer * const this)
 {
 
 }
-/*
-this.setTargetLast = function()
-	{
-		this.targetLast = this.target;
-	}
-	
-	this.progressDrag = function()
-	{
-		this.dragging.bounds.x0 += this.xChannel.delta;
-		this.dragging.bounds.x1 += this.xChannel.delta;
-		this.dragging.bounds.y0 += this.yChannel.delta;
-		this.dragging.bounds.y1 += this.yChannel.delta;
-	}
-	//generally called by view to do some animation such as border highlight
-	this.hasChangedTarget = function()
-	{
-		return this.target !== this.targetLast;
-	}
-	
-	this.hasChangedSelected = function()
-	{
-		return this.isSelected != this.wasSelected;
-	}
-	
-	this.hasMoved = function()
-	{
-		return this.xChannel.delta != 0 || this.yChannel.delta != 0;
-	}
-*/
+
 //--------- Disjunction ---------//
 
 double Disjunction_getDeltaSec(double counterDelta, double counterFrequency)
@@ -132,22 +39,38 @@ void Disjunction_update(Disjunction * const this)
 	//printf("Disjunction_update\n");
 	//printf("Disjunction_update disjunction.timer->deltaSec %f\n",  this->timer->deltaSec);
 	
+	//poll devices
+	for (int i = 0; i < this->devices.count; i++)
+	{
+		Device * device = this->devices.entries[i]; //read from map of values
+		Device_poll(device);
+	}
+
+	//update apps
 	for (int i = 0; i < this->apps.count; i++)
 	{
-		App * app = this->apps.entries[i];
+		App * app = this->apps.entries[i]; //read from map of values
 		if (app->running)
 			App_update(app);
 	}
 /*
-		this.devices.poll();
-		for (var id in this.apps)
-		{	
-			var app = this.apps[id];
-			app.update();
+	//flush devices
+	var numDevices = this.array.length;
+	for (var i = 0; i < numDevices; i++)
+	{
+		var device = this.array[i];
+		if (device.eventBased)
+		{
+			var numChannels = device.channels.length;
+			for (var j = 0; j < numChannels; j++)
+			{
+				var channel = device.channels[j];
+				channel.delta = 0;
+			}
 		}
-		
-		this.devices.flush();
-		
+	}
+	*/
+/*
 		for (var i = 0; i < this.services.array.length; i++)
 		{
 			var service = this.services.array[i];
@@ -174,17 +97,6 @@ void Disjunction_initialise(Disjunction * const this)
 		this->initialise((void *)this);
 		
 	this->initialised = true;
-}
-void Disjunction_start(Disjunction * const this)
-{
-	if (!this->timer->running)
-		Timer_start(this->timer);
-}
-
-void Disjunction_stop(Disjunction * const this)
-{
-	if (this->timer->running)
-		Timer_stop(this->timer);
 }
 
 //dispose removes resources acquired in initialise or updates
@@ -257,6 +169,11 @@ void App_update(App * const this)
 	//if (view != NULL) //JIC user turns off the root view by removing it (since this is the enable/disable mechanism)
 		View_update(view); //final, though view->output called hereby is abstract
 	Ctrl_updatePost(ctrl); //abstract
+}
+
+void App_initialise(App * const this)
+{
+	this->initialise((void *)this);	
 }
 
 void App_start(App * const this)
@@ -423,7 +340,7 @@ void App_start(App * const this)
 			}
 			
 			//initialise app
-			this->initialise((void *)this);
+			//this->initialise((void *)this);
 		}
 		
 		this->running = true;
@@ -508,9 +425,9 @@ void Ctrl_disposeRecurse(Ctrl * const this)
 }
 
 //this can be called on construction or on first add to parent
-void View_initialise(View * const this)
+void View_construct(View * const this)
 {
-	printf("View_initialise %s!\n", this->id);
+	printf("View_construct %s!\n", this->id);
 	
 	this->childrenById.keys = this->_childrenByIdKeys;
 	this->childrenById.entries = (void *) &this->_childrenById;
@@ -520,7 +437,11 @@ void View_initialise(View * const this)
 	this->childrenByZ.entries = (void *) &this->_childrenByZ;
 	this->childrenByZ.capacity = sizeof(this->_childrenByZ);
 	this->childrenByZ.fail = NULL;
+}
 	
+void View_initialise(View * const this)
+{
+	printf("View_initialise %s!\n", this->id);
 	if (this->initialise)
 		this->initialise(this);
 	
@@ -598,3 +519,6 @@ bool View_isRoot(View * const this)
 }
 
 void NullFunction(void * const this){/*printf("NullFunction\n");*/}
+
+//constructor call
+Disjunction_construct(&disjunction);

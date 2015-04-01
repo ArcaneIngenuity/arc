@@ -12,24 +12,6 @@
 #include "../../curt/list_generic.h"
 #include "../../curt/map_generic.h"
 
-typedef struct Timer
-{
-	float baseSec; /** internal */
-	float deltaSec; /** public read / internal write */
-	float accumulatorSec;
-	float period;
-	
-	bool running;
-	
-	//Windows - QPC
-	__int64 counter1;
-	__int64 counter2;
-	__int64 counterDelta;
-	__int64 counterFrequency;
-	double counterPeriod;
-	
-} Timer;
-
 typedef struct DeviceChannel
 {
 	float value;
@@ -41,6 +23,10 @@ typedef struct Device
 	int channelsLength;
 	struct DeviceChannel * channels;
 	bool readEvents;
+	
+	void (*receive)(void * const this);
+	void (*poll)(void * const this);
+	void (*flush)(void * const this);
 } Device;
 
 //use as base struct for inherited type
@@ -139,9 +125,7 @@ typedef struct Disjunction
 	//Key _serviceKeys[SERVICES_MAX];
 	
 	bool initialised; //true after first start
-	
-	struct Timer * timer; //cannot know class / size
-	
+
 	struct Pointer pointer;
 	//TODO Builder
 	
@@ -155,15 +139,10 @@ typedef struct Disjunction
 const struct Disjunction disjunctionEmpty;
 
 //FINAL/BASE METHODS
-Timer * const Timer_constructor(float period);
-int Timer_canConsume(Timer * const this);
-void Timer_accumulate(Timer * const this);
-void Timer_getDeltaSec(Timer * const this);
-void Timer_consume(Timer * const this);
-void Timer_start(Timer * const this);
-void Timer_stop(Timer * const this);
 
 void Device_constructor(Device * this, int channelCount);
+void Device_poll(Device * this);
+//void Device_flush(Device * this);
 void DeviceChannel_constructor(Device * this);
 
 void Pointer_updateSelected(Pointer * const this);
@@ -181,6 +160,7 @@ void Ctrl_updatePost(Ctrl * const this);
 void Ctrl_dispose(Ctrl * const this);
 void Ctrl_disposeRecurse(Ctrl * const this);
 
+void View_construct(View * const this);
 void View_initialise(View * const this);
 void View_update(View * const this);
 void View_disposeRecurse(View * const this);
@@ -190,7 +170,7 @@ void View_addChild(View * const this, View * const child);
 //void View_removeChild(View * const this, View * const child); //first get child by ID
 void View_swapChildren(View * const this, int indexFrom, int indexTo);
 
-//void App_initialise(App * const this);
+void App_initialise(App * const this);
 void App_update(App * const this);
 void App_start(App * const this);
 void App_stop(App * const this);
@@ -199,10 +179,9 @@ void App_dispose(App * const this);
 void App_addService(App * const this, const char * id, Service * service);
 void App_removeService(App * const this, const char * id);
 
+void Disjunction_construct(Disjunction * const this);
 void Disjunction_initialise(Disjunction * const this);
 void Disjunction_dispose(Disjunction * const this);
-void Disjunction_start(Disjunction * const this);
-void Disjunction_stop(Disjunction * const this);
 void Disjunction_update(Disjunction * const this);
 void Disjunction_addApp(Disjunction * const this, const char * id, App * const app);
 //TODO...
@@ -212,6 +191,5 @@ void Disjunction_removeDevice(Disjunction * const this, const char * id);
 
 void NullFunction(void * const this);
 
-/*extern*/ Disjunction disjunction;// = {0}; //could use an empty?
-
+Disjunction disjunction;// = {0}; //could use an empty?
 #endif //DISJUNCTION_H
