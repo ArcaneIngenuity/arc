@@ -79,7 +79,7 @@ void Disjunction_update(Disjunction * const this)
 */
 }
 
-void Disjunction_initialise(Disjunction * const this)
+void Disjunction_construct(Disjunction * const this)
 {
 	this->apps.keys = this->_appKeys;
 	this->apps.entries = (void *) &this->_apps;
@@ -90,13 +90,6 @@ void Disjunction_initialise(Disjunction * const this)
 	this->devices.entries = (void *) &this->_devices;
 	this->devices.capacity = sizeof(this->_devices);
 	this->devices.fail = NULL;
-	
-	//TODO services?
-	
-	if (this->initialise)
-		this->initialise((void *)this);
-		
-	this->initialised = true;
 }
 
 //dispose removes resources acquired in initialise or updates
@@ -519,6 +512,3 @@ bool View_isRoot(View * const this)
 }
 
 void NullFunction(void * const this){/*printf("NullFunction\n");*/}
-
-//constructor call
-Disjunction_construct(&disjunction);

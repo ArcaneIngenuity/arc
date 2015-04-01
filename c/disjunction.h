@@ -7,7 +7,6 @@
 #define DEVICES_MAX 16
 
 #include <stdbool.h>
-#include <time.h>
 
 #include "../../curt/list_generic.h"
 #include "../../curt/map_generic.h"
@@ -123,8 +122,6 @@ typedef struct Disjunction
 	
 	//struct Service _services[SERVICES_MAX];
 	//Key _serviceKeys[SERVICES_MAX];
-	
-	bool initialised; //true after first start
 
 	struct Pointer pointer;
 	//TODO Builder
