@@ -105,7 +105,7 @@ void Disjunction_dispose(Disjunction * const this)
 	if (this->dispose)
 		this->dispose((void *)this);
 	
-	this->initialised = false;
+	//this->initialised = false;
 	printf ("Disjunction_dispose done."); 
 	//free(this); //disjunction object is not a pointer! it's an automatic global variable allocated on the stack.
 }
