@@ -81,15 +81,8 @@ void Disjunction_update(Disjunction * const this)
 
 void Disjunction_construct(Disjunction * const this)
 {
-	this->apps.keys = this->_appKeys;
-	this->apps.entries = (void *) &this->_apps;
-	this->apps.capacity = sizeof(this->_apps);
-	this->apps.fail = NULL;
-	
-	this->devices.keys = this->_deviceKeys;
-	this->devices.entries = (void *) &this->_devices;
-	this->devices.capacity = sizeof(this->_devices);
-	this->devices.fail = NULL;
+	voidPtrMap_create(&this->apps, 		APPS_MAX, 		&this->_appKeys, 	(void *)&this->_apps, 		NULL);
+	voidPtrMap_create(&this->devices, 	DEVICES_MAX, 	&this->_deviceKeys, (void *)&this->_devices, 	NULL);
 }
 
 //dispose removes resources acquired in initialise or updates
@@ -422,10 +415,7 @@ void View_construct(View * const this)
 {
 	printf("View_construct %s!\n", this->id);
 	
-	this->childrenById.keys = this->_childrenByIdKeys;
-	this->childrenById.entries = (void *) &this->_childrenById;
-	this->childrenById.capacity = sizeof(this->_childrenById);
-	this->childrenById.fail = NULL;
+	voidPtrMap_create(&this->childrenById, VIEW_CHILDREN_MAX, &this->_childrenByIdKeys, (void *)&this->_childrenById, NULL);
 	
 	this->childrenByZ.entries = (void *) &this->_childrenByZ;
 	this->childrenByZ.capacity = sizeof(this->_childrenByZ);
