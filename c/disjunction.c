@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h> //for vprintf -- to console
-#include <windows.h>
 
 //--------- Device --------------//
 void Device_constructor(Device * this, int channelsLength)
