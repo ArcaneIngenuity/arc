@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <stdarg.h> //for vprintf -- to console
 
+//#define DISJUNCTION_DEBUG
+
 //--------- Device --------------//
 void Device_constructor(Device * this, int channelsLength)
 {
@@ -35,8 +37,9 @@ double Disjunction_getDeltaSec(double counterDelta, double counterFrequency)
 
 void Disjunction_update(Disjunction * const this)
 {
-	//printf("Disjunction_update\n");
-	//printf("Disjunction_update disjunction.timer->deltaSec %f\n",  this->timer->deltaSec);
+	#ifdef DISJUNCTION_DEBUG
+	printf("Disjunction_update\n");
+	#endif
 	
 	//poll devices
 	for (int i = 0; i < this->devices.count; i++)
@@ -120,7 +123,9 @@ void Disjunction_addApp(Disjunction * const this, const char * id, App * const a
 //--------- App ---------//
 void App_update(App * const this)
 {
-	//printf("App_update\n");
+	#ifdef DISJUNCTION_DEBUG
+	printf("App_update\n");
+	#endif
 	
 	Ctrl * ctrl = this->ctrl;
 	View * view = this->view;
@@ -163,7 +168,9 @@ void App_initialise(App * const this)
 
 void App_start(App * const this)
 {
+	#ifdef DISJUNCTION_DEBUG
 	printf("App_start\n");
+	#endif
 	
 	if (!this->running)
 	{
@@ -349,8 +356,10 @@ void App_start(App * const this)
 
 void App_stop(App * const this)
 {
+	#ifdef DISJUNCTION_DEBUG
 	printf("App_stop\n");
-
+	#endif
+	
 	Ctrl * ctrl = this->ctrl;
 	View * view = this->view;
 	
@@ -412,7 +421,9 @@ void Ctrl_disposeRecurse(Ctrl * const this)
 //this can be called on construction or on first add to parent
 void View_construct(View * const this)
 {
+	#ifdef DISJUNCTION_DEBUG
 	printf("View_construct %s!\n", this->id);
+	#endif
 	
 	voidPtrMap_create(&this->childrenById, VIEW_CHILDREN_MAX, &this->_childrenByIdKeys, (void *)&this->_childrenById, NULL);
 	
@@ -423,7 +434,10 @@ void View_construct(View * const this)
 	
 void View_initialise(View * const this)
 {
+	#ifdef DISJUNCTION_DEBUG
 	printf("View_initialise %s!\n", this->id);
+	#endif
+	
 	if (this->initialise)
 		this->initialise(this);
 	
@@ -458,7 +472,10 @@ void View_update(View * const this)
 
 void View_disposeRecurse(View * const this)
 {
+	#ifdef DISJUNCTION_DEBUG
 	printf("View_disposeRecurse\n");
+	#endif
+	
 	//TODO recurse
 	this->dispose(this);
 	this->initialised = false;
