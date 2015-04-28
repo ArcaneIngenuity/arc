@@ -31,8 +31,12 @@ typedef struct Device
 //use as base struct for inherited type
 typedef struct View
 {
+	//TODO fix this!
 	char id[8+1]; //as per chosen key size plus null terminator
 
+	int width;
+	int height;
+	
 	struct View * parent;
 	
 	Map childrenById; //for user convenience, and because builder is a runtime process
@@ -52,6 +56,7 @@ typedef struct View
 	void (*dispose)(void * const this);
 	void (*update)(void * const this);
 	void (*updatePost)(void * const this);
+	void (*onParentResize)(void * const this);
 	//void (*enable)(void * const this); //start
 	//void (*disable)(void * const this); //stop
 	//bool running; //start/stop
@@ -163,6 +168,7 @@ void View_update(View * const this);
 void View_disposeRecurse(View * const this);
 bool View_isRoot(View * const this);
 void View_addChild(View * const this, View * const child);
+void View_onParentResizeRecurse(View * const this);
 //TODO...
 //void View_removeChild(View * const this, View * const child); //first get child by ID
 void View_swapChildren(View * const this, int indexFrom, int indexTo);
@@ -186,7 +192,7 @@ void Disjunction_removeApp(Disjunction * const this, const char * id);
 void Disjunction_addDevice(Disjunction * const this, const char * id, Device * const device);
 void Disjunction_removeDevice(Disjunction * const this, const char * id);
 
-void NullFunction(void * const this);
+void doNothing(void * const this);
 
 Disjunction disjunction;// = {0}; //could use an empty?
 #endif //DISJUNCTION_H

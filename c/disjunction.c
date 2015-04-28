@@ -517,4 +517,17 @@ bool View_isRoot(View * const this)
 	return this->parent == NULL;
 }
 
-void NullFunction(void * const this){/*printf("NullFunction\n");*/}
+void View_onParentResizeRecurse(View * const this)
+{
+	int length = this->childrenByZ.length;
+	for (int i = 0; i < length; i++)
+	{
+		View * child = this->childrenByZ.entries[i];
+		
+		//depth first - update child and then recurse to its children
+		child->onParentResize(child);
+		View_onParentResizeRecurse(child);
+	}	
+}
+
+void doNothing(void * const this){/*printf("doNothing\n");*/}
