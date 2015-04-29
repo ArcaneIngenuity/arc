@@ -23,9 +23,9 @@ typedef struct Device
 	struct DeviceChannel * channels;
 	bool readEvents;
 	
-	void (*receive)(void * const this);
-	void (*poll)(void * const this);
-	void (*flush)(void * const this);
+	void (*receive)(struct Device * const this);
+	void (*poll)(struct Device * const this);
+	void (*flush)(struct Device * const this);
 } Device;
 
 //use as base struct for inherited type
@@ -50,15 +50,15 @@ typedef struct View
 	bool initialised; //true after first start
 	void * model;
 	
-	void (*start)(void * const this);
-	void (*stop)(void * const this);
-	void (*initialise)(void * const this);
-	void (*dispose)(void * const this);
-	void (*update)(void * const this);
-	void (*updatePost)(void * const this);
-	void (*onParentResize)(void * const this);
-	//void (*enable)(void * const this); //start
-	//void (*disable)(void * const this); //stop
+	void (*start)(struct View * const this);
+	void (*stop)(struct View * const this);
+	void (*initialise)(struct View * const this);
+	void (*dispose)(struct View * const this);
+	void (*update)(struct View * const this);
+	void (*updatePost)(struct View * const this);
+	void (*onParentResize)(struct View * const this);
+	//void (*enable)(struct View * const this); //start
+	//void (*disable)(struct View * const this); //stop
 	//bool running; //start/stop
 } View;
 const struct View viewEmpty;
@@ -69,14 +69,14 @@ typedef struct Ctrl
 	bool initialised; //true after first start
 	void * model;
 	
-	void (*mustStart)(void * const this);
-	void (*mustStop)(void * const this);
-	void (*start)(void * const this);
-	void (*stop)(void * const this);
-	void (*initialise)(void * const this);
-	void (*dispose)(void * const this);
-	void (*update)(void * const this);
-	void (*updatePost)(void * const this);
+	void (*mustStart)(struct Ctrl * const this);
+	void (*mustStop)(struct Ctrl * const this);
+	void (*start)(struct Ctrl * const this);
+	void (*stop)(struct Ctrl * const this);
+	void (*initialise)(struct Ctrl * const this);
+	void (*dispose)(struct Ctrl * const this);
+	void (*update)(struct Ctrl * const this);
+	void (*updatePost)(struct Ctrl * const this);
 } Ctrl;
 const struct Ctrl ctrlEmpty;
 
@@ -93,9 +93,9 @@ typedef struct App
 	struct Ctrl * ctrl; //cannot know class / size
 	
 	//void * external; //anything we had to externally initialise / dispose of, but need a ref to inside App.
-	//void (*input)(void * const this);
-	void (*initialise)(void * const this);
-	void (*dispose)(void * const this);
+	//void (*input)(struct App * const this);
+	void (*initialise)(struct App * const this);
+	void (*dispose)(struct App * const this);
 } App;
 const struct App appEmpty;
 
@@ -132,10 +132,10 @@ typedef struct Disjunction
 	//TODO Builder
 	
 	void * external; //anything we had to externally initialise / dispose of, but need a ref to inside App.
-	//void (*start)(void * const this); 
-	//void (*stop)(void * const this);
-	void (*initialise)(void * const this);
-	void (*dispose)(void * const this);
+	//void (*start)(struct Disjunction * const this); 
+	//void (*stop)(struct Disjunction * const this);
+	void (*initialise)(struct Disjunction * const this);
+	void (*dispose)(struct Disjunction * const this);
 	
 } Disjunction;
 const struct Disjunction disjunctionEmpty;
