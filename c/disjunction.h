@@ -42,7 +42,7 @@ typedef struct View
 	Map childrenById; //for user convenience, and because builder is a runtime process
 	List childrenByZ; //we render back to front of course, thus from end to start of this.
 	
-	Key _childrenByIdKeys[VIEW_CHILDREN_MAX];
+	uint64_t _childrenByIdKeys[VIEW_CHILDREN_MAX];
 	struct View * _childrenById[VIEW_CHILDREN_MAX];
 	
 	struct View * _childrenByZ[VIEW_CHILDREN_MAX];
@@ -120,10 +120,10 @@ typedef struct Disjunction
 	struct Map devices;
 	
 	struct App _apps[APPS_MAX];
-	Key _appKeys[APPS_MAX];
+	uint64_t _appKeys[APPS_MAX];
 	
 	struct Device _devices[DEVICES_MAX];
-	Key _deviceKeys[DEVICES_MAX];
+	uint64_t _deviceKeys[DEVICES_MAX];
 	
 	//struct Service _services[SERVICES_MAX];
 	//Key _serviceKeys[SERVICES_MAX];
