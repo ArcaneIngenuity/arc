@@ -109,8 +109,8 @@ void Disjunction_addApp(Disjunction * const this, const char * id, App * const a
 {
 	if (app)
 	{
-		printf("app->id? %d\n", app->id == NULL);
-		put(&this->apps, app->id, app);
+		printf("app->id? %s\n", app->id); //TODO just set the app->id here
+		put(&this->apps, *(uint64_t *) app->id, app);
 		app->disjunction = this;
 	}
 	else
@@ -118,6 +118,11 @@ void Disjunction_addApp(Disjunction * const this, const char * id, App * const a
 		printf ("Disjunction_addApp - Error: NULL app pointer.\n"); 
 		exit(1);
 	}
+}
+
+App * Disjunction_getApp(Disjunction * const this, const char * id)
+{
+	return get(&this->apps, *(uint64_t *) pad(id));
 }
 
 //--------- App ---------//
@@ -490,7 +495,7 @@ void View_addChild(View * const this, View * const child)
 	
 	//TODO should be if canPut() / canAdd() (both have same capacity)
 	child->parent = this;
-	put(&this->childrenById, &child->id[0], child);
+	put(&this->childrenById, *(uint64_t *) child->id, child);
 	add(&this->childrenByZ, child); //just add it at the next available slot, i.e. on top by default
 }
 
@@ -499,7 +504,7 @@ void View_removeChild(View * const this, View * const child)
 {
 	Map childrenById  = this->childrenById;
 	
-	if (put(&childrenById, child->id, child)) //only do the full process if able to add to the map
+	if (put(&childrenById, *(uint64_t *) child->id, child)) //only do the full process if able to add to the map
 	//TODO there are more things to check here... e.g. make sure that capcity of both collections is same (do in init())
 	{
 		child->parent = this;

@@ -187,6 +187,7 @@ void Disjunction_initialise(Disjunction * const this);
 void Disjunction_dispose(Disjunction * const this);
 void Disjunction_update(Disjunction * const this);
 void Disjunction_addApp(Disjunction * const this, const char * id, App * const app);
+App * Disjunction_getApp(Disjunction * const this, const char * id);
 //TODO...
 void Disjunction_removeApp(Disjunction * const this, const char * id);
 void Disjunction_addDevice(Disjunction * const this, const char * id, Device * const device);
