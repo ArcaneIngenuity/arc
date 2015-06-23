@@ -464,8 +464,6 @@ void View_update(View * const this)
 
 	List childrenByZ = this->childrenByZ;
 	int length = childrenByZ.length;
-	//printf("try %s %d\n", &this->id, length);
-
 	for (int i = 0; i < length; i++)
 	{
 		View * child = (View *)childrenByZ.entries[i];
@@ -481,11 +479,15 @@ void View_disposeRecurse(View * const this)
 	printf("View_disposeRecurse\n");
 	#endif
 	
-	//TODO recurse
+	List childrenByZ = this->childrenByZ;
+	int length = childrenByZ.length;
+	for (int i = 0; i < length; i++)
+	{
+		View * child = (View *)childrenByZ.entries[i]; //NB! dispose in draw order
+		View_disposeRecurse(child);
+	}
 	this->dispose(this);
 	this->initialised = false;
-	//free(this);
-	//_aligned_free(this);
 };
 
 void View_addChild(View * const this, View * const child)
