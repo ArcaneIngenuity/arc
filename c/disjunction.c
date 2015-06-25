@@ -162,7 +162,8 @@ void App_update(App * const this)
 	//this->input(this); //abstract
 	Ctrl_update(ctrl); //abstract
 	//if (view != NULL) //JIC user turns off the root view by removing it (since this is the enable/disable mechanism)
-		View_update(view); //final, though view->output called hereby is abstract
+	if (view->running)
+		View_update(view);
 	Ctrl_updatePost(ctrl); //abstract
 }
 
@@ -354,6 +355,9 @@ void App_start(App * const this)
 			exit(1);
 		}
 		*/
+		
+		Ctrl_start(ctrl);
+		View_start(view);
 		ctrl->start((void *)ctrl);
 		view->start((void *)view);
 	}
@@ -389,6 +393,18 @@ void App_dispose(App * const this)
 	this->dispose((void *)this);
 	this->initialised = false;
 	free(this);
+}
+
+void Ctrl_start(Ctrl * const this)
+{
+	this->start((void *)this);
+	this->running = true;
+}
+
+void Ctrl_stop(Ctrl * const this)
+{
+	this->stop((void *)this);
+	this->running = false;
 }
 
 void Ctrl_initialise(Ctrl * const this)
@@ -435,8 +451,22 @@ void View_construct(View * const this)
 	this->childrenByZ.entries = (void *) &this->_childrenByZ;
 	this->childrenByZ.capacity = sizeof(this->_childrenByZ);
 	this->childrenByZ.fail = NULL;
-}
 	
+	this->running = true;
+}
+
+void View_start(View * const this)
+{
+	this->start((void *)this);
+	this->running = true;
+}
+
+void View_stop(View * const this)
+{
+	this->stop((void *)this);
+	this->running = false;
+}
+
 void View_initialise(View * const this)
 {
 	#ifdef DISJUNCTION_DEBUG
@@ -467,7 +497,8 @@ void View_update(View * const this)
 	for (int i = 0; i < length; i++)
 	{
 		View * child = (View *)childrenByZ.entries[i];
-		View_update(child);//deltaSec //only works if enabled
+		if (child->running)
+			View_update(child);//deltaSec
 	}
 	
 	this->updatePost(this);//deltaSec

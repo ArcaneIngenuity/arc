@@ -44,9 +44,9 @@ typedef struct View
 	
 	uint64_t _childrenByIdKeys[VIEW_CHILDREN_MAX];
 	struct View * _childrenById[VIEW_CHILDREN_MAX];
-	
 	struct View * _childrenByZ[VIEW_CHILDREN_MAX];
 	
+	bool running;
 	bool initialised; //true after first start
 	void * model;
 	
@@ -65,7 +65,7 @@ const struct View viewEmpty;
 
 typedef struct Ctrl
 {
-	//TODO data members
+	bool running; //start/stop
 	bool initialised; //true after first start
 	void * model;
 	
@@ -154,14 +154,16 @@ void Pointer_hasMoved(Pointer * const this);
 
 //bool Ctrl_mustStart(Ctrl * const this);
 //bool Ctrl_mustStop(Ctrl * const this);
-//void Ctrl_start(Ctrl * const this);
-//void Ctrl_stop(Ctrl * const this);
+void Ctrl_start(Ctrl * const this);
+void Ctrl_stop(Ctrl * const this);
 void Ctrl_initialise(Ctrl * const this);
 void Ctrl_update(Ctrl * const this);
 void Ctrl_updatePost(Ctrl * const this);
 void Ctrl_dispose(Ctrl * const this);
 void Ctrl_disposeRecurse(Ctrl * const this);
 
+void View_start(View * const this);
+void View_stop(View * const this);
 void View_construct(View * const this);
 void View_initialise(View * const this);
 void View_update(View * const this);
