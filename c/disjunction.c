@@ -451,8 +451,6 @@ void View_construct(View * const this)
 	this->childrenByZ.entries = (void *) &this->_childrenByZ;
 	this->childrenByZ.capacity = sizeof(this->_childrenByZ);
 	this->childrenByZ.fail = NULL;
-	
-	this->running = true;
 }
 
 void View_start(View * const this)
