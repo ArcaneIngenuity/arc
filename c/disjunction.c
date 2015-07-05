@@ -35,23 +35,32 @@ double Disjunction_getDeltaSec(double counterDelta, double counterFrequency)
 	//return (float)counterDelta.QuadPart /(float)frequency.QuadPart;
 }
 
+
+void Disjunction_construct(Disjunction * const this, int appsCount)
+{
+	this->apps = malloc(sizeof(App) * appsCount);
+	this->appsCount = appsCount;
+}
+
 void Disjunction_update(Disjunction * const this)
 {
 	#ifdef DISJUNCTION_DEBUG
 	printf("Disjunction_update\n");
 	#endif
 	
+	/*
 	//poll devices
-	for (int i = 0; i < this->devices.count; i++)
+	for (int i = 0; i < this->devicesCount; i++)
 	{
-		Device * device = this->devices.entries[i]; //read from map of values
+		Device * device = this->devices[i]; //read from map of values
 		Device_poll(device);
 	}
+	*/
 
 	//update apps
-	for (int i = 0; i < this->apps.count; i++)
+	for (int i = 0; i < this->appsCount; i++)
 	{
-		App * app = this->apps.entries[i]; //read from map of values
+		App * app = &this->apps[i]; //read from map of values
 		if (app->running)
 			App_update(app);
 	}
@@ -81,18 +90,12 @@ void Disjunction_update(Disjunction * const this)
 */
 }
 
-void Disjunction_construct(Disjunction * const this)
-{
-	voidPtrMap_create(&this->apps, 		APPS_MAX, 		&this->_appKeys, 	(void *)&this->_apps, 		NULL);
-	voidPtrMap_create(&this->devices, 	DEVICES_MAX, 	&this->_deviceKeys, (void *)&this->_devices, 	NULL);
-}
-
 //dispose removes resources acquired in initialise or updates
 void Disjunction_dispose(Disjunction * const this)
 {
-	for (int i = 0; i < this->apps.count; i++)
+	for (int i = 0; i < this->appsCount; i++)
 	{
-		App * app = this->apps.entries[i];
+		App * app = &this->apps[i];
 		if (app)
 			App_dispose(app);
 	}
@@ -105,24 +108,27 @@ void Disjunction_dispose(Disjunction * const this)
 	//free(this); //disjunction object is not a pointer! it's an automatic global variable allocated on the stack.
 }
 
-void Disjunction_addApp(Disjunction * const this, const char * id, App * const app)
+App * const Disjunction_addApp(Disjunction * const this, const char * id)
 {
-	if (app)
+	if (this->appsCount < APPS_MAX)
 	{
-		printf("app->id? %s\n", app->id); //TODO just set the app->id here
-		put(&this->apps, *(uint64_t *) app->id, app);
+		App * app = &this->apps[this->appsCount++];
+		printf("app->id? %s\n", app->id);
 		app->disjunction = this;
+		return app;
 	}
-	else
-	{
-		printf ("Disjunction_addApp - Error: NULL app pointer.\n"); 
-		exit(1);
-	}
+	return NULL;
 }
 
-App * Disjunction_getApp(Disjunction * const this, const char * id)
+App * const Disjunction_getApp(Disjunction * const this, const char * id)
 {
-	return get(&this->apps, *(uint64_t *) pad(id));
+	for (int i = 0; i < this->appsCount; i++)
+	{
+		App * app = &this->apps[i];
+		if (strcmp(id, app->id) == 0)
+			return app;
+	}
+	return NULL;
 }
 
 //--------- App ---------//
@@ -445,12 +451,6 @@ void View_construct(View * const this)
 	#ifdef DISJUNCTION_DEBUG
 	printf("View_construct %s!\n", this->id);
 	#endif
-	
-	voidPtrMap_create(&this->childrenById, VIEW_CHILDREN_MAX, &this->_childrenByIdKeys, (void *)&this->_childrenById, NULL);
-	
-	this->childrenByZ.entries = (void *) &this->_childrenByZ;
-	this->childrenByZ.capacity = sizeof(this->_childrenByZ);
-	this->childrenByZ.fail = NULL;
 }
 
 void View_start(View * const this)
@@ -475,13 +475,10 @@ void View_initialise(View * const this)
 		this->initialise(this);
 	
 	this->initialised = true;
-	
-	List childrenByZ = this->childrenByZ;
-	int length = childrenByZ.length;
 
-	for (int i = 0; i < length; i++)
+	for (int i = 0; i < this->childrenCount; i++)
 	{
-		View * child = (View *)childrenByZ.entries[i];
+		View * child = (View *) this->childrenByZ[i];
 		View_initialise(child);//deltaSec //only works if enabled
 	}
 }
@@ -490,11 +487,9 @@ void View_update(View * const this)
 {
 	this->update(this);//deltaSec
 
-	List childrenByZ = this->childrenByZ;
-	int length = childrenByZ.length;
-	for (int i = 0; i < length; i++)
+	for (int i = 0; i < this->childrenCount; i++)
 	{
-		View * child = (View *)childrenByZ.entries[i];
+		View * child = (View *) this->childrenByZ[i];
 		if (child->running)
 			View_update(child);//deltaSec
 	}
@@ -508,45 +503,65 @@ void View_disposeRecurse(View * const this)
 	printf("View_disposeRecurse\n");
 	#endif
 	
-	List childrenByZ = this->childrenByZ;
-	int length = childrenByZ.length;
-	for (int i = 0; i < length; i++)
+	for (int i = 0; i < this->childrenCount; i++)
 	{
-		View * child = (View *)childrenByZ.entries[i]; //NB! dispose in draw order
+		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
 		View_disposeRecurse(child);
 	}
 	this->dispose(this);
 	this->initialised = false;
-};
+}
 
-void View_addChild(View * const this, View * const child)
+View * View_getChildById(View * const this, char * id)
 {
-	Map childrenById = this->childrenById;
-	List childrenByZ = this->childrenByZ;
-	
-	//TODO should be if canPut() / canAdd() (both have same capacity)
+	for (int i = 0; i < this->childrenCount; i++)
+	{
+		View * child = (View *) this->childrenByZ[i];
+		if (strcmp(id, child->id) == 0)
+			return child;
+	}
+	return NULL;
+}
+
+View * View_addChild(View * const this, View * const child)
+{
 	child->parent = this;
-	put(&this->childrenById, *(uint64_t *) child->id, child);
-	add(&this->childrenByZ, child); //just add it at the next available slot, i.e. on top by default
+
+	if (this->childrenCount == VIEW_CHILDREN_MAX)
+		return NULL;
+	else
+	{
+		this->childrenByZ[this->childrenCount++] = child;
+		return child;
+	}
 }
 
 /*
-void View_removeChild(View * const this, View * const child)
+View *
+View_removeChild(View * const this, View * const child)
 {
-	Map childrenById  = this->childrenById;
-	
-	if (put(&childrenById, *(uint64_t *) child->id, child)) //only do the full process if able to add to the map
-	//TODO there are more things to check here... e.g. make sure that capcity of both collections is same (do in init())
+	child->parent = NULL;
+
+	if (this->childrenCount == 0)
+		return ARRAY_EMPTY;
+	else
 	{
-		child->parent = this;
-		List childrenByZ = this->childrenByZ;
-		add(&childrenByZ, child);
+		//TODO find child index
+		
+		//TODO shift all back
+		
+		this->childrenCount--;
+		return child;
 	}
 }
 */
-void View_swapChildren(View * const this, int indexFrom, int indexTo)
+/*
+ArrayResult
+View_swapChildren(View * const this, int indexFrom, int indexTo)
 {
+	
 }
+*/
 
 bool View_isRoot(View * const this)
 {
@@ -557,10 +572,9 @@ void View_onParentResizeRecurse(View * const this)
 {
 	this->onParentResize(this);
 	
-	int length = this->childrenByZ.length;
-	for (int i = 0; i < length; i++)
+	for (int i = 0; i < this->childrenCount; i++)
 	{
-		View * child = this->childrenByZ.entries[i];
+		View * child = (View *) this->childrenByZ[i];
 		
 		//depth first - update child and then recurse to its children
 		
