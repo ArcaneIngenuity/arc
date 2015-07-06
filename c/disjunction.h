@@ -120,7 +120,7 @@ typedef struct Service
 
 typedef struct Disjunction
 {
-	App * apps;
+	App * apps[APPS_MAX]; //malloc'd array of pointers to apps -- allows ad-hoc allocation or batched pre-allocation
 	int appsCount;
 	
 	//struct Service _services[SERVICES_MAX];
@@ -168,7 +168,7 @@ void 		View_update(View * const this);
 void 		View_disposeRecurse(View * const this);
 bool 		View_isRoot(View * const this);
 void 		View_onParentResizeRecurse(View * const this);
-View * 		View_getChildById(View * const this, char * id);
+View * 		View_getChild(View * const this, char * id);
 View *		View_addChild(View * const this, View * const child);
 //
 //TODO... View * View_removeChild(View * const this, View * const child); //first get child by ID
@@ -186,8 +186,8 @@ void 		Disjunction_construct(Disjunction * const this, int appsCount);
 void 		Disjunction_initialise(Disjunction * const this);
 void 		Disjunction_dispose(Disjunction * const this);
 void 		Disjunction_update(Disjunction * const this);
-App * const Disjunction_addApp(Disjunction * const this, const char * id);
-App * const Disjunction_getApp(Disjunction * const this, const char * id);
+App * const Disjunction_addApp(Disjunction * const this, App * app);
+App * const Disjunction_getApp(Disjunction * const this, const char * const id);
 //TODO... void Disjunction_removeApp(Disjunction * const this, const char * id);
 //TODO... void Disjunction_addDevice(Disjunction * const this, const char * id, Device * const device);
 //TODO... void Disjunction_removeDevice(Disjunction * const this, const char * id);

@@ -38,8 +38,6 @@ double Disjunction_getDeltaSec(double counterDelta, double counterFrequency)
 
 void Disjunction_construct(Disjunction * const this, int appsCount)
 {
-	this->apps = malloc(sizeof(App) * appsCount);
-	this->appsCount = appsCount;
 }
 
 void Disjunction_update(Disjunction * const this)
@@ -60,7 +58,7 @@ void Disjunction_update(Disjunction * const this)
 	//update apps
 	for (int i = 0; i < this->appsCount; i++)
 	{
-		App * app = &this->apps[i]; //read from map of values
+		App * app = this->apps[i]; //read from map of values
 		if (app->running)
 			App_update(app);
 	}
@@ -95,7 +93,7 @@ void Disjunction_dispose(Disjunction * const this)
 {
 	for (int i = 0; i < this->appsCount; i++)
 	{
-		App * app = &this->apps[i];
+		App * app = this->apps[i];
 		if (app)
 			App_dispose(app);
 	}
@@ -108,23 +106,26 @@ void Disjunction_dispose(Disjunction * const this)
 	//free(this); //disjunction object is not a pointer! it's an automatic global variable allocated on the stack.
 }
 
-App * const Disjunction_addApp(Disjunction * const this, const char * id)
+App * const Disjunction_addApp(Disjunction * const this, App * const app)
 {
+	printf("app0");
 	if (this->appsCount < APPS_MAX)
 	{
-		App * app = &this->apps[this->appsCount++];
-		printf("app->id? %s\n", app->id);
+		printf("app1");
+		this->apps[this->appsCount++] = app;
+		printf("app2");
 		app->disjunction = this;
+		printf("app->id? %s\n", app->id);
 		return app;
 	}
 	return NULL;
 }
 
-App * const Disjunction_getApp(Disjunction * const this, const char * id)
+App * const Disjunction_getApp(Disjunction * const this, const char * const id)
 {
 	for (int i = 0; i < this->appsCount; i++)
 	{
-		App * app = &this->apps[i];
+		App * app = this->apps[i];
 		if (strcmp(id, app->id) == 0)
 			return app;
 	}
@@ -512,7 +513,7 @@ void View_disposeRecurse(View * const this)
 	this->initialised = false;
 }
 
-View * View_getChildById(View * const this, char * id)
+View * View_getChild(View * const this, char * id)
 {
 	for (int i = 0; i < this->childrenCount; i++)
 	{
