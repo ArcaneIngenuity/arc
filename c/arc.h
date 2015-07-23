@@ -1,5 +1,5 @@
-#ifndef DISJUNCTION_H
-#define DISJUNCTION_H
+#ifndef ARC_H
+#define ARC_H
 
 #include <stdbool.h>
 //#include <limits.h> //for INT_MIN
@@ -87,7 +87,7 @@ const struct Ctrl ctrlEmpty;
 typedef struct App
 {
 	char * id; //for compound apps
-	struct Disjunction * disjunction; //in spite of typedef, use struct due to circular ref App->Disjunction TODO remove this ref, and allow Apps to send messages up to DJ?
+	struct Hub * hub; //in spite of typedef, use struct due to circular ref App->Hub TODO remove this ref, and allow Apps to send messages up to DJ?
 	//struct Map services;
 	
 	bool running; //start/stop
@@ -118,7 +118,7 @@ typedef struct Service
 	void * models;
 } Service;
 
-typedef struct Disjunction
+typedef struct Hub
 {
 	App * apps[APPS_MAX]; //malloc'd array of pointers to apps -- allows ad-hoc allocation or batched pre-allocation
 	int appsCount;
@@ -130,13 +130,13 @@ typedef struct Disjunction
 	//TODO Builder
 	
 	void * external; //anything we had to externally initialise / dispose of, but need a ref to inside App.
-	//void (*start)(struct Disjunction * const this); 
-	//void (*stop)(struct Disjunction * const this);
-	void (*initialise)(struct Disjunction * const this);
-	void (*dispose)(struct Disjunction * const this);
+	//void (*start)(struct Hub * const this); 
+	//void (*stop)(struct Hub * const this);
+	void (*initialise)(struct Hub * const this);
+	void (*dispose)(struct Hub * const this);
 	
-} Disjunction;
-const struct Disjunction disjunctionEmpty;
+} Hub;
+const struct Hub disjunctionEmpty;
 
 //FINAL/BASE METHODS
 
@@ -182,17 +182,17 @@ void 		App_dispose(App * const this);
 //TODO... void App_addService(App * const this, const char * id, Service * service);
 //TODO... void App_removeService(App * const this, const char * id);
 
-void 		Disjunction_construct(Disjunction * const this, int appsCount);
-void 		Disjunction_initialise(Disjunction * const this);
-void 		Disjunction_dispose(Disjunction * const this);
-void 		Disjunction_update(Disjunction * const this);
-App * const Disjunction_addApp(Disjunction * const this, App * app);
-App * const Disjunction_getApp(Disjunction * const this, const char * const id);
-//TODO... void Disjunction_removeApp(Disjunction * const this, const char * id);
-//TODO... void Disjunction_addDevice(Disjunction * const this, const char * id, Device * const device);
-//TODO... void Disjunction_removeDevice(Disjunction * const this, const char * id);
+void 		Hub_construct(Hub * const this, int appsCount);
+void 		Hub_initialise(Hub * const this);
+void 		Hub_dispose(Hub * const this);
+void 		Hub_update(Hub * const this);
+App * const Hub_addApp(Hub * const this, App * app);
+App * const Hub_getApp(Hub * const this, const char * const id);
+//TODO... void Hub_removeApp(Hub * const this, const char * id);
+//TODO... void Hub_addDevice(Hub * const this, const char * id, Device * const device);
+//TODO... void Hub_removeDevice(Hub * const this, const char * id);
 
 void doNothing(void * const this);
 
-Disjunction disjunction;// = {0}; //could use an empty?
-#endif //DISJUNCTION_H
+Hub hub;// = {0}; //could use an empty?
+#endif //ARC_H

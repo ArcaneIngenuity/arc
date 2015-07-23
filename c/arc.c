@@ -1,6 +1,6 @@
-//collection definitions *before* inclusion of disjunction.h! (definitions in header lead to multiple definitions due to this: http://stackoverflow.com/questions/14425262/why-include-guards-do-not-prevent-multiple-function-definitions)
+//collection definitions *before* inclusion of arc.h! (definitions in header lead to multiple definitions due to this: http://stackoverflow.com/questions/14425262/why-include-guards-do-not-prevent-multiple-function-definitions)
 
-#include "disjunction.h"
+#include "arc.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -27,23 +27,23 @@ void Pointer_updateSelected(Pointer * const this)
 
 }
 
-//--------- Disjunction ---------//
+//--------- Hub ---------//
 
-double Disjunction_getDeltaSec(double counterDelta, double counterFrequency)
+double Hub_getDeltaSec(double counterDelta, double counterFrequency)
 {
 	
 	//return (float)counterDelta.QuadPart /(float)frequency.QuadPart;
 }
 
 
-void Disjunction_construct(Disjunction * const this, int appsCount)
+void Hub_construct(Hub * const this, int appsCount)
 {
 }
 
-void Disjunction_update(Disjunction * const this)
+void Hub_update(Hub * const this)
 {
 	#ifdef DISJUNCTION_DEBUG
-	printf("Disjunction_update\n");
+	printf("Hub_update\n");
 	#endif
 	
 	/*
@@ -89,7 +89,7 @@ void Disjunction_update(Disjunction * const this)
 }
 
 //dispose removes resources acquired in initialise or updates
-void Disjunction_dispose(Disjunction * const this)
+void Hub_dispose(Hub * const this)
 {
 	for (int i = 0; i < this->appsCount; i++)
 	{
@@ -102,11 +102,11 @@ void Disjunction_dispose(Disjunction * const this)
 		this->dispose((void *)this);
 	
 	//this->initialised = false;
-	printf ("Disjunction_dispose done."); 
-	//free(this); //disjunction object is not a pointer! it's an automatic global variable allocated on the stack.
+	printf ("Hub_dispose done."); 
+	//free(this); //hub object is not a pointer!
 }
 
-App * const Disjunction_addApp(Disjunction * const this, App * const app)
+App * const Hub_addApp(Hub * const this, App * const app)
 {
 	printf("app0");
 	if (this->appsCount < APPS_MAX)
@@ -114,14 +114,14 @@ App * const Disjunction_addApp(Disjunction * const this, App * const app)
 		printf("app1");
 		this->apps[this->appsCount++] = app;
 		printf("app2");
-		app->disjunction = this;
+		app->hub = this;
 		printf("app->id? %s\n", app->id);
 		return app;
 	}
 	return NULL;
 }
 
-App * const Disjunction_getApp(Disjunction * const this, const char * const id)
+App * const Hub_getApp(Hub * const this, const char * const id)
 {
 	for (int i = 0; i < this->appsCount; i++)
 	{
@@ -141,7 +141,7 @@ void App_update(App * const this)
 	
 	Ctrl * ctrl = this->ctrl;
 	View * view = this->view;
-	//Pointer * pointer = this->disjunction->pointer;
+	//Pointer * pointer = this->hub->pointer;
 	/*
 	if (pointer)
 	{
@@ -156,7 +156,7 @@ void App_update(App * const this)
 	//Ctrl * ctrl = this->ctrl;
 	//View * view = this->view;
 	/*
-	Pointer * pointer = this->disjunction->pointer;
+	Pointer * pointer = this->hub->pointer;
 	Pointer_updateSelected(pointer); //final
 	*/
 	
