@@ -3,6 +3,12 @@
 
 #include <stdbool.h>
 //#include <limits.h> //for INT_MIN
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "log/log.h"
+
+//(REMOVE ME) collection definitions *before* inclusion of arc.h! (definitions in header lead to multiple definitions due to this: http://stackoverflow.com/questions/14425262/why-include-guards-do-not-prevent-multiple-function-definitions)
 
 #define VIEW_CHILDREN_MAX 8
 #define SERVICES_MAX 16

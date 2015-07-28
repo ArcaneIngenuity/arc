@@ -1,10 +1,4 @@
-//collection definitions *before* inclusion of arc.h! (definitions in header lead to multiple definitions due to this: http://stackoverflow.com/questions/14425262/why-include-guards-do-not-prevent-multiple-function-definitions)
-
 #include "arc.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h> //for vprintf -- to console
 
 //#define DISJUNCTION_DEBUG
 
