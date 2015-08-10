@@ -2,25 +2,6 @@
 
 //#define DISJUNCTION_DEBUG
 
-//--------- Device --------------//
-void Device_constructor(Device * this, int channelsLength)
-{
-	this->channelsLength = channelsLength;
-	this->channels = malloc(channelsLength * sizeof(Device));
-}
-
-void Device_poll(Device * this)
-{
-	//this->poll(this);//deltaSec
-}
-
-//--------- Pointer -------------//
-
-void Pointer_updateSelected(Pointer * const this)
-{
-
-}
-
 //--------- Hub ---------//
 
 double Hub_getDeltaSec(double counterDelta, double counterFrequency)

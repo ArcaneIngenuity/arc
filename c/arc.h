@@ -26,23 +26,6 @@ ArrayResult
 } ArrayResult;
 */
 
-typedef struct DeviceChannel
-{
-	float value;
-	float delta;
-} DeviceChannel;
-
-typedef struct Device
-{
-	int channelsLength;
-	struct DeviceChannel * channels;
-	bool readEvents;
-	
-	void (*receive)(struct Device * const this);
-	void (*poll)(struct Device * const this);
-	void (*flush)(struct Device * const this);
-} Device;
-
 //use as base struct for inherited type
 typedef struct View
 {
@@ -102,21 +85,10 @@ typedef struct App
 	struct View * view; //cannot know class / size
 	struct Ctrl * ctrl; //cannot know class / size
 	
-	//void * external; //anything we had to externally initialise / dispose of, but need a ref to inside App.
-	//void (*input)(struct App * const this);
 	void (*initialise)(struct App * const this);
 	void (*dispose)(struct App * const this);
 } App;
 const struct App appEmpty;
-
-typedef struct Pointer
-{
-	Device * device;
-	View * target;
-	View * targetLast;
-	bool selected;
-	bool selectedLast;
-} Pointer;
 
 typedef struct Service
 {
@@ -132,7 +104,6 @@ typedef struct Hub
 	//struct Service _services[SERVICES_MAX];
 	//Key _serviceKeys[SERVICES_MAX];
 
-	//struct Pointer pointer;
 	//TODO Builder
 	
 	void * external; //anything we had to externally initialise / dispose of, but need a ref to inside App.
@@ -145,16 +116,6 @@ typedef struct Hub
 const struct Hub disjunctionEmpty;
 
 //FINAL/BASE METHODS
-
-void Device_constructor(Device * this, int channelCount);
-void Device_poll(Device * this);
-//void Device_flush(Device * this);
-void DeviceChannel_constructor(Device * this);
-
-void Pointer_updateSelected(Pointer * const this);
-void Pointer_hasChangedTarget(Pointer * const this);
-void Pointer_hasChangedSelected(Pointer * const this);
-void Pointer_hasMoved(Pointer * const this);
 
 //bool 		Ctrl_mustStart(Ctrl * const this);
 //bool 		Ctrl_mustStop(Ctrl * const this);
