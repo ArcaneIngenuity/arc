@@ -1,4 +1,5 @@
-==Glossary==
+Glossary
+========
 
  * Hub: contains and updates Apps - exists so we may run multiple Apps in parallel off the same timing mechanism (loop or callback).
  * App: contains and updates Ctrls (and thus models) and Views.
@@ -12,5 +13,5 @@
 
 update/updatePost, initialise/dispose, start/stop and suspend/resume are generally all recursive functions, irrespective of where they appear. Exceptions are:
 
- * View_start()/_stop(): Views should necessarily be started separately, though stopping a parent View necessarily prevents all descendant Views from being run (though technically their "updating" flag remains true).
+ * View_start()/View_stop(): Views must be started individually, this is not recursive, though stopping a parent View necessarily prevents all descendant Views from being updated (though internally, descendants' "updating" flag remains as they were, so if they were updating then they will continue updating when their ancestor is View_start()ed again).
  
