@@ -157,7 +157,7 @@ Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A central point from which all <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>s may be managed / updated. </p>
-<p>A single timing mechanism (loop or callback) is used to run a <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a>, from which each <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>'s <a class="el" href="arc_8c.html#a63512392b291279280fe9f5e4b62a871">App_update</a> will be called via Hub_update. This provides implicit synchronisation and best performance across multiple <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>s that may be running side-by-side. As such, <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> needs no start / stop like <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>; Hub_update is run perpetually until the executable terminates. </p>
+<p>A single timing mechanism (loop or callback) is used to run a <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a>, from which each <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>'s <a class="el" href="arc_8c.html#a63512392b291279280fe9f5e4b62a871">App_update</a> will be called via Hub_update. This provides implicit synchronisation and best performance across multiple <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>s that may be updating side-by-side. As such, <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> needs no start / stop like <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>; Hub_update is run perpetually until the executable terminates. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="a3c72d914702e709b541c178cfe4b85df"></a>
 <div class="memitem">
@@ -182,7 +182,7 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Adds an <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> to the <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> (at the next available slot, if any), which must have a valid <a class="el" href="struct_app.html#a33230f9825bcd27e9fad19a4182c3c3d" title="ID by which an App may be retrieved from its Hub (TODO); irrelevant except where running multiple app...">App.id</a> by the time it is added. </p>
+<p>Adds an <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> to the <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> (at the next available slot, if any), which must have a valid <a class="el" href="struct_app.html#a33230f9825bcd27e9fad19a4182c3c3d" title="ID by which an App may be retrieved from its Hub (TODO); irrelevant except where updating multiple ap...">App.id</a> by the time it is added. </p>
 
 </div>
 </div>
@@ -253,7 +253,7 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Gets an <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> from the <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> by its <a class="el" href="struct_app.html#a33230f9825bcd27e9fad19a4182c3c3d" title="ID by which an App may be retrieved from its Hub (TODO); irrelevant except where running multiple app...">App.id</a>. </p>
+<p>Gets an <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> from the <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> by its <a class="el" href="struct_app.html#a33230f9825bcd27e9fad19a4182c3c3d" title="ID by which an App may be retrieved from its Hub (TODO); irrelevant except where updating multiple ap...">App.id</a>. </p>
 
 </div>
 </div>

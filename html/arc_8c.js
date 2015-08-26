@@ -20,7 +20,6 @@ var arc_8c =
     [ "Hub_construct", "arc_8c.html#add65bcbd56b1f192590d210472ca9126", null ],
     [ "Hub_dispose", "arc_8c.html#af7523a2dd8f519fac400b767cfe81a67", null ],
     [ "Hub_getApp", "arc_8c.html#aead76042f9a3b556ae443603eed94e02", null ],
-    [ "Hub_getDeltaSec", "arc_8c.html#a45b53b7b68446d4d1b2ce5b7429ea502", null ],
     [ "Hub_resume", "arc_8c.html#aa37c3e88276022292690fb130e22a4c6", null ],
     [ "Hub_suspend", "arc_8c.html#a545db900048b3e0489884cfda68ebd98", null ],
     [ "Hub_update", "arc_8c.html#aa9dd34f865269547e24d66a2943b1d2a", null ],

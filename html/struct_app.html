@@ -133,13 +133,13 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a33230f9825bcd27e9fad19a4182c3c3d"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#a33230f9825bcd27e9fad19a4182c3c3d">id</a></td></tr>
-<tr class="memdesc:a33230f9825bcd27e9fad19a4182c3c3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">ID by which an <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> may be retrieved from its <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> (TODO); irrelevant except where running multiple apps through the same <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a>. (NEEDS REVIEW, apps go into indexed slots)  <a href="#a33230f9825bcd27e9fad19a4182c3c3d">More...</a><br /></td></tr>
+<tr class="memdesc:a33230f9825bcd27e9fad19a4182c3c3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">ID by which an <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> may be retrieved from its <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> (TODO); irrelevant except where updating multiple apps through the same <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a>. (NEEDS REVIEW, apps go into indexed slots)  <a href="#a33230f9825bcd27e9fad19a4182c3c3d">More...</a><br /></td></tr>
 <tr class="separator:a33230f9825bcd27e9fad19a4182c3c3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a99380fa222bde921aeb805420f0c1a94"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="struct_hub.html">Hub</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#a99380fa222bde921aeb805420f0c1a94">hub</a></td></tr>
 <tr class="separator:a99380fa222bde921aeb805420f0c1a94"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5ba5c3223120bbe9fc806df5232eb279"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#a5ba5c3223120bbe9fc806df5232eb279">running</a></td></tr>
-<tr class="memdesc:a5ba5c3223120bbe9fc806df5232eb279"><td class="mdescLeft">&#160;</td><td class="mdescRight">Should this have <a class="el" href="struct_app.html#a63512392b291279280fe9f5e4b62a871">App_update()</a> called on it every frame?  <a href="#a5ba5c3223120bbe9fc806df5232eb279">More...</a><br /></td></tr>
-<tr class="separator:a5ba5c3223120bbe9fc806df5232eb279"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5785e3a367ea6f28371942c0cb4cc1b8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#a5785e3a367ea6f28371942c0cb4cc1b8">updating</a></td></tr>
+<tr class="memdesc:a5785e3a367ea6f28371942c0cb4cc1b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Should this have <a class="el" href="struct_app.html#a63512392b291279280fe9f5e4b62a871">App_update()</a> called on it every frame?  <a href="#a5785e3a367ea6f28371942c0cb4cc1b8">More...</a><br /></td></tr>
+<tr class="separator:a5785e3a367ea6f28371942c0cb4cc1b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2a69addab05c2f4459becab3c9b753b1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#a2a69addab05c2f4459becab3c9b753b1">initialised</a></td></tr>
 <tr class="memdesc:a2a69addab05c2f4459becab3c9b753b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">True after first initialisation. If re-initialisation is required, manually reset this to false.  <a href="#a2a69addab05c2f4459becab3c9b753b1">More...</a><br /></td></tr>
 <tr class="separator:a2a69addab05c2f4459becab3c9b753b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -161,7 +161,7 @@ Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>An application that consists of model, <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a>s and <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>s; resides within a global application <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a>. </p>
-<p>Often, only a single <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> will be required within the (singleton)<a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a>. If an <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> is to be run less frequently than specified by the rate dictated by its <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a>, this can be handled in App_update by only running full update logic when some accumulator reaches a certain amount of elapsed time or frames. </p>
+<p>Often, only a single <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> will be required within the (singleton)<a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a>. If an <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> is to be run less frequently than specified by the rate dictated by its <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a>, this can be handled in App_update by only updating full update logic when some accumulator reaches a certain amount of elapsed time or frames. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="a941b058d3a7e415e9eca4ac7dc8a825e"></a>
 <div class="memitem">
@@ -373,7 +373,7 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p>ID by which an <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> may be retrieved from its <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> (TODO); irrelevant except where running multiple apps through the same <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a>. (NEEDS REVIEW, apps go into indexed slots) </p>
+<p>ID by which an <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> may be retrieved from its <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> (TODO); irrelevant except where updating multiple apps through the same <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a>. (NEEDS REVIEW, apps go into indexed slots) </p>
 
 </div>
 </div>
@@ -419,12 +419,12 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
-<a class="anchor" id="a5ba5c3223120bbe9fc806df5232eb279"></a>
+<a class="anchor" id="a5785e3a367ea6f28371942c0cb4cc1b8"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">bool App::running</td>
+          <td class="memname">bool App::updating</td>
         </tr>
       </table>
 </div><div class="memdoc">

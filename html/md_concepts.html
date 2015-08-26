@@ -93,7 +93,8 @@ $(document).ready(function(){initNavTree('md_concepts.html','');});
 <div class="title">concepts </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><ul>
+<div class="textblock"><p>==Glossary==</p>
+<ul>
 <li><a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a>: contains and updates Apps - exists so we may run multiple Apps in parallel off the same timing mechanism (loop or callback).</li>
 <li><a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>: contains and updates Ctrls (and thus models) and Views.</li>
 <li>model: a generic object (user specified type) that holds logical world state.</li>
@@ -104,7 +105,10 @@ $(document).ready(function(){initNavTree('md_concepts.html','');});
 <li>start/stop: commence or cease updates (<a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>, <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a>, <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>; <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> is not included here as it is always updating).</li>
 <li>resume/suspend: for when mandatory application context is regained or lost, typically due to a loss and subsequent restoration of the window (and thus rendering and input capability) or graphics context (<a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a>, <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>, <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a>, <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>); naturally a stop is required before a suspend, while a start is required after a resume.</li>
 </ul>
-<p>update/updatePost, initialise/dispose, start/stop and suspend/resume are generally all recursive functions, irrespective of where they appear. </p>
+<p>update/updatePost, initialise/dispose, start/stop and suspend/resume are generally all recursive functions, irrespective of where they appear. Exceptions are:</p>
+<ul>
+<li><a class="el" href="struct_view.html#a6f84d25ea279f5658fce4e3bc3b5bcb4">View_start()</a>/_stop(): Views should necessarily be started separately, though stopping a parent <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> necessarily prevents all descendant Views from being run (though technically their "updating" flag remains true). </li>
+</ul>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

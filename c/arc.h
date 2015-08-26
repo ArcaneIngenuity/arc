@@ -3,6 +3,7 @@
 /*! \mainpage Main Page
 Arc is a lightweight applications development framework for realtime apps, specifically geared for games, simulations, and rich user experiences. See [README](md__r_e_a_d_m_e.html "README") for more. 
 
+Source is available [here](https://github.com/ArcaneIngenuity/arc "arc"). 
  */
 #ifndef ARC_H
 #define ARC_H
@@ -54,7 +55,7 @@ typedef struct View
 	int childrenCount; ///< The number of child Views held by this parent View. Negative for invalid return values (e.g. on seek).
 	
 	bool updating; ///< Should this have View_update() called on it every frame?
-	bool initialised; ///< True after first initialisation. If re-initialisation is required, manually reset this to false.
+	bool initialised; ///< True after first initialisation. If re-initialisation is required, this should be manually reset to false.
 	void * model; ///< The model associated with this View. May or may not be the same as this View's App's model, depending on \link Configuration \endlink.
 	
 	void (*start)(struct View * const this); ///< \brief User-supplied callback for when this View start()s.
@@ -75,9 +76,9 @@ const struct View viewEmpty; ///< Used to set instance to empty / zero all its m
 /// Handles specific game / business / simulation logic within an App.
 
 /// For every discrete Ctrl needed, allocate it and set the appropriate callbacks.<br>
-/// A Ctrl instance may then be added to an App by setting App.ctrl; this will be the root Ctrl. Often, this will be the only Ctrl needed; though in some cases the user may prefer to use sub-Ctrl s attached to root.<br>
-/// Sub-Ctrls may be accessed through the App's root Ctrl.<br>
-/// A Ctrl operates on a model. In arc, models need no specific type; they can be anything (and are internally denoted as void *). Ctrl reads and writes model state based on input and View state.
+/// A Ctrl instance may then be added to an App by setting App.ctrl; this will be the root Ctrl. Often, this will be the only Ctrl needed; though in some cases the user may prefer to use sub-%Ctrl%s attached to root.<br>
+/// Sub-%Ctrl%s may be accessed through the App's root Ctrl.<br>
+/// A Ctrl operates on a model. In arc, models need no specific type; they can be anything (and are internally denoted as void *). Ctrl writes new model state by reading extant model state, inputs and View state.
 typedef struct Ctrl
 {
 	bool updating; ///< Should this have Ctrl_update() called on it every frame?

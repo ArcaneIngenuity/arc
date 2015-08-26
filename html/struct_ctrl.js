@@ -12,10 +12,10 @@ var struct_ctrl =
     [ "mustStart", "struct_ctrl.html#aa124e91f2f2d231ff67e46db836f92d2", null ],
     [ "mustStop", "struct_ctrl.html#a2ac570f9d5886681b6cb9fd7a6f9d16b", null ],
     [ "resume", "struct_ctrl.html#a3864cd73ae81c97bd12f427c916f16aa", null ],
-    [ "running", "struct_ctrl.html#a1d7bf5b82d96fcd5a9c105c357627b17", null ],
     [ "start", "struct_ctrl.html#af746e85813cb365fe6d30d8c04b190eb", null ],
     [ "stop", "struct_ctrl.html#ad4d1065c8e7111842932f04b23ba4638", null ],
     [ "suspend", "struct_ctrl.html#a9d29a1b1e9118d5178e047bf632e4792", null ],
     [ "update", "struct_ctrl.html#a27d08cea5d4c43159298eecfc71d1aae", null ],
-    [ "updatePost", "struct_ctrl.html#af546250c0d813441d5057856608fb569", null ]
+    [ "updatePost", "struct_ctrl.html#af546250c0d813441d5057856608fb569", null ],
+    [ "updating", "struct_ctrl.html#abee9c102754aadf04b1c1d72da4d9ab8", null ]
 ];

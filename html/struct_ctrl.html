@@ -118,9 +118,9 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a1d7bf5b82d96fcd5a9c105c357627b17"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#a1d7bf5b82d96fcd5a9c105c357627b17">running</a></td></tr>
-<tr class="memdesc:a1d7bf5b82d96fcd5a9c105c357627b17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Should this have <a class="el" href="struct_ctrl.html#a7c3e32486ea528ccf6f7e16e6727dff8">Ctrl_update()</a> called on it every frame?  <a href="#a1d7bf5b82d96fcd5a9c105c357627b17">More...</a><br /></td></tr>
-<tr class="separator:a1d7bf5b82d96fcd5a9c105c357627b17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abee9c102754aadf04b1c1d72da4d9ab8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#abee9c102754aadf04b1c1d72da4d9ab8">updating</a></td></tr>
+<tr class="memdesc:abee9c102754aadf04b1c1d72da4d9ab8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Should this have <a class="el" href="struct_ctrl.html#a7c3e32486ea528ccf6f7e16e6727dff8">Ctrl_update()</a> called on it every frame?  <a href="#abee9c102754aadf04b1c1d72da4d9ab8">More...</a><br /></td></tr>
+<tr class="separator:abee9c102754aadf04b1c1d72da4d9ab8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5f0ce877f7becb8421d61b76e9d75e11"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#a5f0ce877f7becb8421d61b76e9d75e11">initialised</a></td></tr>
 <tr class="memdesc:a5f0ce877f7becb8421d61b76e9d75e11"><td class="mdescLeft">&#160;</td><td class="mdescRight">True after first initialisation. If re-initialisation is required, manually reset this to false.  <a href="#a5f0ce877f7becb8421d61b76e9d75e11">More...</a><br /></td></tr>
 <tr class="separator:a5f0ce877f7becb8421d61b76e9d75e11"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -161,9 +161,9 @@ Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Handles specific game / business / simulation logic within an <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>. </p>
 <p>For every discrete <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> needed, allocate it and set the appropriate callbacks.<br />
- A <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> instance may then be added to an <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> by setting <a class="el" href="struct_app.html#ac9152e04baee7d793b917643d6738589" title="The root Ctrl associated with this App. ">App.ctrl</a>; this will be the root <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>. Often, this will be the only <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> needed; though in some cases the user may prefer to use sub-Ctrl s attached to root.<br />
+ A <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> instance may then be added to an <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> by setting <a class="el" href="struct_app.html#ac9152e04baee7d793b917643d6738589" title="The root Ctrl associated with this App. ">App.ctrl</a>; this will be the root <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>. Often, this will be the only <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> needed; though in some cases the user may prefer to use sub-Ctrls attached to root.<br />
  Sub-Ctrls may be accessed through the <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>'s root <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>.<br />
- A <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> operates on a model. In arc, models need no specific type; they can be anything (and are internally denoted as void *). <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> reads and writes model state based on input and <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> state. </p>
+ A <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> operates on a model. In arc, models need no specific type; they can be anything (and are internally denoted as void *). <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> writes new model state by reading extant model state, inputs and <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> state. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="ab22987c9256f1219204e3d77e7d73da3"></a>
 <div class="memitem">
@@ -379,20 +379,6 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
-<a class="anchor" id="a1d7bf5b82d96fcd5a9c105c357627b17"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool Ctrl::running</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Should this have <a class="el" href="struct_ctrl.html#a7c3e32486ea528ccf6f7e16e6727dff8">Ctrl_update()</a> called on it every frame? </p>
-
-</div>
-</div>
 <a class="anchor" id="af746e85813cb365fe6d30d8c04b190eb"></a>
 <div class="memitem">
 <div class="memproto">
@@ -460,6 +446,20 @@ Here is the caller graph for this function:</div>
 </div><div class="memdoc">
 
 <p>User-supplied callback for when this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> <a class="el" href="struct_ctrl.html#af546250c0d813441d5057856608fb569" title="User-supplied callback for when this Ctrl updatePost()s, i.e. update this Ctrl after any of its App&#39;s...">updatePost()</a>s, i.e. update this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> after any of its <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>'s <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a>s update. </p>
+
+</div>
+</div>
+<a class="anchor" id="abee9c102754aadf04b1c1d72da4d9ab8"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Ctrl::updating</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Should this have <a class="el" href="struct_ctrl.html#a7c3e32486ea528ccf6f7e16e6727dff8">Ctrl_update()</a> called on it every frame? </p>
 
 </div>
 </div>

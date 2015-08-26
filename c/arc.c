@@ -3,14 +3,6 @@
 //#define DISJUNCTION_DEBUG
 
 //--------- Hub ---------//
-
-double Hub_getDeltaSec(double counterDelta, double counterFrequency)
-{
-	
-	//return (float)counterDelta.QuadPart /(float)frequency.QuadPart;
-}
-
-
 void Hub_construct(Hub * const this, int appsCount)
 {
 }
@@ -21,15 +13,6 @@ void Hub_update(Hub * const this)
 	printf("Hub_update\n");
 	#endif
 	
-	/*
-	//poll devices
-	for (int i = 0; i < this->devicesCount; i++)
-	{
-		Device * device = this->devices[i]; //read from map of values
-		Device_poll(device);
-	}
-	*/
-
 	//update apps
 	for (int i = 0; i < this->appsCount; i++)
 	{
@@ -37,33 +20,8 @@ void Hub_update(Hub * const this)
 		if (app->updating)
 			App_update(app);
 	}
-/*
-	//flush devices
-	var numDevices = this.array.length;
-	for (var i = 0; i < numDevices; i++)
-	{
-		var device = this.array[i];
-		if (device.eventBased)
-		{
-			var numChannels = device.channels.length;
-			for (var j = 0; j < numChannels; j++)
-			{
-				var channel = device.channels[j];
-				channel.delta = 0;
-			}
-		}
-	}
-	*/
-/*
-		for (var i = 0; i < this.services.array.length; i++)
-		{
-			var service = this.services.array[i];
-			service.updateJournals();
-		}
-*/
 }
 
-//dispose removes resources acquired in initialise or updates
 void Hub_dispose(Hub * const this)
 {
 	for (int i = 0; i < this->appsCount; i++)
@@ -146,32 +104,7 @@ void App_update(App * const this)
 	
 	Ctrl * ctrl = this->ctrl;
 	View * view = this->view;
-	//Pointer * pointer = this->hub->pointer;
-	/*
-	if (pointer)
-	{
-		//if (view->enabled) //root enabled
-		//{
-			Pointer_findTarget(pointer, view);
-			Pointer_updateSelected(pointer);
-		//}
-	}
-	*/
-
-	//Ctrl * ctrl = this->ctrl;
-	//View * view = this->view;
-	/*
-	Pointer * pointer = this->hub->pointer;
-	Pointer_updateSelected(pointer); //final
-	*/
 	
-	//app->input uses raw & pointer input, and custom input methods on services, to:
-	//-write to model AND/OR views (if we want view-specific values)
-	//-do any pre-processing of raw input necessary. remember that picking may come from elsewhere e.g. framebuffer
-	//-apply input abstraction as per app-specific rules
-	//-custom-calculate pointer position within Views (one, some or all - as desired) - may require top-level processing due to nature of incoming info e.g. framebuffer ids
-	
-	//this->input(this); //abstract
 	Ctrl_update(ctrl); //abstract
 	//if (view != NULL) //JIC user turns off the root view by removing it (since this is the enable/disable mechanism)
 	if (view->updating)
@@ -390,7 +323,6 @@ void App_stop(App * const this)
 	this->updating = false;
 }
 
-//dispose removes resources acquired in initialise or updates
 void App_dispose(App * const this)
 {
 	Ctrl * ctrl = this->ctrl;
@@ -400,7 +332,6 @@ void App_dispose(App * const this)
 	View_dispose(view);
 	
 	//this->services.dispose();
-	//this->devices.dispose();
 	
 	this->dispose((void *)this);
 	this->initialised = false;
@@ -427,29 +358,23 @@ void App_resume(App * const this)
 	printf ("App_resume done.");
 }
 
-//called when we want Ctrl to start updating
 void Ctrl_start(Ctrl * const this)
 {
 	this->start((void *)this);
 	this->updating = true;
 }
 
-//called when we want Ctrl to stop updating
 void Ctrl_stop(Ctrl * const this)
 {
 	this->stop((void *)this);
 	this->updating = false;
 }
 
-//called when application loses rendering context
-//may be that we need to cease all Ctrl processing (e.g. single player games)
 void Ctrl_suspend(Ctrl * const this)
 {
 	this->suspend(this);
 }
 
-//called when application regains rendering context
-//may be that we need to resume all Ctrl processing (e.g. single player games)
 void Ctrl_resume(Ctrl * const this)
 {
 	this->resume(this);	
@@ -479,7 +404,6 @@ void Ctrl_dispose(Ctrl * const this)
 	this->initialised = false;
 }
 
-//this can be called on construction or on first add to parent
 void View_construct(View * const this)
 {
 	#ifdef DISJUNCTION_DEBUG
@@ -487,21 +411,18 @@ void View_construct(View * const this)
 	#endif
 }
 
-//called when we want View to start updating
 void View_start(View * const this)
 {
 	this->start((void *)this);
 	this->updating = true;
 }
 
-//called when we want View to stop updating
 void View_stop(View * const this)
 {
 	this->stop((void *)this);
 	this->updating = false;
 }
 
-//called when application loses rendering context
 void View_suspend(View * const this)
 {
 	for (int i = 0; i < this->childrenCount; i++)
@@ -513,7 +434,6 @@ void View_suspend(View * const this)
 		this->suspend(this);
 }
 
-//called when application regains rendering context
 void View_resume(View * const this)
 {
 	for (int i = 0; i < this->childrenCount; i++)
@@ -532,7 +452,7 @@ void View_initialise(View * const this)
 	printf("View_initialise %s!\n", this->id);
 	#endif
 	
-	//if (this->initialise)
+	if (this->initialise)
 		this->initialise(this);
 	
 	this->initialised = true;

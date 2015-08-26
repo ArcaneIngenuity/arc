@@ -155,11 +155,11 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:adedf6262df083b89569135a5e6c4cc39"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#adedf6262df083b89569135a5e6c4cc39">childrenCount</a></td></tr>
 <tr class="memdesc:adedf6262df083b89569135a5e6c4cc39"><td class="mdescLeft">&#160;</td><td class="mdescRight">The number of child Views held by this parent <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a>. Negative for invalid return values (e.g. on seek).  <a href="#adedf6262df083b89569135a5e6c4cc39">More...</a><br /></td></tr>
 <tr class="separator:adedf6262df083b89569135a5e6c4cc39"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a39947cc9fc6b192b4ccb6b9a2562d3e1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#a39947cc9fc6b192b4ccb6b9a2562d3e1">running</a></td></tr>
-<tr class="memdesc:a39947cc9fc6b192b4ccb6b9a2562d3e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Should this have <a class="el" href="struct_view.html#ad83babf4c22c4e7aa6270711c6be24fc">View_update()</a> called on it every frame?  <a href="#a39947cc9fc6b192b4ccb6b9a2562d3e1">More...</a><br /></td></tr>
-<tr class="separator:a39947cc9fc6b192b4ccb6b9a2562d3e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49ba564eb2080ac333c280d36555c985"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#a49ba564eb2080ac333c280d36555c985">updating</a></td></tr>
+<tr class="memdesc:a49ba564eb2080ac333c280d36555c985"><td class="mdescLeft">&#160;</td><td class="mdescRight">Should this have <a class="el" href="struct_view.html#ad83babf4c22c4e7aa6270711c6be24fc">View_update()</a> called on it every frame?  <a href="#a49ba564eb2080ac333c280d36555c985">More...</a><br /></td></tr>
+<tr class="separator:a49ba564eb2080ac333c280d36555c985"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a60ba40ef2ec70f0fd7ddbf3a9ce6d91e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#a60ba40ef2ec70f0fd7ddbf3a9ce6d91e">initialised</a></td></tr>
-<tr class="memdesc:a60ba40ef2ec70f0fd7ddbf3a9ce6d91e"><td class="mdescLeft">&#160;</td><td class="mdescRight">True after first initialisation. If re-initialisation is required, manually reset this to false.  <a href="#a60ba40ef2ec70f0fd7ddbf3a9ce6d91e">More...</a><br /></td></tr>
+<tr class="memdesc:a60ba40ef2ec70f0fd7ddbf3a9ce6d91e"><td class="mdescLeft">&#160;</td><td class="mdescRight">True after first initialisation. If re-initialisation is required, this should be manually reset to false.  <a href="#a60ba40ef2ec70f0fd7ddbf3a9ce6d91e">More...</a><br /></td></tr>
 <tr class="separator:a60ba40ef2ec70f0fd7ddbf3a9ce6d91e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a25213ea61e61fd4e97c6f61c4a9479b6"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#a25213ea61e61fd4e97c6f61c4a9479b6">model</a></td></tr>
 <tr class="memdesc:a25213ea61e61fd4e97c6f61c4a9479b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">The model associated with this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a>. May or may not be the same as this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a>'s <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>'s model, depending on <a class="el" href="">Configuration</a>.  <a href="#a25213ea61e61fd4e97c6f61c4a9479b6">More...</a><br /></td></tr>
@@ -618,7 +618,7 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p>True after first initialisation. If re-initialisation is required, manually reset this to false. </p>
+<p>True after first initialisation. If re-initialisation is required, this should be manually reset to false. </p>
 
 </div>
 </div>
@@ -675,20 +675,6 @@ Here is the caller graph for this function:</div>
 </div><div class="memdoc">
 
 <p>User-supplied callback for when this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> must <a class="el" href="struct_view.html#acea56f0d3fcce710bacd2ee597a3a504" title="User-supplied callback for when this View must resume() due to regaining rendering context...">resume()</a> due to regaining rendering context. </p>
-
-</div>
-</div>
-<a class="anchor" id="a39947cc9fc6b192b4ccb6b9a2562d3e1"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool View::running</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Should this have <a class="el" href="struct_view.html#ad83babf4c22c4e7aa6270711c6be24fc">View_update()</a> called on it every frame? </p>
 
 </div>
 </div>
@@ -759,6 +745,20 @@ Here is the caller graph for this function:</div>
 </div><div class="memdoc">
 
 <p>User-supplied callback for when this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> <a class="el" href="struct_view.html#a67efa6a772aa7e036e51f1dbc2a4b673" title="User-supplied callback for when this View updatePost()s, i.e. update this View after its children upd...">updatePost()</a>s, i.e. update this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> after its children update. </p>
+
+</div>
+</div>
+<a class="anchor" id="a49ba564eb2080ac333c280d36555c985"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool View::updating</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Should this have <a class="el" href="struct_view.html#ad83babf4c22c4e7aa6270711c6be24fc">View_update()</a> called on it every frame? </p>
 
 </div>
 </div>

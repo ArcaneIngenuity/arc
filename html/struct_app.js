@@ -14,6 +14,6 @@ var struct_app =
     [ "initialise", "struct_app.html#aafbb60a6a0d536e315a94813a8c6d3fb", null ],
     [ "initialised", "struct_app.html#a2a69addab05c2f4459becab3c9b753b1", null ],
     [ "model", "struct_app.html#a6e9a75aed78b10266bf477baeed059b0", null ],
-    [ "running", "struct_app.html#a5ba5c3223120bbe9fc806df5232eb279", null ],
+    [ "updating", "struct_app.html#a5785e3a367ea6f28371942c0cb4cc1b8", null ],
     [ "view", "struct_app.html#af3e68b8acec42c3d9e2a415208a58465", null ]
 ];

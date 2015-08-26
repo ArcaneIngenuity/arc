@@ -1,3 +1,5 @@
+==Glossary==
+
  * Hub: contains and updates Apps - exists so we may run multiple Apps in parallel off the same timing mechanism (loop or callback).
  * App: contains and updates Ctrls (and thus models) and Views.
  * model: a generic object (user specified type) that holds logical world state.
@@ -8,5 +10,7 @@
  * start/stop: commence or cease updates (App, View, Ctrl; Hub is not included here as it is always updating).
  * resume/suspend: for when mandatory application context is regained or lost, typically due to a loss and subsequent restoration of the window (and thus rendering and input capability) or graphics context (Hub, App, View, Ctrl); naturally a stop is required before  a suspend, while a start is required after a resume.
 
-update/updatePost, initialise/dispose, start/stop and suspend/resume are generally all recursive functions, irrespective of where they appear.
+update/updatePost, initialise/dispose, start/stop and suspend/resume are generally all recursive functions, irrespective of where they appear. Exceptions are:
+
+ * View_start()/_stop(): Views should necessarily be started separately, though stopping a parent View necessarily prevents all descendant Views from being run (though technically their "updating" flag remains true).
  
