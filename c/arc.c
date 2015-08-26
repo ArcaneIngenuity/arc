@@ -408,15 +408,7 @@ void App_dispose(App * const this)
 }
 
 void App_suspend(App * const this)
-{
-	/*
-	for (int i = 0; i < this->childrenCount; i++)
-	{
-		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
-		View_suspend(child);
-	}
-	*/
-	
+{	
 	View_suspend(this->view);
 	
 	if (this->ctrl->suspend)
@@ -427,14 +419,6 @@ void App_suspend(App * const this)
 
 void App_resume(App * const this)
 {
-	/*
-	for (int i = 0; i < this->childrenCount; i++)
-	{
-		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
-		View_resume(child);
-	}
-	*/
-	
 	View_resume(this->view);
 
 	if (this->ctrl->resume)

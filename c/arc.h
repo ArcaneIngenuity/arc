@@ -59,12 +59,12 @@ typedef struct View
 	
 	void (*start)(struct View * const this); ///< \brief User-supplied callback for when this View start()s.
 	void (*stop)(struct View * const this); ///< \brief User-supplied callback for when this View stop()s.
-	void (*suspend)(struct View * const this);
-	void (*resume)(struct View * const this);
+	void (*suspend)(struct View * const this); ///< \brief User-supplied callback for when this View must suspend() due to a loss of rendering context.
+	void (*resume)(struct View * const this); ///< \brief User-supplied callback for when this View must resume() due to regaining rendering context.
 	void (*initialise)(struct View * const this); ///< \brief User-supplied callback for when this View initialise()s.
 	void (*dispose)(struct View * const this); ///< \brief User-supplied callback for when this View dispose()s of its resources.
-	void (*update)(struct View * const this); ///< \brief User-supplied callback for when this View update()s.
-	void (*updatePost)(struct View * const this); ///< \brief User-supplied callback for when this View updatePost()s.
+	void (*update)(struct View * const this); ///< \brief User-supplied callback for when this View update()s, i.e. update this View before its children update.
+	void (*updatePost)(struct View * const this); ///< \brief User-supplied callback for when this View updatePost()s, i.e. update this View after its children update.
 	void (*onParentResize)(struct View * const this); ///< \brief User-supplied callback for when this View's parent is resized. Root View resize is handled by some external (platform-specific) callback.
 	//void (*enable)(struct View * const this); //start
 	//void (*disable)(struct View * const this); //stop
@@ -88,12 +88,12 @@ typedef struct Ctrl
 	void (*mustStop)(struct Ctrl * const this); ///< \brief User-supplied callback for checking when this Ctrl mustStop().
 	void (*start)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl start()s.
 	void (*stop)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl stop()s.
-	void (*suspend)(struct View * const this);
-	void (*resume)(struct View * const this);
+	void (*suspend)(struct View * const this); ///< \brief User-supplied callback for when this Ctrl must suspend() due to a loss of rendering context.
+	void (*resume)(struct View * const this); ///< \brief User-supplied callback for when this Ctrl must resume() due to regaining rendering context.
 	void (*initialise)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl initialise()s.
 	void (*dispose)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl dispose()s of its resources.
-	void (*update)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl update()s.
-	void (*updatePost)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl updatePost()s.
+	void (*update)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl update()s, i.e. update this Ctrl before any of its App's View%s update.
+	void (*updatePost)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl updatePost()s, i.e. update this Ctrl after any of its App's View%s update.
 
 } Ctrl;
 const struct Ctrl ctrlEmpty; ///< Used to set instance to empty / zero all its members, as a convenience to be used instead of memset(.., 0, ..).
@@ -140,18 +140,17 @@ typedef struct Hub
 	App * apps[APPS_MAX]; //malloc'd array of pointers to apps -- allows ad-hoc allocation or batched pre-allocation
 	int appsCount; ///< The number of valid App%s (counted from zero) currently in the Hub.apps array. (NEEDS REVIEW - these should act as slots and all should be checked, so don't need this)
 	
+	//TODO global Services?
 	//struct Service _services[SERVICES_MAX];
 	//Key _serviceKeys[SERVICES_MAX];
 
 	//TODO Builder
 	void (*initialise)(struct Hub * const this); ///< \brief User-supplied callback for when this Hub initialise()s.
 	void (*dispose)(struct Hub * const this); ///< \brief User-supplied callback for when this Hub dispose()s of its resources.
+	void (*suspend)(struct Hub * const this); ///< \brief User-supplied callback for when this Ctrl must suspend() due to a loss of rendering context.
+	void (*resume)(struct Hub * const this); ///< \brief User-supplied callback for when this Hub must resume() due to regaining rendering context.
 	
 	void * external; ///< User-defined reference to global state; useful if avoiding global variables.
-	//void (*start)(struct Hub * const this); 
-	//void (*stop)(struct Hub * const this);
-	void (*suspend)(struct Hub * const this);
-	void (*resume)(struct Hub * const this);
 
 } Hub;
 const struct Hub hubEmpty; ///< Used to set instance to empty / zero all its members, as a convenience to be used instead of memset(.., 0, ..).
@@ -169,8 +168,8 @@ void 		Ctrl_dispose(Ctrl * const this); ///< \memberof Ctrl Disposes of the Ctrl
 
 void 		View_start(View * const this); ///< \memberof View Starts the View using \link start \endlink.
 void 		View_stop(View * const this); ///< \memberof View Stops the View using \link stop \endlink.
-void 		View_suspend(View * const this);
-void 		View_resume(View * const this);
+void 		View_suspend(View * const this); ///< \memberof View Has this View and its children %s \link suspend \endlink operations due to a loss of rendering context.
+void 		View_resume(View * const this); ///< \memberof View Has this View and its children %s \link resume \endlink operations due to regaining rendering context.
 void 		View_construct(View * const this); ///< \memberof View Constructs the View using \link construct \endlink. (NEEDS REVIEW, UNUSED?)
 void 		View_initialise(View * const this); ///< \memberof View Initialises the View using \link initialise \endlink.
 void 		View_update(View * const this); ///< \memberof View Updates the View using \link update \endlink.
@@ -184,8 +183,8 @@ View *		View_addChild(View * const this, View * const child); ///< \memberof Vie
 
 void 		App_initialise(App * const this); ///< \memberof App Initialises the App using \link initialise \endlink.
 void 		App_update(App * const this); ///< \memberof App Updates the App using \link update \endlink.
-//void 		App_suspend(App * const this);
-//void 		App_resume(App * const this);
+void 		App_suspend(App * const this); ///< \memberof App Has the App's View%s and Ctrl%s \link suspend \endlink operations due to a loss of rendering context.
+void 		App_resume(App * const this); ///< \memberof App Has the App's View%s and Ctrl%s \link resume \endlink operations due to regaining rendering context.
 void 		App_start(App * const this); ///< \memberof App Starts the App using \link start \endlink.
 void 		App_stop(App * const this); ///< \memberof App Stops the App using \link stop \endlink.
 void 		App_dispose(App * const this); ///< \memberof App Disposes of the App and its Views and Ctrls, optionally using \link dispose \endlink. (NEEDS REVIEW, 2ND CLAUSE)
@@ -196,7 +195,8 @@ void 		Hub_construct(Hub * const this, int appsCount); ///< \memberof Hub Constr
 void 		Hub_initialise(Hub * const this); ///< \memberof Hub Initialises context that affects all App s held by the Hub (e.g. OpenGL, OpenAL), using \link initialise \endlink.
 void 		Hub_dispose(Hub * const this); ///< \memberof Hub Disposes of context that affects all App s held by the Hub (e.g. OpenGL, OpenAL), using \link dispose \endlink.
 void 		Hub_update(Hub * const this); ///< \memberof Hub Updates all Apps within the Hub.
-void 		Hub_suspend(Hub * const this);
+void 		Hub_suspend(Hub * const this); ///< \memberof Hub Has all App%s \link suspend \endlink operations due to a loss of rendering context.
+void 		Hub_resume(Hub * const this); ///< \memberof Hub Has all App%s \link resume \endlink operations due to regaining rendering context.
 App * const Hub_addApp(Hub * const this, App * app); ///< \memberof Hub Adds an App to the Hub (at the next available slot, if any), which must have a valid App.id by the time it is added.
 App * const Hub_getApp(Hub * const this, const char * const id); ///< \memberof Hub Gets an App from the Hub by its App.id.
 //TODO... void Hub_removeApp(Hub * const this, const char * id);
