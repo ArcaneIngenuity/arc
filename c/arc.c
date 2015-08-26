@@ -366,8 +366,8 @@ void App_dispose(App * const this)
 	Ctrl * ctrl = this->ctrl;
 	View * view = this->view;
 
-	Ctrl_disposeRecurse(ctrl);
-	View_disposeRecurse(view);
+	Ctrl_dispose(ctrl);
+	View_dispose(view);
 	
 	//this->services.dispose();
 	//this->devices.dispose();
@@ -411,14 +411,6 @@ void Ctrl_dispose(Ctrl * const this)
 {
 	this->dispose(this);
 	this->initialised = false;
-}
-
-void Ctrl_disposeRecurse(Ctrl * const this)
-{
-	//TODO recurse
-	this->dispose(this);
-	this->initialised = false;
-	//free(this);
 }
 
 //this can be called on construction or on first add to parent
@@ -473,16 +465,16 @@ void View_update(View * const this)
 	this->updatePost(this);//deltaSec
 }
 
-void View_disposeRecurse(View * const this)
+void View_dispose(View * const this)
 {
 	#ifdef DISJUNCTION_DEBUG
-	printf("View_disposeRecurse\n");
+	printf("View_dispose\n");
 	#endif
 	
 	for (int i = 0; i < this->childrenCount; i++)
 	{
 		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
-		View_disposeRecurse(child);
+		View_dispose(child);
 	}
 	this->dispose(this);
 	this->initialised = false;
