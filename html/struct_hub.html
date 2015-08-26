@@ -123,6 +123,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:af7523a2dd8f519fac400b767cfe81a67"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa9dd34f865269547e24d66a2943b1d2a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_hub.html#aa9dd34f865269547e24d66a2943b1d2a">Hub_update</a> (<a class="el" href="struct_hub.html">Hub</a> *const this)</td></tr>
 <tr class="separator:aa9dd34f865269547e24d66a2943b1d2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a545db900048b3e0489884cfda68ebd98"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_hub.html#a545db900048b3e0489884cfda68ebd98">Hub_suspend</a> (<a class="el" href="struct_hub.html">Hub</a> *const this)</td></tr>
+<tr class="separator:a545db900048b3e0489884cfda68ebd98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa37c3e88276022292690fb130e22a4c6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_hub.html#aa37c3e88276022292690fb130e22a4c6">Hub_resume</a> (<a class="el" href="struct_hub.html">Hub</a> *const this)</td></tr>
+<tr class="separator:aa37c3e88276022292690fb130e22a4c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3c72d914702e709b541c178cfe4b85df"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_app.html">App</a> *const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_hub.html#a3c72d914702e709b541c178cfe4b85df">Hub_addApp</a> (<a class="el" href="struct_hub.html">Hub</a> *const this, <a class="el" href="struct_app.html">App</a> *app)</td></tr>
 <tr class="separator:a3c72d914702e709b541c178cfe4b85df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac19ed2ca01bb27bb48705162b5b7e5d0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_app.html">App</a> *const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_hub.html#ac19ed2ca01bb27bb48705162b5b7e5d0">Hub_getApp</a> (<a class="el" href="struct_hub.html">Hub</a> *const this, const char *const id)</td></tr>
@@ -141,13 +145,15 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a254a4f0fb54497f22e33cf59a1f07283"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_hub.html#a254a4f0fb54497f22e33cf59a1f07283">dispose</a> )(struct <a class="el" href="struct_hub.html">Hub</a> *const this)</td></tr>
 <tr class="memdesc:a254a4f0fb54497f22e33cf59a1f07283"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied callback for when this <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> <a class="el" href="struct_hub.html#a254a4f0fb54497f22e33cf59a1f07283" title="User-supplied callback for when this Hub dispose()s of its resources. ">dispose()</a>s of its resources.  <a href="#a254a4f0fb54497f22e33cf59a1f07283">More...</a><br /></td></tr>
 <tr class="separator:a254a4f0fb54497f22e33cf59a1f07283"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9701f064b2f1a8066eef51417d029532"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_hub.html#a9701f064b2f1a8066eef51417d029532">suspend</a> )(struct <a class="el" href="struct_hub.html">Hub</a> *const this)</td></tr>
+<tr class="memdesc:a9701f064b2f1a8066eef51417d029532"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied callback for when this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> must <a class="el" href="struct_hub.html#a9701f064b2f1a8066eef51417d029532" title="User-supplied callback for when this Ctrl must suspend() due to a loss of rendering context...">suspend()</a> due to a loss of rendering context.  <a href="#a9701f064b2f1a8066eef51417d029532">More...</a><br /></td></tr>
+<tr class="separator:a9701f064b2f1a8066eef51417d029532"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8abbf06a8080334d17fb6039cc49b8d0"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_hub.html#a8abbf06a8080334d17fb6039cc49b8d0">resume</a> )(struct <a class="el" href="struct_hub.html">Hub</a> *const this)</td></tr>
+<tr class="memdesc:a8abbf06a8080334d17fb6039cc49b8d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied callback for when this <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> must <a class="el" href="struct_hub.html#a8abbf06a8080334d17fb6039cc49b8d0" title="User-supplied callback for when this Hub must resume() due to regaining rendering context...">resume()</a> due to regaining rendering context.  <a href="#a8abbf06a8080334d17fb6039cc49b8d0">More...</a><br /></td></tr>
+<tr class="separator:a8abbf06a8080334d17fb6039cc49b8d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7a1e66abb321327655e1e59e6238a742"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_hub.html#a7a1e66abb321327655e1e59e6238a742">external</a></td></tr>
 <tr class="memdesc:a7a1e66abb321327655e1e59e6238a742"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-defined reference to global state; useful if avoiding global variables.  <a href="#a7a1e66abb321327655e1e59e6238a742">More...</a><br /></td></tr>
 <tr class="separator:a7a1e66abb321327655e1e59e6238a742"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9701f064b2f1a8066eef51417d029532"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_hub.html#a9701f064b2f1a8066eef51417d029532">suspend</a> )(struct <a class="el" href="struct_hub.html">Hub</a> *const this)</td></tr>
-<tr class="separator:a9701f064b2f1a8066eef51417d029532"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8abbf06a8080334d17fb6039cc49b8d0"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_hub.html#a8abbf06a8080334d17fb6039cc49b8d0">resume</a> )(struct <a class="el" href="struct_hub.html">Hub</a> *const this)</td></tr>
-<tr class="separator:a8abbf06a8080334d17fb6039cc49b8d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A central point from which all <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>s may be managed / updated. </p>
@@ -268,6 +274,40 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="aa37c3e88276022292690fb130e22a4c6"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Hub_resume </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_hub.html">Hub</a> *const&#160;</td>
+          <td class="paramname"><em>this</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Has all <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>s <a class="el" href="struct_hub.html#a8abbf06a8080334d17fb6039cc49b8d0">resume</a> operations due to regaining rendering context. </p>
+
+</div>
+</div>
+<a class="anchor" id="a545db900048b3e0489884cfda68ebd98"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Hub_suspend </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_hub.html">Hub</a> *const&#160;</td>
+          <td class="paramname"><em>this</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Has all <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>s <a class="el" href="struct_hub.html#a9701f064b2f1a8066eef51417d029532">suspend</a> operations due to a loss of rendering context. </p>
+
+</div>
+</div>
 <a class="anchor" id="aa9dd34f865269547e24d66a2943b1d2a"></a>
 <div class="memitem">
 <div class="memproto">
@@ -364,6 +404,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>User-supplied callback for when this <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> must <a class="el" href="struct_hub.html#a8abbf06a8080334d17fb6039cc49b8d0" title="User-supplied callback for when this Hub must resume() due to regaining rendering context...">resume()</a> due to regaining rendering context. </p>
+
 </div>
 </div>
 <a class="anchor" id="a9701f064b2f1a8066eef51417d029532"></a>
@@ -375,6 +417,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>User-supplied callback for when this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> must <a class="el" href="struct_hub.html#a9701f064b2f1a8066eef51417d029532" title="User-supplied callback for when this Ctrl must suspend() due to a loss of rendering context...">suspend()</a> due to a loss of rendering context. </p>
 
 </div>
 </div>

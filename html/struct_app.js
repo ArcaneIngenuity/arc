@@ -2,8 +2,10 @@ var struct_app =
 [
     [ "App_dispose", "struct_app.html#a941b058d3a7e415e9eca4ac7dc8a825e", null ],
     [ "App_initialise", "struct_app.html#a3aa2dee87d568d9ff409244bb158061c", null ],
+    [ "App_resume", "struct_app.html#ade7157aa1dfd2f872dacadc90e526d7e", null ],
     [ "App_start", "struct_app.html#aa45dc4bd81e6ac74778bb1fc591b2de5", null ],
     [ "App_stop", "struct_app.html#af12a5f973f86bfdde9746470217982d9", null ],
+    [ "App_suspend", "struct_app.html#abd58b661beaf40e522f43c92c1db1252", null ],
     [ "App_update", "struct_app.html#a63512392b291279280fe9f5e4b62a871", null ],
     [ "ctrl", "struct_app.html#ac9152e04baee7d793b917643d6738589", null ],
     [ "dispose", "struct_app.html#a7cb4cfb86c7ccfa589c7a054ed421e95", null ],

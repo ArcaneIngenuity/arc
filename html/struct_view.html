@@ -106,8 +106,6 @@ $(document).ready(function(){initNavTree('struct_view.html','');});
 Collaboration diagram for View:</div>
 <div class="dyncontent">
 <div class="center"><img src="struct_view__coll__graph.png" border="0" usemap="#_view_coll__map" alt="Collaboration graph"/></div>
-<map name="_view_coll__map" id="_view_coll__map">
-</map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -118,6 +116,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a6f84d25ea279f5658fce4e3bc3b5bcb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42a8dd43d13ad07962878f61524c48e6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#a42a8dd43d13ad07962878f61524c48e6">View_stop</a> (<a class="el" href="struct_view.html">View</a> *const this)</td></tr>
 <tr class="separator:a42a8dd43d13ad07962878f61524c48e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6447e55f2358f2e46a819fee523f2685"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#a6447e55f2358f2e46a819fee523f2685">View_suspend</a> (<a class="el" href="struct_view.html">View</a> *const this)</td></tr>
+<tr class="separator:a6447e55f2358f2e46a819fee523f2685"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8805e56bb677e1caa184c7c5e7d8e334"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#a8805e56bb677e1caa184c7c5e7d8e334">View_resume</a> (<a class="el" href="struct_view.html">View</a> *const this)</td></tr>
+<tr class="separator:a8805e56bb677e1caa184c7c5e7d8e334"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a79b0cf6e610e85700d458b12ec38ee7f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#a79b0cf6e610e85700d458b12ec38ee7f">View_construct</a> (<a class="el" href="struct_view.html">View</a> *const this)</td></tr>
 <tr class="separator:a79b0cf6e610e85700d458b12ec38ee7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3961f4a9135495200a4778ad1fd23282"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#a3961f4a9135495200a4778ad1fd23282">View_initialise</a> (<a class="el" href="struct_view.html">View</a> *const this)</td></tr>
@@ -169,8 +171,10 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a5f7a1268dad187b7742fa8089d7a79c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied callback for when this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> <a class="el" href="struct_view.html#a5f7a1268dad187b7742fa8089d7a79c8" title="User-supplied callback for when this View stop()s. ">stop()</a>s.  <a href="#a5f7a1268dad187b7742fa8089d7a79c8">More...</a><br /></td></tr>
 <tr class="separator:a5f7a1268dad187b7742fa8089d7a79c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4ea02ebe6cc657f066e5c89584e2431d"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#a4ea02ebe6cc657f066e5c89584e2431d">suspend</a> )(struct <a class="el" href="struct_view.html">View</a> *const this)</td></tr>
+<tr class="memdesc:a4ea02ebe6cc657f066e5c89584e2431d"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied callback for when this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> must <a class="el" href="struct_view.html#a4ea02ebe6cc657f066e5c89584e2431d" title="User-supplied callback for when this View must suspend() due to a loss of rendering context...">suspend()</a> due to a loss of rendering context.  <a href="#a4ea02ebe6cc657f066e5c89584e2431d">More...</a><br /></td></tr>
 <tr class="separator:a4ea02ebe6cc657f066e5c89584e2431d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acea56f0d3fcce710bacd2ee597a3a504"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#acea56f0d3fcce710bacd2ee597a3a504">resume</a> )(struct <a class="el" href="struct_view.html">View</a> *const this)</td></tr>
+<tr class="memdesc:acea56f0d3fcce710bacd2ee597a3a504"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied callback for when this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> must <a class="el" href="struct_view.html#acea56f0d3fcce710bacd2ee597a3a504" title="User-supplied callback for when this View must resume() due to regaining rendering context...">resume()</a> due to regaining rendering context.  <a href="#acea56f0d3fcce710bacd2ee597a3a504">More...</a><br /></td></tr>
 <tr class="separator:acea56f0d3fcce710bacd2ee597a3a504"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac6228485984082c8e1e42fe5f0af8287"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#ac6228485984082c8e1e42fe5f0af8287">initialise</a> )(struct <a class="el" href="struct_view.html">View</a> *const this)</td></tr>
 <tr class="memdesc:ac6228485984082c8e1e42fe5f0af8287"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied callback for when this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> <a class="el" href="struct_view.html#ac6228485984082c8e1e42fe5f0af8287" title="User-supplied callback for when this View initialise()s. ">initialise()</a>s.  <a href="#ac6228485984082c8e1e42fe5f0af8287">More...</a><br /></td></tr>
@@ -179,10 +183,10 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:aeff06c0bcdbea52889194c13c0583fe4"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied callback for when this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> <a class="el" href="struct_view.html#aeff06c0bcdbea52889194c13c0583fe4" title="User-supplied callback for when this View dispose()s of its resources. ">dispose()</a>s of its resources.  <a href="#aeff06c0bcdbea52889194c13c0583fe4">More...</a><br /></td></tr>
 <tr class="separator:aeff06c0bcdbea52889194c13c0583fe4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a17ddb9186426d8803f16da7735849fd3"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#a17ddb9186426d8803f16da7735849fd3">update</a> )(struct <a class="el" href="struct_view.html">View</a> *const this)</td></tr>
-<tr class="memdesc:a17ddb9186426d8803f16da7735849fd3"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied callback for when this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> <a class="el" href="struct_view.html#a17ddb9186426d8803f16da7735849fd3" title="User-supplied callback for when this View update()s. ">update()</a>s.  <a href="#a17ddb9186426d8803f16da7735849fd3">More...</a><br /></td></tr>
+<tr class="memdesc:a17ddb9186426d8803f16da7735849fd3"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied callback for when this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> <a class="el" href="struct_view.html#a17ddb9186426d8803f16da7735849fd3" title="User-supplied callback for when this View update()s, i.e. update this View before its children update...">update()</a>s, i.e. update this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> before its children update.  <a href="#a17ddb9186426d8803f16da7735849fd3">More...</a><br /></td></tr>
 <tr class="separator:a17ddb9186426d8803f16da7735849fd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a67efa6a772aa7e036e51f1dbc2a4b673"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#a67efa6a772aa7e036e51f1dbc2a4b673">updatePost</a> )(struct <a class="el" href="struct_view.html">View</a> *const this)</td></tr>
-<tr class="memdesc:a67efa6a772aa7e036e51f1dbc2a4b673"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied callback for when this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> <a class="el" href="struct_view.html#a67efa6a772aa7e036e51f1dbc2a4b673" title="User-supplied callback for when this View updatePost()s. ">updatePost()</a>s.  <a href="#a67efa6a772aa7e036e51f1dbc2a4b673">More...</a><br /></td></tr>
+<tr class="memdesc:a67efa6a772aa7e036e51f1dbc2a4b673"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied callback for when this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> <a class="el" href="struct_view.html#a67efa6a772aa7e036e51f1dbc2a4b673" title="User-supplied callback for when this View updatePost()s, i.e. update this View after its children upd...">updatePost()</a>s, i.e. update this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> after its children update.  <a href="#a67efa6a772aa7e036e51f1dbc2a4b673">More...</a><br /></td></tr>
 <tr class="separator:a67efa6a772aa7e036e51f1dbc2a4b673"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afbcb9956338ce2d9708e759e3c67308e"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#afbcb9956338ce2d9708e759e3c67308e">onParentResize</a> )(struct <a class="el" href="struct_view.html">View</a> *const this)</td></tr>
 <tr class="memdesc:afbcb9956338ce2d9708e759e3c67308e"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied callback for when this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a>'s parent is resized. Root <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> resize is handled by some external (platform-specific) callback.  <a href="#afbcb9956338ce2d9708e759e3c67308e">More...</a><br /></td></tr>
@@ -393,6 +397,34 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
+<a class="anchor" id="a8805e56bb677e1caa184c7c5e7d8e334"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void View_resume </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_view.html">View</a> *const&#160;</td>
+          <td class="paramname"><em>this</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Has this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> and its children s <a class="el" href="struct_view.html#acea56f0d3fcce710bacd2ee597a3a504">resume</a> operations due to regaining rendering context. </p>
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="struct_view_a8805e56bb677e1caa184c7c5e7d8e334_icgraph.png" border="0" usemap="#struct_view_a8805e56bb677e1caa184c7c5e7d8e334_icgraph" alt=""/></div>
+<map name="struct_view_a8805e56bb677e1caa184c7c5e7d8e334_icgraph" id="struct_view_a8805e56bb677e1caa184c7c5e7d8e334_icgraph">
+<area shape="rect" id="node2" href="arc_8c.html#ade7157aa1dfd2f872dacadc90e526d7e" title="App_resume" alt="" coords="192,5,287,32"/>
+<area shape="rect" id="node3" href="arc_8c.html#a8805e56bb677e1caa184c7c5e7d8e334" title="View_resume" alt="" coords="189,56,289,83"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
 <a class="anchor" id="a6f84d25ea279f5658fce4e3bc3b5bcb4"></a>
 <div class="memitem">
 <div class="memproto">
@@ -434,6 +466,34 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 <p>Stops the <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> using <a class="el" href="struct_view.html#a5f7a1268dad187b7742fa8089d7a79c8">stop</a>. </p>
+
+</div>
+</div>
+<a class="anchor" id="a6447e55f2358f2e46a819fee523f2685"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void View_suspend </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_view.html">View</a> *const&#160;</td>
+          <td class="paramname"><em>this</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Has this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> and its children s <a class="el" href="struct_view.html#a4ea02ebe6cc657f066e5c89584e2431d">suspend</a> operations due to a loss of rendering context. </p>
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="struct_view_a6447e55f2358f2e46a819fee523f2685_icgraph.png" border="0" usemap="#struct_view_a6447e55f2358f2e46a819fee523f2685_icgraph" alt=""/></div>
+<map name="struct_view_a6447e55f2358f2e46a819fee523f2685_icgraph" id="struct_view_a6447e55f2358f2e46a819fee523f2685_icgraph">
+<area shape="rect" id="node2" href="arc_8c.html#abd58b661beaf40e522f43c92c1db1252" title="App_suspend" alt="" coords="199,5,300,32"/>
+<area shape="rect" id="node3" href="arc_8c.html#a6447e55f2358f2e46a819fee523f2685" title="View_suspend" alt="" coords="196,56,303,83"/>
+</map>
+</div>
+</p>
 
 </div>
 </div>
@@ -614,6 +674,8 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
+<p>User-supplied callback for when this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> must <a class="el" href="struct_view.html#acea56f0d3fcce710bacd2ee597a3a504" title="User-supplied callback for when this View must resume() due to regaining rendering context...">resume()</a> due to regaining rendering context. </p>
+
 </div>
 </div>
 <a class="anchor" id="a39947cc9fc6b192b4ccb6b9a2562d3e1"></a>
@@ -668,6 +730,8 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
+<p>User-supplied callback for when this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> must <a class="el" href="struct_view.html#a4ea02ebe6cc657f066e5c89584e2431d" title="User-supplied callback for when this View must suspend() due to a loss of rendering context...">suspend()</a> due to a loss of rendering context. </p>
+
 </div>
 </div>
 <a class="anchor" id="a17ddb9186426d8803f16da7735849fd3"></a>
@@ -680,7 +744,7 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p>User-supplied callback for when this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> <a class="el" href="struct_view.html#a17ddb9186426d8803f16da7735849fd3" title="User-supplied callback for when this View update()s. ">update()</a>s. </p>
+<p>User-supplied callback for when this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> <a class="el" href="struct_view.html#a17ddb9186426d8803f16da7735849fd3" title="User-supplied callback for when this View update()s, i.e. update this View before its children update...">update()</a>s, i.e. update this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> before its children update. </p>
 
 </div>
 </div>
@@ -694,7 +758,7 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p>User-supplied callback for when this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> <a class="el" href="struct_view.html#a67efa6a772aa7e036e51f1dbc2a4b673" title="User-supplied callback for when this View updatePost()s. ">updatePost()</a>s. </p>
+<p>User-supplied callback for when this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> <a class="el" href="struct_view.html#a67efa6a772aa7e036e51f1dbc2a4b673" title="User-supplied callback for when this View updatePost()s, i.e. update this View after its children upd...">updatePost()</a>s, i.e. update this <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> after its children update. </p>
 
 </div>
 </div>

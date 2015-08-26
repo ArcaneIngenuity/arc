@@ -119,6 +119,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a3aa2dee87d568d9ff409244bb158061c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a63512392b291279280fe9f5e4b62a871"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#a63512392b291279280fe9f5e4b62a871">App_update</a> (<a class="el" href="struct_app.html">App</a> *const this)</td></tr>
 <tr class="separator:a63512392b291279280fe9f5e4b62a871"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd58b661beaf40e522f43c92c1db1252"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#abd58b661beaf40e522f43c92c1db1252">App_suspend</a> (<a class="el" href="struct_app.html">App</a> *const this)</td></tr>
+<tr class="separator:abd58b661beaf40e522f43c92c1db1252"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade7157aa1dfd2f872dacadc90e526d7e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#ade7157aa1dfd2f872dacadc90e526d7e">App_resume</a> (<a class="el" href="struct_app.html">App</a> *const this)</td></tr>
+<tr class="separator:ade7157aa1dfd2f872dacadc90e526d7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa45dc4bd81e6ac74778bb1fc591b2de5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#aa45dc4bd81e6ac74778bb1fc591b2de5">App_start</a> (<a class="el" href="struct_app.html">App</a> *const this)</td></tr>
 <tr class="separator:aa45dc4bd81e6ac74778bb1fc591b2de5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af12a5f973f86bfdde9746470217982d9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#af12a5f973f86bfdde9746470217982d9">App_stop</a> (<a class="el" href="struct_app.html">App</a> *const this)</td></tr>
@@ -203,6 +207,33 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
+<a class="anchor" id="ade7157aa1dfd2f872dacadc90e526d7e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void App_resume </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_app.html">App</a> *const&#160;</td>
+          <td class="paramname"><em>this</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Has the <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>'s <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a>s and <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>s <a class="el" href="">resume</a> operations due to regaining rendering context. </p>
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="struct_app_ade7157aa1dfd2f872dacadc90e526d7e_icgraph.png" border="0" usemap="#struct_app_ade7157aa1dfd2f872dacadc90e526d7e_icgraph" alt=""/></div>
+<map name="struct_app_ade7157aa1dfd2f872dacadc90e526d7e_icgraph" id="struct_app_ade7157aa1dfd2f872dacadc90e526d7e_icgraph">
+<area shape="rect" id="node2" href="arc_8c.html#aa37c3e88276022292690fb130e22a4c6" title="Hub_resume" alt="" coords="180,5,275,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
 <a class="anchor" id="aa45dc4bd81e6ac74778bb1fc591b2de5"></a>
 <div class="memitem">
 <div class="memproto">
@@ -234,6 +265,33 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 <p>Stops the <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> using <a class="el" href="">stop</a>. </p>
+
+</div>
+</div>
+<a class="anchor" id="abd58b661beaf40e522f43c92c1db1252"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void App_suspend </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_app.html">App</a> *const&#160;</td>
+          <td class="paramname"><em>this</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Has the <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>'s <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a>s and <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>s <a class="el" href="">suspend</a> operations due to a loss of rendering context. </p>
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="struct_app_abd58b661beaf40e522f43c92c1db1252_icgraph.png" border="0" usemap="#struct_app_abd58b661beaf40e522f43c92c1db1252_icgraph" alt=""/></div>
+<map name="struct_app_abd58b661beaf40e522f43c92c1db1252_icgraph" id="struct_app_abd58b661beaf40e522f43c92c1db1252_icgraph">
+<area shape="rect" id="node2" href="arc_8c.html#a545db900048b3e0489884cfda68ebd98" title="Hub_suspend" alt="" coords="185,5,287,32"/>
+</map>
+</div>
+</p>
 
 </div>
 </div>

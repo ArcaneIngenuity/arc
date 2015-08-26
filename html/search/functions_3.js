@@ -6,7 +6,7 @@ var searchData=
   ['hub_5fgetapp',['Hub_getApp',['../struct_hub.html#ac19ed2ca01bb27bb48705162b5b7e5d0',1,'Hub::Hub_getApp()'],['../arc_8c.html#aead76042f9a3b556ae443603eed94e02',1,'Hub_getApp():&#160;arc.c']]],
   ['hub_5fgetdeltasec',['Hub_getDeltaSec',['../arc_8c.html#a45b53b7b68446d4d1b2ce5b7429ea502',1,'arc.c']]],
   ['hub_5finitialise',['Hub_initialise',['../struct_hub.html#a7b8d203e57ddc0272ebbb2ec012802ed',1,'Hub']]],
-  ['hub_5fresume',['Hub_resume',['../arc_8c.html#aa37c3e88276022292690fb130e22a4c6',1,'arc.c']]],
-  ['hub_5fsuspend',['Hub_suspend',['../arc_8c.html#a545db900048b3e0489884cfda68ebd98',1,'Hub_suspend(Hub *const this):&#160;arc.c'],['../arc_8h.html#a545db900048b3e0489884cfda68ebd98',1,'Hub_suspend(Hub *const this):&#160;arc.c']]],
+  ['hub_5fresume',['Hub_resume',['../struct_hub.html#aa37c3e88276022292690fb130e22a4c6',1,'Hub::Hub_resume()'],['../arc_8c.html#aa37c3e88276022292690fb130e22a4c6',1,'Hub_resume():&#160;arc.c']]],
+  ['hub_5fsuspend',['Hub_suspend',['../struct_hub.html#a545db900048b3e0489884cfda68ebd98',1,'Hub::Hub_suspend()'],['../arc_8c.html#a545db900048b3e0489884cfda68ebd98',1,'Hub_suspend():&#160;arc.c']]],
   ['hub_5fupdate',['Hub_update',['../struct_hub.html#aa9dd34f865269547e24d66a2943b1d2a',1,'Hub::Hub_update()'],['../arc_8c.html#aa9dd34f865269547e24d66a2943b1d2a',1,'Hub_update():&#160;arc.c']]]
 ];

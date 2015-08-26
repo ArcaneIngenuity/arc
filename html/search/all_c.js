@@ -9,10 +9,10 @@ var searchData=
   ['view_5finitialise',['View_initialise',['../struct_view.html#a3961f4a9135495200a4778ad1fd23282',1,'View::View_initialise()'],['../arc_8c.html#a3961f4a9135495200a4778ad1fd23282',1,'View_initialise():&#160;arc.c']]],
   ['view_5fisroot',['View_isRoot',['../struct_view.html#a90c9498e382410aed3de9b4d29a89837',1,'View::View_isRoot()'],['../arc_8c.html#a90c9498e382410aed3de9b4d29a89837',1,'View_isRoot():&#160;arc.c']]],
   ['view_5fonparentresizerecurse',['View_onParentResizeRecurse',['../struct_view.html#af524fb7519cdb2b72cbb7e1c5abfdbb4',1,'View::View_onParentResizeRecurse()'],['../arc_8c.html#af524fb7519cdb2b72cbb7e1c5abfdbb4',1,'View_onParentResizeRecurse():&#160;arc.c']]],
-  ['view_5fresume',['View_resume',['../arc_8c.html#a8805e56bb677e1caa184c7c5e7d8e334',1,'View_resume(View *const this):&#160;arc.c'],['../arc_8h.html#a8805e56bb677e1caa184c7c5e7d8e334',1,'View_resume(View *const this):&#160;arc.c']]],
+  ['view_5fresume',['View_resume',['../struct_view.html#a8805e56bb677e1caa184c7c5e7d8e334',1,'View::View_resume()'],['../arc_8c.html#a8805e56bb677e1caa184c7c5e7d8e334',1,'View_resume():&#160;arc.c']]],
   ['view_5fstart',['View_start',['../struct_view.html#a6f84d25ea279f5658fce4e3bc3b5bcb4',1,'View::View_start()'],['../arc_8c.html#a6f84d25ea279f5658fce4e3bc3b5bcb4',1,'View_start():&#160;arc.c']]],
   ['view_5fstop',['View_stop',['../struct_view.html#a42a8dd43d13ad07962878f61524c48e6',1,'View::View_stop()'],['../arc_8c.html#a42a8dd43d13ad07962878f61524c48e6',1,'View_stop():&#160;arc.c']]],
-  ['view_5fsuspend',['View_suspend',['../arc_8c.html#a6447e55f2358f2e46a819fee523f2685',1,'View_suspend(View *const this):&#160;arc.c'],['../arc_8h.html#a6447e55f2358f2e46a819fee523f2685',1,'View_suspend(View *const this):&#160;arc.c']]],
+  ['view_5fsuspend',['View_suspend',['../struct_view.html#a6447e55f2358f2e46a819fee523f2685',1,'View::View_suspend()'],['../arc_8c.html#a6447e55f2358f2e46a819fee523f2685',1,'View_suspend():&#160;arc.c']]],
   ['view_5fupdate',['View_update',['../struct_view.html#ad83babf4c22c4e7aa6270711c6be24fc',1,'View::View_update()'],['../arc_8c.html#ad83babf4c22c4e7aa6270711c6be24fc',1,'View_update():&#160;arc.c']]],
   ['viewempty',['viewEmpty',['../arc_8h.html#ae4dd93d8ea546f4060da0b76e86c96bc',1,'arc.h']]]
 ];
