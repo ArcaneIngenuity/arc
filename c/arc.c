@@ -89,7 +89,7 @@ void Hub_suspend(Hub * const this)
 		if (app)
 			App_suspend(app);
 	}
-	
+
 	if (this->suspend)
 		this->suspend((void *)this);
 	
@@ -525,7 +525,8 @@ void View_suspend(View * const this)
 		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
 		View_suspend(child);
 	}
-	this->suspend(this);
+	if (this->suspend)
+		this->suspend(this);
 }
 
 //called when application regains rendering context
@@ -536,7 +537,8 @@ void View_resume(View * const this)
 		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
 		View_resume(child);
 	}
-	this->resume(this);	
+	if (this->resume)
+		this->resume(this);	
 }
 
 
