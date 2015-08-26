@@ -103,6 +103,21 @@ $(document).ready(function(){initNavTree('arc_8h.html','');});
 <code>#include &lt;stdlib.h&gt;</code><br />
 <code>#include &lt;stdio.h&gt;</code><br />
 <code>#include &quot;log/log.h&quot;</code><br />
+</div><div class="textblock"><div class="dynheader">
+Include dependency graph for arc.h:</div>
+<div class="dyncontent">
+<div class="center"><img src="arc_8h__incl.png" border="0" usemap="#c_2arc_8h" alt=""/></div>
+<map name="c_2arc_8h" id="c_2arc_8h">
+</map>
+</div>
+</div><div class="textblock"><div class="dynheader">
+This graph shows which files directly or indirectly include this file:</div>
+<div class="dyncontent">
+<div class="center"><img src="arc_8h__dep__incl.png" border="0" usemap="#c_2arc_8hdep" alt=""/></div>
+<map name="c_2arc_8hdep" id="c_2arc_8hdep">
+<area shape="rect" id="node2" href="arc_8c.html" title="c/arc.c" alt="" coords="5,80,68,107"/>
+</map>
+</div>
 </div>
 <p><a href="arc_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -155,6 +170,12 @@ Typedefs</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a6447e55f2358f2e46a819fee523f2685"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="arc_8h.html#a6447e55f2358f2e46a819fee523f2685">View_suspend</a> (<a class="el" href="struct_view.html">View</a> *const this)</td></tr>
+<tr class="separator:a6447e55f2358f2e46a819fee523f2685"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8805e56bb677e1caa184c7c5e7d8e334"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="arc_8h.html#a8805e56bb677e1caa184c7c5e7d8e334">View_resume</a> (<a class="el" href="struct_view.html">View</a> *const this)</td></tr>
+<tr class="separator:a8805e56bb677e1caa184c7c5e7d8e334"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a545db900048b3e0489884cfda68ebd98"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="arc_8h.html#a545db900048b3e0489884cfda68ebd98">Hub_suspend</a> (<a class="el" href="struct_hub.html">Hub</a> *const this)</td></tr>
+<tr class="separator:a545db900048b3e0489884cfda68ebd98"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70fd043a7af77f79290b0853d23991eb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="arc_8h.html#a70fd043a7af77f79290b0853d23991eb">doNothing</a> (void *const this)</td></tr>
 <tr class="memdesc:a70fd043a7af77f79290b0853d23991eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">A null-pattern callback which is the default when no user-defined callback has yet been supplied (prevents null pointer crashes).  <a href="#a70fd043a7af77f79290b0853d23991eb">More...</a><br /></td></tr>
 <tr class="separator:a70fd043a7af77f79290b0853d23991eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -328,6 +349,107 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 
 <p>A null-pattern callback which is the default when no user-defined callback has yet been supplied (prevents null pointer crashes). </p>
+
+</div>
+</div>
+<a class="anchor" id="a545db900048b3e0489884cfda68ebd98"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Hub_suspend </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_hub.html">Hub</a> *const&#160;</td>
+          <td class="paramname"><em>this</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="arc_8h_a545db900048b3e0489884cfda68ebd98_cgraph.png" border="0" usemap="#arc_8h_a545db900048b3e0489884cfda68ebd98_cgraph" alt=""/></div>
+<map name="arc_8h_a545db900048b3e0489884cfda68ebd98_cgraph" id="arc_8h_a545db900048b3e0489884cfda68ebd98_cgraph">
+<area shape="rect" id="node2" href="arc_8c.html#abd58b661beaf40e522f43c92c1db1252" title="App_suspend" alt="" coords="155,29,256,56"/>
+<area shape="rect" id="node3" href="arc_8c.html#a6447e55f2358f2e46a819fee523f2685" title="View_suspend" alt="" coords="304,29,411,56"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a8805e56bb677e1caa184c7c5e7d8e334"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void View_resume </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_view.html">View</a> *const&#160;</td>
+          <td class="paramname"><em>this</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="arc_8h_a8805e56bb677e1caa184c7c5e7d8e334_cgraph.png" border="0" usemap="#arc_8h_a8805e56bb677e1caa184c7c5e7d8e334_cgraph" alt=""/></div>
+<map name="arc_8h_a8805e56bb677e1caa184c7c5e7d8e334_cgraph" id="arc_8h_a8805e56bb677e1caa184c7c5e7d8e334_cgraph">
+<area shape="rect" id="node2" href="arc_8c.html#a8805e56bb677e1caa184c7c5e7d8e334" title="View_resume" alt="" coords="153,29,253,56"/>
+</map>
+</div>
+</p>
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="arc_8h_a8805e56bb677e1caa184c7c5e7d8e334_icgraph.png" border="0" usemap="#arc_8h_a8805e56bb677e1caa184c7c5e7d8e334_icgraph" alt=""/></div>
+<map name="arc_8h_a8805e56bb677e1caa184c7c5e7d8e334_icgraph" id="arc_8h_a8805e56bb677e1caa184c7c5e7d8e334_icgraph">
+<area shape="rect" id="node2" href="arc_8c.html#ade7157aa1dfd2f872dacadc90e526d7e" title="App_resume" alt="" coords="153,29,248,56"/>
+<area shape="rect" id="node3" href="arc_8c.html#aa37c3e88276022292690fb130e22a4c6" title="Hub_resume" alt="" coords="296,29,391,56"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a6447e55f2358f2e46a819fee523f2685"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void View_suspend </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_view.html">View</a> *const&#160;</td>
+          <td class="paramname"><em>this</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="arc_8h_a6447e55f2358f2e46a819fee523f2685_cgraph.png" border="0" usemap="#arc_8h_a6447e55f2358f2e46a819fee523f2685_cgraph" alt=""/></div>
+<map name="arc_8h_a6447e55f2358f2e46a819fee523f2685_cgraph" id="arc_8h_a6447e55f2358f2e46a819fee523f2685_cgraph">
+<area shape="rect" id="node2" href="arc_8c.html#a6447e55f2358f2e46a819fee523f2685" title="View_suspend" alt="" coords="160,29,267,56"/>
+</map>
+</div>
+</p>
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="arc_8h_a6447e55f2358f2e46a819fee523f2685_icgraph.png" border="0" usemap="#arc_8h_a6447e55f2358f2e46a819fee523f2685_icgraph" alt=""/></div>
+<map name="arc_8h_a6447e55f2358f2e46a819fee523f2685_icgraph" id="arc_8h_a6447e55f2358f2e46a819fee523f2685_icgraph">
+<area shape="rect" id="node2" href="arc_8c.html#abd58b661beaf40e522f43c92c1db1252" title="App_suspend" alt="" coords="160,29,261,56"/>
+<area shape="rect" id="node3" href="arc_8h.html#a545db900048b3e0489884cfda68ebd98" title="Hub_suspend" alt="" coords="309,29,411,56"/>
+</map>
+</div>
+</p>
 
 </div>
 </div>

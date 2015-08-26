@@ -81,6 +81,36 @@ void Hub_dispose(Hub * const this)
 	//free(this); //hub object is not a pointer!
 }
 
+void Hub_suspend(Hub * const this)
+{
+	for (int i = 0; i < this->appsCount; i++)
+	{
+		App * app = this->apps[i];
+		if (app)
+			App_suspend(app);
+	}
+	
+	if (this->suspend)
+		this->suspend((void *)this);
+	
+	printf ("Hub_suspend done.");
+}
+
+void Hub_resume(Hub * const this)
+{
+	for (int i = 0; i < this->appsCount; i++)
+	{
+		App * app = this->apps[i];
+		if (app)
+			App_resume(app);
+	}
+	
+	if (this->resume)
+		this->resume((void *)this);
+	
+	printf ("Hub_resume done.");
+}
+
 App * const Hub_addApp(Hub * const this, App * const app)
 {
 	printf("app0");
@@ -377,16 +407,68 @@ void App_dispose(App * const this)
 	free(this);
 }
 
+void App_suspend(App * const this)
+{
+	/*
+	for (int i = 0; i < this->childrenCount; i++)
+	{
+		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
+		View_suspend(child);
+	}
+	*/
+	
+	View_suspend(this->view);
+	
+	if (this->ctrl->suspend)
+		this->ctrl->suspend((void *)this);
+	
+	printf ("App_suspend done.");
+}
+
+void App_resume(App * const this)
+{
+	/*
+	for (int i = 0; i < this->childrenCount; i++)
+	{
+		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
+		View_resume(child);
+	}
+	*/
+	
+	View_resume(this->view);
+
+	if (this->ctrl->resume)
+		this->ctrl->resume((void *)this);
+
+	printf ("App_resume done.");
+}
+
+//called when we want Ctrl to start updating
 void Ctrl_start(Ctrl * const this)
 {
 	this->start((void *)this);
 	this->running = true;
 }
 
+//called when we want Ctrl to stop updating
 void Ctrl_stop(Ctrl * const this)
 {
 	this->stop((void *)this);
 	this->running = false;
+}
+
+//called when application loses rendering context
+//may be that we need to cease all Ctrl processing (e.g. single player games)
+void Ctrl_suspend(Ctrl * const this)
+{
+	this->suspend(this);
+}
+
+//called when application regains rendering context
+//may be that we need to resume all Ctrl processing (e.g. single player games)
+void Ctrl_resume(Ctrl * const this)
+{
+	this->resume(this);	
 }
 
 void Ctrl_initialise(Ctrl * const this)
@@ -421,17 +503,42 @@ void View_construct(View * const this)
 	#endif
 }
 
+//called when we want View to start updating
 void View_start(View * const this)
 {
 	this->start((void *)this);
 	this->running = true;
 }
 
+//called when we want View to stop updating
 void View_stop(View * const this)
 {
 	this->stop((void *)this);
 	this->running = false;
 }
+
+//called when application loses rendering context
+void View_suspend(View * const this)
+{
+	for (int i = 0; i < this->childrenCount; i++)
+	{
+		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
+		View_suspend(child);
+	}
+	this->suspend(this);
+}
+
+//called when application regains rendering context
+void View_resume(View * const this)
+{
+	for (int i = 0; i < this->childrenCount; i++)
+	{
+		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
+		View_resume(child);
+	}
+	this->resume(this);	
+}
+
 
 void View_initialise(View * const this)
 {
@@ -439,7 +546,7 @@ void View_initialise(View * const this)
 	printf("View_initialise %s!\n", this->id);
 	#endif
 	
-	if (this->initialise)
+	//if (this->initialise)
 		this->initialise(this);
 	
 	this->initialised = true;

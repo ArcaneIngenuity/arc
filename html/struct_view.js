@@ -21,9 +21,11 @@ var struct_view =
     [ "model", "struct_view.html#a25213ea61e61fd4e97c6f61c4a9479b6", null ],
     [ "onParentResize", "struct_view.html#afbcb9956338ce2d9708e759e3c67308e", null ],
     [ "parent", "struct_view.html#ae0eff71afdec360c2ccc4eb738a9d4eb", null ],
+    [ "resume", "struct_view.html#acea56f0d3fcce710bacd2ee597a3a504", null ],
     [ "running", "struct_view.html#a39947cc9fc6b192b4ccb6b9a2562d3e1", null ],
     [ "start", "struct_view.html#a48190f92eedd6e10d71a84e27ed6ee0e", null ],
     [ "stop", "struct_view.html#a5f7a1268dad187b7742fa8089d7a79c8", null ],
+    [ "suspend", "struct_view.html#a4ea02ebe6cc657f066e5c89584e2431d", null ],
     [ "update", "struct_view.html#a17ddb9186426d8803f16da7735849fd3", null ],
     [ "updatePost", "struct_view.html#a67efa6a772aa7e036e51f1dbc2a4b673", null ],
     [ "width", "struct_view.html#ae039aa744b085db819ae149705b2c32b", null ]

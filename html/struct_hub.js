@@ -10,5 +10,7 @@ var struct_hub =
     [ "appsCount", "struct_hub.html#ac4d6de9dff6dbc23707e47375cff4ac4", null ],
     [ "dispose", "struct_hub.html#a254a4f0fb54497f22e33cf59a1f07283", null ],
     [ "external", "struct_hub.html#a7a1e66abb321327655e1e59e6238a742", null ],
-    [ "initialise", "struct_hub.html#a0043944ff0afcdcfc3422cdaad6426e8", null ]
+    [ "initialise", "struct_hub.html#a0043944ff0afcdcfc3422cdaad6426e8", null ],
+    [ "resume", "struct_hub.html#a8abbf06a8080334d17fb6039cc49b8d0", null ],
+    [ "suspend", "struct_hub.html#a9701f064b2f1a8066eef51417d029532", null ]
 ];

@@ -1,0 +1,5 @@
+<map id="App_update" name="App_update">
+<area shape="rect" id="node2" href="$struct_ctrl.html#a7c3e32486ea528ccf6f7e16e6727dff8" title="Ctrl::Ctrl_update" alt="" coords="161,5,277,32"/>
+<area shape="rect" id="node3" href="$struct_view.html#ad83babf4c22c4e7aa6270711c6be24fc" title="View::View_update" alt="" coords="153,56,285,83"/>
+<area shape="rect" id="node4" href="$struct_view.html#ac405c34c283c8e4da67025e6ad7e338b" title="View::Ctrl_updatePost" alt="" coords="144,107,295,133"/>
+</map>

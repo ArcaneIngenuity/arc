@@ -102,6 +102,16 @@ $(document).ready(function(){initNavTree('struct_hub.html','');});
  <a href="struct_hub.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="arc_8h_source.html">arc.h</a>&gt;</code></p>
+<div class="dynheader">
+Collaboration diagram for Hub:</div>
+<div class="dyncontent">
+<div class="center"><img src="struct_hub__coll__graph.png" border="0" usemap="#_hub_coll__map" alt="Collaboration graph"/></div>
+<map name="_hub_coll__map" id="_hub_coll__map">
+<area shape="rect" id="node2" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub..." alt="" coords="69,97,115,124"/>
+<area shape="rect" id="node3" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. " alt="" coords="87,7,137,33"/>
+<area shape="rect" id="node4" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. " alt="" coords="259,7,301,33"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -134,6 +144,10 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a7a1e66abb321327655e1e59e6238a742"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_hub.html#a7a1e66abb321327655e1e59e6238a742">external</a></td></tr>
 <tr class="memdesc:a7a1e66abb321327655e1e59e6238a742"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-defined reference to global state; useful if avoiding global variables.  <a href="#a7a1e66abb321327655e1e59e6238a742">More...</a><br /></td></tr>
 <tr class="separator:a7a1e66abb321327655e1e59e6238a742"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9701f064b2f1a8066eef51417d029532"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_hub.html#a9701f064b2f1a8066eef51417d029532">suspend</a> )(struct <a class="el" href="struct_hub.html">Hub</a> *const this)</td></tr>
+<tr class="separator:a9701f064b2f1a8066eef51417d029532"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8abbf06a8080334d17fb6039cc49b8d0"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_hub.html#a8abbf06a8080334d17fb6039cc49b8d0">resume</a> )(struct <a class="el" href="struct_hub.html">Hub</a> *const this)</td></tr>
+<tr class="separator:a8abbf06a8080334d17fb6039cc49b8d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A central point from which all <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>s may be managed / updated. </p>
@@ -337,6 +351,30 @@ Public Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>User-supplied callback for when this <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> <a class="el" href="struct_hub.html#a0043944ff0afcdcfc3422cdaad6426e8" title="User-supplied callback for when this Hub initialise()s. ">initialise()</a>s. </p>
+
+</div>
+</div>
+<a class="anchor" id="a8abbf06a8080334d17fb6039cc49b8d0"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void(* Hub::resume) (struct <a class="el" href="struct_hub.html">Hub</a> *const this)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a9701f064b2f1a8066eef51417d029532"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void(* Hub::suspend) (struct <a class="el" href="struct_hub.html">Hub</a> *const this)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>

@@ -59,6 +59,8 @@ typedef struct View
 	
 	void (*start)(struct View * const this); ///< \brief User-supplied callback for when this View start()s.
 	void (*stop)(struct View * const this); ///< \brief User-supplied callback for when this View stop()s.
+	void (*suspend)(struct View * const this);
+	void (*resume)(struct View * const this);
 	void (*initialise)(struct View * const this); ///< \brief User-supplied callback for when this View initialise()s.
 	void (*dispose)(struct View * const this); ///< \brief User-supplied callback for when this View dispose()s of its resources.
 	void (*update)(struct View * const this); ///< \brief User-supplied callback for when this View update()s.
@@ -86,10 +88,13 @@ typedef struct Ctrl
 	void (*mustStop)(struct Ctrl * const this); ///< \brief User-supplied callback for checking when this Ctrl mustStop().
 	void (*start)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl start()s.
 	void (*stop)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl stop()s.
+	void (*suspend)(struct View * const this);
+	void (*resume)(struct View * const this);
 	void (*initialise)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl initialise()s.
 	void (*dispose)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl dispose()s of its resources.
 	void (*update)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl update()s.
 	void (*updatePost)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl updatePost()s.
+
 } Ctrl;
 const struct Ctrl ctrlEmpty; ///< Used to set instance to empty / zero all its members, as a convenience to be used instead of memset(.., 0, ..).
 
@@ -143,7 +148,11 @@ typedef struct Hub
 	void (*dispose)(struct Hub * const this); ///< \brief User-supplied callback for when this Hub dispose()s of its resources.
 	
 	void * external; ///< User-defined reference to global state; useful if avoiding global variables.
-	
+	//void (*start)(struct Hub * const this); 
+	//void (*stop)(struct Hub * const this);
+	void (*suspend)(struct Hub * const this);
+	void (*resume)(struct Hub * const this);
+
 } Hub;
 const struct Hub hubEmpty; ///< Used to set instance to empty / zero all its members, as a convenience to be used instead of memset(.., 0, ..).
 
@@ -160,6 +169,8 @@ void 		Ctrl_dispose(Ctrl * const this); ///< \memberof Ctrl Disposes of the Ctrl
 
 void 		View_start(View * const this); ///< \memberof View Starts the View using \link start \endlink.
 void 		View_stop(View * const this); ///< \memberof View Stops the View using \link stop \endlink.
+void 		View_suspend(View * const this);
+void 		View_resume(View * const this);
 void 		View_construct(View * const this); ///< \memberof View Constructs the View using \link construct \endlink. (NEEDS REVIEW, UNUSED?)
 void 		View_initialise(View * const this); ///< \memberof View Initialises the View using \link initialise \endlink.
 void 		View_update(View * const this); ///< \memberof View Updates the View using \link update \endlink.
@@ -168,12 +179,13 @@ bool 		View_isRoot(View * const this); ///< \memberof View Is this the root View
 void 		View_onParentResizeRecurse(View * const this); ///< \memberof View What to do when parent resizes, using \link onParentResize \endlink.
 View * 		View_getChild(View * const this, char * id); ///< \memberof View Gets a child of this View by its \link id \endlink.
 View *		View_addChild(View * const this, View * const child); ///< \memberof View Adds a child to this View, using its \link id \endlink.
-//
 //TODO... View * View_removeChild(View * const this, View * const child); //first get child by ID
 //ArrayResult View_swapChildren(View * const this, int indexFrom, int indexTo);
 
 void 		App_initialise(App * const this); ///< \memberof App Initialises the App using \link initialise \endlink.
 void 		App_update(App * const this); ///< \memberof App Updates the App using \link update \endlink.
+//void 		App_suspend(App * const this);
+//void 		App_resume(App * const this);
 void 		App_start(App * const this); ///< \memberof App Starts the App using \link start \endlink.
 void 		App_stop(App * const this); ///< \memberof App Stops the App using \link stop \endlink.
 void 		App_dispose(App * const this); ///< \memberof App Disposes of the App and its Views and Ctrls, optionally using \link dispose \endlink. (NEEDS REVIEW, 2ND CLAUSE)
@@ -184,6 +196,7 @@ void 		Hub_construct(Hub * const this, int appsCount); ///< \memberof Hub Constr
 void 		Hub_initialise(Hub * const this); ///< \memberof Hub Initialises context that affects all App s held by the Hub (e.g. OpenGL, OpenAL), using \link initialise \endlink.
 void 		Hub_dispose(Hub * const this); ///< \memberof Hub Disposes of context that affects all App s held by the Hub (e.g. OpenGL, OpenAL), using \link dispose \endlink.
 void 		Hub_update(Hub * const this); ///< \memberof Hub Updates all Apps within the Hub.
+void 		Hub_suspend(Hub * const this);
 App * const Hub_addApp(Hub * const this, App * app); ///< \memberof Hub Adds an App to the Hub (at the next available slot, if any), which must have a valid App.id by the time it is added.
 App * const Hub_getApp(Hub * const this, const char * const id); ///< \memberof Hub Gets an App from the Hub by its App.id.
 //TODO... void Hub_removeApp(Hub * const this, const char * id);
