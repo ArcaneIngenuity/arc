@@ -53,7 +53,7 @@ typedef struct View
 	struct View * childrenByZ[VIEW_CHILDREN_MAX]; ///< View's children, where index is Z-order (Z is the stacking/draw order, i.e. goes positive out of screen).
 	int childrenCount; ///< The number of child Views held by this parent View. Negative for invalid return values (e.g. on seek).
 	
-	bool running; ///< Should this have View_update() called on it every frame?
+	bool updating; ///< Should this have View_update() called on it every frame?
 	bool initialised; ///< True after first initialisation. If re-initialisation is required, manually reset this to false.
 	void * model; ///< The model associated with this View. May or may not be the same as this View's App's model, depending on \link Configuration \endlink.
 	
@@ -68,7 +68,7 @@ typedef struct View
 	void (*onParentResize)(struct View * const this); ///< \brief User-supplied callback for when this View's parent is resized. Root View resize is handled by some external (platform-specific) callback.
 	//void (*enable)(struct View * const this); //start
 	//void (*disable)(struct View * const this); //stop
-	//bool running; //start/stop
+	//bool updating; //start/stop
 } View;
 const struct View viewEmpty; ///< Used to set instance to empty / zero all its members, as a convenience to be used instead of memset(.., 0, ..).
 
@@ -80,7 +80,7 @@ const struct View viewEmpty; ///< Used to set instance to empty / zero all its m
 /// A Ctrl operates on a model. In arc, models need no specific type; they can be anything (and are internally denoted as void *). Ctrl reads and writes model state based on input and View state.
 typedef struct Ctrl
 {
-	bool running; ///< Should this have Ctrl_update() called on it every frame?
+	bool updating; ///< Should this have Ctrl_update() called on it every frame?
 	bool initialised; ///< True after first initialisation. If re-initialisation is required, manually reset this to false.
 	void * model; ///< The model associated with this View. May or may not be the same as this View's App's (complete) model, depending on \link Configuration \endlink.
 	
@@ -101,14 +101,14 @@ const struct Ctrl ctrlEmpty; ///< Used to set instance to empty / zero all its m
 /// An application that consists of model, View%s and Ctrl%s; resides within a global application Hub.
 
 /// Often, only a single App will be required within the (singleton)Hub.
-/// If an App is to be run less frequently than specified by the rate dictated by its Hub, this can be handled in App_update by only running full update logic when some accumulator reaches a certain amount of elapsed time or frames.
+/// If an App is to be run less frequently than specified by the rate dictated by its Hub, this can be handled in App_update by only updating full update logic when some accumulator reaches a certain amount of elapsed time or frames.
 typedef struct App
 {
-	char * id; ///< ID by which an App may be retrieved from its Hub (TODO); irrelevant except where running multiple apps through the same Hub. (NEEDS REVIEW, apps go into indexed slots)
+	char * id; ///< ID by which an App may be retrieved from its Hub (TODO); irrelevant except where updating multiple apps through the same Hub. (NEEDS REVIEW, apps go into indexed slots)
 	struct Hub * hub; //in spite of typedef, use struct due to circular ref App->Hub TODO remove this ref, and allow Apps to send messages up to DJ?
 	//struct Map services;
 	
-	bool running; ///< Should this have App_update() called on it every frame?
+	bool updating; ///< Should this have App_update() called on it every frame?
 	bool initialised; ///< True after first initialisation. If re-initialisation is required, manually reset this to false.
 	void * model; ///< The model associated with this App.
 	struct View * view; ///< The root View associated with this App.
@@ -133,7 +133,7 @@ const struct Service serviceEmpty; ///< Used to set instance to empty / zero all
 
 /// A central point from which all App%s may be managed / updated.
 
-/// A single timing mechanism (loop or callback) is used to run a Hub, from which each App's \link App_update \endlink will be called via Hub_update. This provides implicit synchronisation and best performance across multiple App%s that may be running side-by-side.
+/// A single timing mechanism (loop or callback) is used to run a Hub, from which each App's \link App_update \endlink will be called via Hub_update. This provides implicit synchronisation and best performance across multiple App%s that may be updating side-by-side.
 /// As such, Hub needs no start / stop like App; Hub_update is run perpetually until the executable terminates.
 typedef struct Hub
 {

@@ -34,7 +34,7 @@ void Hub_update(Hub * const this)
 	for (int i = 0; i < this->appsCount; i++)
 	{
 		App * app = this->apps[i]; //read from map of values
-		if (app->running)
+		if (app->updating)
 			App_update(app);
 	}
 /*
@@ -174,7 +174,7 @@ void App_update(App * const this)
 	//this->input(this); //abstract
 	Ctrl_update(ctrl); //abstract
 	//if (view != NULL) //JIC user turns off the root view by removing it (since this is the enable/disable mechanism)
-	if (view->running)
+	if (view->updating)
 		View_update(view);
 	Ctrl_updatePost(ctrl); //abstract
 }
@@ -190,7 +190,7 @@ void App_start(App * const this)
 	printf("App_start\n");
 	#endif
 	
-	if (!this->running)
+	if (!this->updating)
 	{
 		Ctrl * ctrl = this->ctrl;
 		View * view = this->view;
@@ -353,7 +353,7 @@ void App_start(App * const this)
 			//this->initialise((void *)this);
 		}
 		
-		this->running = true;
+		this->updating = true;
 		/*
 		if (!ctrl->initialised)
 		{
@@ -387,7 +387,7 @@ void App_stop(App * const this)
 	ctrl->stop((void *)ctrl);
 	view->stop((void *)view);
 	
-	this->running = false;
+	this->updating = false;
 }
 
 //dispose removes resources acquired in initialise or updates
@@ -431,14 +431,14 @@ void App_resume(App * const this)
 void Ctrl_start(Ctrl * const this)
 {
 	this->start((void *)this);
-	this->running = true;
+	this->updating = true;
 }
 
 //called when we want Ctrl to stop updating
 void Ctrl_stop(Ctrl * const this)
 {
 	this->stop((void *)this);
-	this->running = false;
+	this->updating = false;
 }
 
 //called when application loses rendering context
@@ -491,14 +491,14 @@ void View_construct(View * const this)
 void View_start(View * const this)
 {
 	this->start((void *)this);
-	this->running = true;
+	this->updating = true;
 }
 
 //called when we want View to stop updating
 void View_stop(View * const this)
 {
 	this->stop((void *)this);
-	this->running = false;
+	this->updating = false;
 }
 
 //called when application loses rendering context
@@ -551,7 +551,7 @@ void View_update(View * const this)
 	for (int i = 0; i < this->childrenCount; i++)
 	{
 		View * child = (View *) this->childrenByZ[i];
-		if (child->running)
+		if (child->updating)
 			View_update(child);//deltaSec
 	}
 	
