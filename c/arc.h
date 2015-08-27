@@ -166,7 +166,7 @@ void 		Ctrl_start(Ctrl * const this); ///< \memberof Ctrl Starts the Ctrl using 
 void 		Ctrl_stop(Ctrl * const this); ///< \memberof Ctrl Stops the Ctrl using \link stop \endlink.
 void		Ctrl_initialise(Ctrl * const this); ///< \memberof Ctrl Initialises the Ctrl using \link initialise \endlink.
 void 		Ctrl_update(Ctrl * const this); ///< \memberof Ctrl Updates the Ctrl using \link update \endlink.
-void 		Ctrl_updatePost(Ctrl * const this); ///< \memberof Ctrl \memberof View Post-updates the Ctrl using \link updatePost \endlink.
+void 		Ctrl_updatePost(Ctrl * const this); ///< \memberof Ctrl \memberof Ctrl Post-updates the Ctrl using \link updatePost \endlink.
 void 		Ctrl_dispose(Ctrl * const this); ///< \memberof Ctrl Disposes of the Ctrl using \link dispose \endlink.
 
 
@@ -212,5 +212,5 @@ App * const Hub_getApp(Hub * const this, const char * const id); ///< \memberof 
 void doNothing(void * const this); ///< A null-pattern callback which is the default when no user-defined callback has yet been supplied (prevents null pointer crashes).
 
 //globals
-Hub hub; //allows every other file to ref as extern, and no requirement to include main from renderer etc.
+//Hub hub; //allows every other file to ref as extern, and no requirement to include main from renderer etc.
 #endif //ARC_H

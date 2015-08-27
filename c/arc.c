@@ -1,15 +1,20 @@
 #include "arc.h"
 
-//#define DISJUNCTION_DEBUG
+//#define ARC_DEBUG 1
 
 //--------- Hub ---------//
-void Hub_construct(Hub * const this, int appsCount)
+
+void Hub_setDefaultCallbacks(Hub * hub)
 {
+	hub->initialise = (void * const)&doNothing;
+	hub->dispose 	= (void * const)&doNothing;
+	hub->suspend 	= (void * const)&doNothing;
+	hub->resume 	= (void * const)&doNothing;
 }
 
 void Hub_update(Hub * const this)
 {
-	#ifdef DISJUNCTION_DEBUG
+	#ifdef ARC_DEBUG
 	printf("Hub_update\n");
 	#endif
 	
@@ -104,6 +109,8 @@ App * App_construct()//App ** app)
 	*app = appEmpty;
 	app->initialise = (void * const)&doNothing;
 	app->dispose 	= (void * const)&doNothing;
+	
+	return app;
 }
 
 /*
@@ -115,7 +122,7 @@ void App_destruct(App ** app) //pointer-to-pointer required for __attribute__ cl
 */
 void App_update(App * const this)
 {
-	#ifdef DISJUNCTION_DEBUG
+	#ifdef ARC_DEBUG
 	printf("App_update\n");
 	#endif
 	
@@ -140,7 +147,7 @@ void App_initialise(App * const this)
 
 void App_start(App * const this)
 {
-	#ifdef DISJUNCTION_DEBUG
+	#ifdef ARC_DEBUG
 	printf("App_start\n");
 	#endif
 	
@@ -331,7 +338,7 @@ void App_start(App * const this)
 
 void App_stop(App * const this)
 {
-	#ifdef DISJUNCTION_DEBUG
+	#ifdef ARC_DEBUG
 	printf("App_stop\n");
 	#endif
 	
@@ -386,6 +393,8 @@ Ctrl * Ctrl_construct(size_t sizeofSubclass)
 	Ctrl * ctrl = malloc(sizeofSubclass);
 	memset(ctrl, 0, 	 sizeofSubclass);
 	Ctrl_setDefaultCallbacks(ctrl);
+	
+	return ctrl;
 }
 
 void Ctrl_setDefaultCallbacks(Ctrl * const this)
@@ -450,7 +459,7 @@ void Ctrl_dispose(Ctrl * const this)
 //--------- View ---------//
 void View_setDefaultCallbacks(View * const this)
 {
-	#ifdef DISJUNCTION_DEBUG
+	#ifdef ARC_DEBUG
 	printf("View_construct %s!\n", this->id);
 	#endif
 	
@@ -475,6 +484,8 @@ View * View_construct(size_t sizeofSubclass)
 	View * view = malloc(sizeofSubclass);
 	memset(view, 0, 	 sizeofSubclass);
 	View_setDefaultCallbacks(view);
+	
+	return view;
 }
 
 void View_start(View * const this)
@@ -514,7 +525,7 @@ void View_resume(View * const this)
 
 void View_initialise(View * const this)
 {
-	#ifdef DISJUNCTION_DEBUG
+	#ifdef ARC_DEBUG
 	printf("View_initialise %s!\n", this->id);
 	#endif
 	
@@ -545,7 +556,7 @@ void View_update(View * const this)
 
 void View_dispose(View * const this)
 {
-	#ifdef DISJUNCTION_DEBUG
+	#ifdef ARC_DEBUG
 	printf("View_dispose\n");
 	#endif
 	
