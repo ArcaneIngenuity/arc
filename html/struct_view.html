@@ -112,6 +112,10 @@ Collaboration diagram for View:</div>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ac405c34c283c8e4da67025e6ad7e338b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#ac405c34c283c8e4da67025e6ad7e338b">Ctrl_updatePost</a> (<a class="el" href="struct_ctrl.html">Ctrl</a> *const this)</td></tr>
 <tr class="separator:ac405c34c283c8e4da67025e6ad7e338b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1589505fe33a936b945a2764c751af14"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_view.html">View</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#a1589505fe33a936b945a2764c751af14">View_construct</a> (size_t sizeofSubclass)</td></tr>
+<tr class="separator:a1589505fe33a936b945a2764c751af14"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d3c721c3f2a38f3941a86c8771ea6cb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#a1d3c721c3f2a38f3941a86c8771ea6cb">View_setDefaultCallbacks</a> (<a class="el" href="struct_view.html">View</a> *const this)</td></tr>
+<tr class="separator:a1d3c721c3f2a38f3941a86c8771ea6cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6f84d25ea279f5658fce4e3bc3b5bcb4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#a6f84d25ea279f5658fce4e3bc3b5bcb4">View_start</a> (<a class="el" href="struct_view.html">View</a> *const this)</td></tr>
 <tr class="separator:a6f84d25ea279f5658fce4e3bc3b5bcb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42a8dd43d13ad07962878f61524c48e6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#a42a8dd43d13ad07962878f61524c48e6">View_stop</a> (<a class="el" href="struct_view.html">View</a> *const this)</td></tr>
@@ -120,8 +124,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a6447e55f2358f2e46a819fee523f2685"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8805e56bb677e1caa184c7c5e7d8e334"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#a8805e56bb677e1caa184c7c5e7d8e334">View_resume</a> (<a class="el" href="struct_view.html">View</a> *const this)</td></tr>
 <tr class="separator:a8805e56bb677e1caa184c7c5e7d8e334"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a79b0cf6e610e85700d458b12ec38ee7f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#a79b0cf6e610e85700d458b12ec38ee7f">View_construct</a> (<a class="el" href="struct_view.html">View</a> *const this)</td></tr>
-<tr class="separator:a79b0cf6e610e85700d458b12ec38ee7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3961f4a9135495200a4778ad1fd23282"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#a3961f4a9135495200a4778ad1fd23282">View_initialise</a> (<a class="el" href="struct_view.html">View</a> *const this)</td></tr>
 <tr class="separator:a3961f4a9135495200a4778ad1fd23282"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad83babf4c22c4e7aa6270711c6be24fc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_view.html#ad83babf4c22c4e7aa6270711c6be24fc">View_update</a> (<a class="el" href="struct_view.html">View</a> *const this)</td></tr>
@@ -254,20 +256,20 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
-<a class="anchor" id="a79b0cf6e610e85700d458b12ec38ee7f"></a>
+<a class="anchor" id="a1589505fe33a936b945a2764c751af14"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void View_construct </td>
+          <td class="memname"><a class="el" href="struct_view.html">View</a> * View_construct </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="struct_view.html">View</a> *const&#160;</td>
-          <td class="paramname"><em>this</em></td><td>)</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>sizeofSubclass</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Constructs the <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> using <a class="el" href="">construct</a>. (NEEDS REVIEW, UNUSED?) </p>
+<p>Constructs the <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> and sets all callbacks to do nothing. </p>
 
 </div>
 </div>
@@ -346,7 +348,8 @@ Here is the caller graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="struct_view_a3961f4a9135495200a4778ad1fd23282_icgraph.png" border="0" usemap="#struct_view_a3961f4a9135495200a4778ad1fd23282_icgraph" alt=""/></div>
 <map name="struct_view_a3961f4a9135495200a4778ad1fd23282_icgraph" id="struct_view_a3961f4a9135495200a4778ad1fd23282_icgraph">
-<area shape="rect" id="node2" href="arc_8c.html#a3961f4a9135495200a4778ad1fd23282" title="View_initialise" alt="" coords="193,5,297,32"/>
+<area shape="rect" id="node2" href="arc_8c.html#a3aa2dee87d568d9ff409244bb158061c" title="App_initialise" alt="" coords="196,5,295,32"/>
+<area shape="rect" id="node3" href="arc_8c.html#a3961f4a9135495200a4778ad1fd23282" title="View_initialise" alt="" coords="193,56,297,83"/>
 </map>
 </div>
 </p>
@@ -419,6 +422,33 @@ Here is the caller graph for this function:</div>
 <map name="struct_view_a8805e56bb677e1caa184c7c5e7d8e334_icgraph" id="struct_view_a8805e56bb677e1caa184c7c5e7d8e334_icgraph">
 <area shape="rect" id="node2" href="arc_8c.html#ade7157aa1dfd2f872dacadc90e526d7e" title="App_resume" alt="" coords="192,5,287,32"/>
 <area shape="rect" id="node3" href="arc_8c.html#a8805e56bb677e1caa184c7c5e7d8e334" title="View_resume" alt="" coords="189,56,289,83"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="a1d3c721c3f2a38f3941a86c8771ea6cb"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void View_setDefaultCallbacks </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_view.html">View</a> *const&#160;</td>
+          <td class="paramname"><em>this</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Sets all <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a>'s callbacks to do nothing. </p>
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="struct_view_a1d3c721c3f2a38f3941a86c8771ea6cb_icgraph.png" border="0" usemap="#struct_view_a1d3c721c3f2a38f3941a86c8771ea6cb_icgraph" alt=""/></div>
+<map name="struct_view_a1d3c721c3f2a38f3941a86c8771ea6cb_icgraph" id="struct_view_a1d3c721c3f2a38f3941a86c8771ea6cb_icgraph">
+<area shape="rect" id="node2" href="arc_8c.html#a834bbd496eebc1852e94bb61b48d4602" title="View_construct" alt="" coords="261,5,372,32"/>
 </map>
 </div>
 </p>

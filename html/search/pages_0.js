@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['concepts',['concepts',['../md_concepts.html',1,'']]]
+  ['glossary',['Glossary',['../md_concepts.html',1,'']]]
 ];

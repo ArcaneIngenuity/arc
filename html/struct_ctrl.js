@@ -1,7 +1,9 @@
 var struct_ctrl =
 [
+    [ "Ctrl_construct", "struct_ctrl.html#a41e7d9964874b956aabcf8c9663aa6fb", null ],
     [ "Ctrl_dispose", "struct_ctrl.html#ab22987c9256f1219204e3d77e7d73da3", null ],
     [ "Ctrl_initialise", "struct_ctrl.html#aaf3d0a388f1e1cde8b9dd12483854dd3", null ],
+    [ "Ctrl_setDefaultCallbacks", "struct_ctrl.html#ac18a3d45b28b3e133e0cfc00f1e4886b", null ],
     [ "Ctrl_start", "struct_ctrl.html#a8778c5a9981282bc95856d5776cdfd17", null ],
     [ "Ctrl_stop", "struct_ctrl.html#a8650029ca515c25ef98af8641b1bff59", null ],
     [ "Ctrl_update", "struct_ctrl.html#a7c3e32486ea528ccf6f7e16e6727dff8", null ],

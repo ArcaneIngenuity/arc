@@ -3,7 +3,7 @@ var NAVTREE =
   [ "arc", "index.html", [
     [ "Main Page", "index.html", null ],
     [ "README", "md__r_e_a_d_m_e.html", null ],
-    [ "concepts", "md_concepts.html", null ],
+    [ "Glossary", "md_concepts.html", null ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],
       [ "Class Index", "classes.html", null ],

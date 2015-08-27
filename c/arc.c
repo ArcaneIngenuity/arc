@@ -31,8 +31,7 @@ void Hub_dispose(Hub * const this)
 			App_dispose(app);
 	}
 	
-	if (this->dispose)
-		this->dispose((void *)this);
+	this->dispose((void *)this);
 	
 	//this->initialised = false;
 	printf ("Hub_dispose done."); 
@@ -48,8 +47,7 @@ void Hub_suspend(Hub * const this)
 			App_suspend(app);
 	}
 
-	if (this->suspend)
-		this->suspend((void *)this);
+	this->suspend((void *)this);
 	
 	printf ("Hub_suspend done.");
 }
@@ -63,8 +61,7 @@ void Hub_resume(Hub * const this)
 			App_resume(app);
 	}
 	
-	if (this->resume)
-		this->resume((void *)this);
+	this->resume((void *)this);
 	
 	printf ("Hub_resume done.");
 }
@@ -96,6 +93,26 @@ App * const Hub_getApp(Hub * const this, const char * const id)
 }
 
 //--------- App ---------//
+App * App_construct()//App ** app)
+{
+	//TODO ifdef GCC, link destruct() via attr cleanup 
+	//#ifdef __GNUC__
+	//App * app __attribute__((cleanup (App_destruct))) = malloc(sizeof(App));
+	//#else //no auto destructor!
+	App * app = malloc(sizeof(App));
+	//#endif//__GNUC__
+	*app = appEmpty;
+	app->initialise = (void * const)&doNothing;
+	app->dispose 	= (void * const)&doNothing;
+}
+
+/*
+void App_destruct(App ** app) //pointer-to-pointer required for __attribute__ cleanup
+{
+	LOGI("destruct %s", (*app)->id);
+	free(*app);
+}
+*/
 void App_update(App * const this)
 {
 	#ifdef DISJUNCTION_DEBUG
@@ -107,6 +124,7 @@ void App_update(App * const this)
 	
 	Ctrl_update(ctrl); //abstract
 	//if (view != NULL) //JIC user turns off the root view by removing it (since this is the enable/disable mechanism)
+	//really, we should just exit if either View or Ctrl are null, at App_start()
 	if (view->updating)
 		View_update(view);
 	Ctrl_updatePost(ctrl); //abstract
@@ -115,6 +133,9 @@ void App_update(App * const this)
 void App_initialise(App * const this)
 {
 	this->initialise((void *)this);	
+	
+	Ctrl_initialise(this->ctrl);
+	View_initialise(this->view); //initialises all descendants too
 }
 
 void App_start(App * const this)
@@ -342,8 +363,7 @@ void App_suspend(App * const this)
 {	
 	View_suspend(this->view);
 	
-	if (this->ctrl->suspend)
-		this->ctrl->suspend((void *)this);
+	this->ctrl->suspend((void *)this);
 	
 	printf ("App_suspend done.");
 }
@@ -352,10 +372,34 @@ void App_resume(App * const this)
 {
 	View_resume(this->view);
 
-	if (this->ctrl->resume)
-		this->ctrl->resume((void *)this);
+	this->ctrl->resume((void *)this);
 
 	printf ("App_resume done.");
+}
+
+//--------- Ctrl ---------//
+Ctrl * Ctrl_construct(size_t sizeofSubclass)
+{
+	//since we can't pass in a type,
+	//allocate full size of the "subclass" - this is fine as "base"
+	//struct is situated from zero in this allocated space
+	Ctrl * ctrl = malloc(sizeofSubclass);
+	memset(ctrl, 0, 	 sizeofSubclass);
+	Ctrl_setDefaultCallbacks(ctrl);
+}
+
+void Ctrl_setDefaultCallbacks(Ctrl * const this)
+{
+	this->mustStart = (void * const)&doNothing;
+	this->mustStop 	= (void * const)&doNothing;
+	this->start 	= (void * const)&doNothing;
+	this->stop 		= (void * const)&doNothing;
+	this->suspend 	= (void * const)&doNothing;
+	this->resume 	= (void * const)&doNothing;
+	this->initialise= (void * const)&doNothing;
+	this->dispose 	= (void * const)&doNothing;
+	this->update 	= (void * const)&doNothing;
+	this->updatePost= (void * const)&doNothing;
 }
 
 void Ctrl_start(Ctrl * const this)
@@ -382,8 +426,7 @@ void Ctrl_resume(Ctrl * const this)
 
 void Ctrl_initialise(Ctrl * const this)
 {
-	if (this->initialise)
-		this->initialise(this);
+	this->initialise(this);
 	
 	this->initialised = true;
 }
@@ -404,11 +447,34 @@ void Ctrl_dispose(Ctrl * const this)
 	this->initialised = false;
 }
 
-void View_construct(View * const this)
+//--------- View ---------//
+void View_setDefaultCallbacks(View * const this)
 {
 	#ifdef DISJUNCTION_DEBUG
 	printf("View_construct %s!\n", this->id);
 	#endif
+	
+	//null id
+	//null model
+	this->start 			= (void * const)&doNothing;
+	this->stop 				= (void * const)&doNothing;
+	this->suspend 			= (void * const)&doNothing;
+	this->resume 			= (void * const)&doNothing;
+	this->initialise		= (void * const)&doNothing;
+	this->dispose 			= (void * const)&doNothing;
+	this->update 			= (void * const)&doNothing;
+	this->updatePost		= (void * const)&doNothing;
+	this->onParentResize 	= (void * const)&doNothing;
+}
+
+View * View_construct(size_t sizeofSubclass)
+{
+	//since we can't pass in a type,
+	//allocate full size of the "subclass" - this is fine as "base"
+	//struct is situated from zero in this allocated space
+	View * view = malloc(sizeofSubclass);
+	memset(view, 0, 	 sizeofSubclass);
+	View_setDefaultCallbacks(view);
 }
 
 void View_start(View * const this)
@@ -430,8 +496,8 @@ void View_suspend(View * const this)
 		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
 		View_suspend(child);
 	}
-	if (this->suspend)
-		this->suspend(this);
+	
+	this->suspend(this);
 }
 
 void View_resume(View * const this)
@@ -441,8 +507,8 @@ void View_resume(View * const this)
 		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
 		View_resume(child);
 	}
-	if (this->resume)
-		this->resume(this);	
+	
+	this->resume(this);	
 }
 
 
@@ -452,8 +518,7 @@ void View_initialise(View * const this)
 	printf("View_initialise %s!\n", this->id);
 	#endif
 	
-	if (this->initialise)
-		this->initialise(this);
+	this->initialise(this);
 	
 	this->initialised = true;
 
@@ -563,4 +628,5 @@ void View_onParentResizeRecurse(View * const this)
 	}	
 }
 
+//--------- misc ---------//
 void doNothing(void * const this){/*printf("doNothing\n");*/}

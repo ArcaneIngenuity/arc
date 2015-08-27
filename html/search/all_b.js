@@ -1,6 +1,9 @@
 var searchData=
 [
-  ['update',['update',['../struct_view.html#a17ddb9186426d8803f16da7735849fd3',1,'View::update()'],['../struct_ctrl.html#a27d08cea5d4c43159298eecfc71d1aae',1,'Ctrl::update()']]],
-  ['updatepost',['updatePost',['../struct_view.html#a67efa6a772aa7e036e51f1dbc2a4b673',1,'View::updatePost()'],['../struct_ctrl.html#af546250c0d813441d5057856608fb569',1,'Ctrl::updatePost()']]],
-  ['updating',['updating',['../struct_view.html#a49ba564eb2080ac333c280d36555c985',1,'View::updating()'],['../struct_ctrl.html#abee9c102754aadf04b1c1d72da4d9ab8',1,'Ctrl::updating()'],['../struct_app.html#a5785e3a367ea6f28371942c0cb4cc1b8',1,'App::updating()']]]
+  ['service',['Service',['../struct_service.html',1,'Service'],['../arc_8h.html#a03f39bac5794c71a7257372e4b175086',1,'Service():&#160;arc.h']]],
+  ['serviceempty',['serviceEmpty',['../arc_8h.html#aa6f2445024b84e45e51004cf3e9dbb7b',1,'arc.h']]],
+  ['services_5fmax',['SERVICES_MAX',['../arc_8h.html#abb05dd8142a60542150c50ed191626c6',1,'arc.h']]],
+  ['start',['start',['../struct_view.html#a48190f92eedd6e10d71a84e27ed6ee0e',1,'View::start()'],['../struct_ctrl.html#af746e85813cb365fe6d30d8c04b190eb',1,'Ctrl::start()']]],
+  ['stop',['stop',['../struct_view.html#a5f7a1268dad187b7742fa8089d7a79c8',1,'View::stop()'],['../struct_ctrl.html#ad4d1065c8e7111842932f04b23ba4638',1,'Ctrl::stop()']]],
+  ['suspend',['suspend',['../struct_view.html#a4ea02ebe6cc657f066e5c89584e2431d',1,'View::suspend()'],['../struct_ctrl.html#a9d29a1b1e9118d5178e047bf632e4792',1,'Ctrl::suspend()'],['../struct_hub.html#a9701f064b2f1a8066eef51417d029532',1,'Hub::suspend()']]]
 ];

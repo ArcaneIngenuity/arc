@@ -105,6 +105,10 @@ $(document).ready(function(){initNavTree('struct_ctrl.html','');});
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:a41e7d9964874b956aabcf8c9663aa6fb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_ctrl.html">Ctrl</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#a41e7d9964874b956aabcf8c9663aa6fb">Ctrl_construct</a> (size_t sizeofSubclass)</td></tr>
+<tr class="separator:a41e7d9964874b956aabcf8c9663aa6fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac18a3d45b28b3e133e0cfc00f1e4886b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#ac18a3d45b28b3e133e0cfc00f1e4886b">Ctrl_setDefaultCallbacks</a> (<a class="el" href="struct_ctrl.html">Ctrl</a> *const this)</td></tr>
+<tr class="separator:ac18a3d45b28b3e133e0cfc00f1e4886b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8778c5a9981282bc95856d5776cdfd17"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#a8778c5a9981282bc95856d5776cdfd17">Ctrl_start</a> (<a class="el" href="struct_ctrl.html">Ctrl</a> *const this)</td></tr>
 <tr class="separator:a8778c5a9981282bc95856d5776cdfd17"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8650029ca515c25ef98af8641b1bff59"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#a8650029ca515c25ef98af8641b1bff59">Ctrl_stop</a> (<a class="el" href="struct_ctrl.html">Ctrl</a> *const this)</td></tr>
@@ -165,6 +169,23 @@ Public Attributes</h2></td></tr>
  Sub-Ctrls may be accessed through the <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>'s root <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>.<br />
  A <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> operates on a model. In arc, models need no specific type; they can be anything (and are internally denoted as void *). <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> writes new model state by reading extant model state, inputs and <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> state. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a41e7d9964874b956aabcf8c9663aa6fb"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_ctrl.html">Ctrl</a> * Ctrl_construct </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>sizeofSubclass</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Constructs the <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> and sets all callbacks to do nothing. </p>
+
+</div>
+</div>
 <a class="anchor" id="ab22987c9256f1219204e3d77e7d73da3"></a>
 <div class="memitem">
 <div class="memproto">
@@ -206,6 +227,43 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 <p>Initialises the <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> using <a class="el" href="struct_ctrl.html#a8c96ac1c7be3314c85eb9b4b36774f0c">initialise</a>. </p>
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="struct_ctrl_aaf3d0a388f1e1cde8b9dd12483854dd3_icgraph.png" border="0" usemap="#struct_ctrl_aaf3d0a388f1e1cde8b9dd12483854dd3_icgraph" alt=""/></div>
+<map name="struct_ctrl_aaf3d0a388f1e1cde8b9dd12483854dd3_icgraph" id="struct_ctrl_aaf3d0a388f1e1cde8b9dd12483854dd3_icgraph">
+<area shape="rect" id="node2" href="arc_8c.html#a3aa2dee87d568d9ff409244bb158061c" title="App_initialise" alt="" coords="177,5,276,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="ac18a3d45b28b3e133e0cfc00f1e4886b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Ctrl_setDefaultCallbacks </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_ctrl.html">Ctrl</a> *const&#160;</td>
+          <td class="paramname"><em>this</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Sets all <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>'s callbacks to do nothing. </p>
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="struct_ctrl_ac18a3d45b28b3e133e0cfc00f1e4886b_icgraph.png" border="0" usemap="#struct_ctrl_ac18a3d45b28b3e133e0cfc00f1e4886b_icgraph" alt=""/></div>
+<map name="struct_ctrl_ac18a3d45b28b3e133e0cfc00f1e4886b_icgraph" id="struct_ctrl_ac18a3d45b28b3e133e0cfc00f1e4886b_icgraph">
+<area shape="rect" id="node2" href="arc_8c.html#a7914b4bab1f24ba15c2a22a978ed1251" title="Ctrl_construct" alt="" coords="245,5,348,32"/>
+</map>
+</div>
+</p>
 
 </div>
 </div>

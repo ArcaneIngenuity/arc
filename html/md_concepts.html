@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.10"/>
-<title>arc: concepts</title>
+<title>arc: Glossary</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -90,11 +90,10 @@ $(document).ready(function(){initNavTree('md_concepts.html','');});
 
 <div class="header">
   <div class="headertitle">
-<div class="title">concepts </div>  </div>
+<div class="title">Glossary </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>==Glossary==</p>
-<ul>
+<div class="textblock"><ul>
 <li><a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a>: contains and updates Apps - exists so we may run multiple Apps in parallel off the same timing mechanism (loop or callback).</li>
 <li><a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>: contains and updates Ctrls (and thus models) and Views.</li>
 <li>model: a generic object (user specified type) that holds logical world state.</li>
@@ -107,7 +106,7 @@ $(document).ready(function(){initNavTree('md_concepts.html','');});
 </ul>
 <p>update/updatePost, initialise/dispose, start/stop and suspend/resume are generally all recursive functions, irrespective of where they appear. Exceptions are:</p>
 <ul>
-<li><a class="el" href="struct_view.html#a6f84d25ea279f5658fce4e3bc3b5bcb4">View_start()</a>/_stop(): Views should necessarily be started separately, though stopping a parent <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> necessarily prevents all descendant Views from being run (though technically their "updating" flag remains true). </li>
+<li><a class="el" href="struct_view.html#a6f84d25ea279f5658fce4e3bc3b5bcb4">View_start()</a>/View_stop(): Views must be started individually, this is not recursive, though stopping a parent <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> necessarily prevents all descendant Views from being updated (though internally, descendants' "updating" flag remains as they were, so if they were updating then they will continue updating when their ancestor is <a class="el" href="struct_view.html#a6f84d25ea279f5658fce4e3bc3b5bcb4">View_start()</a>ed again). </li>
 </ul>
 </div></div><!-- contents -->
 </div><!-- doc-content -->

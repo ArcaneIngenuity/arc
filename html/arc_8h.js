@@ -14,6 +14,7 @@ var arc_8h =
     [ "Hub", "arc_8h.html#aaec1a3a00e2799af290b58ddb9dfb739", null ],
     [ "Service", "arc_8h.html#a03f39bac5794c71a7257372e4b175086", null ],
     [ "View", "arc_8h.html#a4db1f4ea505b597e255278b110002b63", null ],
+    [ "App_destruct", "arc_8h.html#a2a776b44ac40755ca240c06c9c634bba", null ],
     [ "doNothing", "arc_8h.html#a70fd043a7af77f79290b0853d23991eb", null ],
     [ "appEmpty", "arc_8h.html#a7cd2ae989a387e6274a71e47f7f92476", null ],
     [ "ctrlEmpty", "arc_8h.html#aa2e9c81f21cf43af209396b0a88a7ec9", null ],

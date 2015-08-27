@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['parent',['parent',['../struct_view.html#ae0eff71afdec360c2ccc4eb738a9d4eb',1,'View']]]
+  ['onparentresize',['onParentResize',['../struct_view.html#afbcb9956338ce2d9708e759e3c67308e',1,'View']]]
 ];

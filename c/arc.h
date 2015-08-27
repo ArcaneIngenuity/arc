@@ -158,6 +158,8 @@ const struct Hub hubEmpty; ///< Used to set instance to empty / zero all its mem
 
 //FINAL/BASE METHODS
 
+Ctrl * 		Ctrl_construct(size_t sizeofSubclass); ///< \memberof Ctrl Constructs the Ctrl and sets all callbacks to do nothing.
+void 		Ctrl_setDefaultCallbacks(Ctrl * const this); ///< \memberof Ctrl Sets all Ctrl's callbacks to do nothing.
 //bool 		Ctrl_mustStart(Ctrl * const this); ///< \memberof Ctrl
 //bool 		Ctrl_mustStop(Ctrl * const this); ///< \memberof Ctrl
 void 		Ctrl_start(Ctrl * const this); ///< \memberof Ctrl Starts the Ctrl using \link start \endlink.
@@ -167,11 +169,13 @@ void 		Ctrl_update(Ctrl * const this); ///< \memberof Ctrl Updates the Ctrl usin
 void 		Ctrl_updatePost(Ctrl * const this); ///< \memberof Ctrl \memberof View Post-updates the Ctrl using \link updatePost \endlink.
 void 		Ctrl_dispose(Ctrl * const this); ///< \memberof Ctrl Disposes of the Ctrl using \link dispose \endlink.
 
+
+View * 		View_construct(size_t sizeofSubclass); ///< \memberof View Constructs the View and sets all callbacks to do nothing.
+void 		View_setDefaultCallbacks(View * const this); ///< \memberof View Sets all View's callbacks to do nothing.
 void 		View_start(View * const this); ///< \memberof View Starts the View using \link start \endlink.
 void 		View_stop(View * const this); ///< \memberof View Stops the View using \link stop \endlink.
 void 		View_suspend(View * const this); ///< \memberof View Has this View and its children %s \link suspend \endlink operations due to a loss of rendering context.
 void 		View_resume(View * const this); ///< \memberof View Has this View and its children %s \link resume \endlink operations due to regaining rendering context.
-void 		View_construct(View * const this); ///< \memberof View Constructs the View using \link construct \endlink. (NEEDS REVIEW, UNUSED?)
 void 		View_initialise(View * const this); ///< \memberof View Initialises the View using \link initialise \endlink.
 void 		View_update(View * const this); ///< \memberof View Updates the View using \link update \endlink.
 void 		View_dispose(View * const this); ///< \memberof View Disposes of the View and its children, depth-first, using \link dispose \endlink.
@@ -182,6 +186,7 @@ View *		View_addChild(View * const this, View * const child); ///< \memberof Vie
 //TODO... View * View_removeChild(View * const this, View * const child); //first get child by ID
 //ArrayResult View_swapChildren(View * const this, int indexFrom, int indexTo);
 
+void App_destruct(App ** app);
 void 		App_initialise(App * const this); ///< \memberof App Initialises the App using \link initialise \endlink.
 void 		App_update(App * const this); ///< \memberof App Updates the App using \link update \endlink.
 void 		App_suspend(App * const this); ///< \memberof App Has the App's View%s and Ctrl%s \link suspend \endlink operations due to a loss of rendering context.
@@ -206,5 +211,6 @@ App * const Hub_getApp(Hub * const this, const char * const id); ///< \memberof 
 
 void doNothing(void * const this); ///< A null-pattern callback which is the default when no user-defined callback has yet been supplied (prevents null pointer crashes).
 
-Hub hub;// = {0}; ///< Global instance of Hub. (NEEDS REVIEW, remove?)
+//globals
+Hub hub; //allows every other file to ref as extern, and no requirement to include main from renderer etc.
 #endif //ARC_H

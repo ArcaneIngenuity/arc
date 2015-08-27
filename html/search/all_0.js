@@ -1,6 +1,8 @@
 var searchData=
 [
   ['app',['App',['../struct_app.html',1,'App'],['../struct_service.html#ab3a80d3ffc6862d493391c2172a84762',1,'Service::app()'],['../arc_8h.html#a9387c4f86a2963de44de2483f44aae79',1,'App():&#160;arc.h']]],
+  ['app_5fconstruct',['App_construct',['../arc_8c.html#ace948c611cfff3d238d6a4af072479ef',1,'arc.c']]],
+  ['app_5fdestruct',['App_destruct',['../arc_8h.html#a2a776b44ac40755ca240c06c9c634bba',1,'arc.h']]],
   ['app_5fdispose',['App_dispose',['../struct_app.html#a941b058d3a7e415e9eca4ac7dc8a825e',1,'App::App_dispose()'],['../arc_8c.html#a941b058d3a7e415e9eca4ac7dc8a825e',1,'App_dispose():&#160;arc.c']]],
   ['app_5finitialise',['App_initialise',['../struct_app.html#a3aa2dee87d568d9ff409244bb158061c',1,'App::App_initialise()'],['../arc_8c.html#a3aa2dee87d568d9ff409244bb158061c',1,'App_initialise():&#160;arc.c']]],
   ['app_5fresume',['App_resume',['../struct_app.html#ade7157aa1dfd2f872dacadc90e526d7e',1,'App::App_resume()'],['../arc_8c.html#ade7157aa1dfd2f872dacadc90e526d7e',1,'App_resume():&#160;arc.c']]],
