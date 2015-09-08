@@ -1,11 +1,16 @@
 #include "arc.h"
 
-//#define ARC_DEBUG 1
+#define ARC_DEBUG_ONEOFFS 1
+//#define ARC_DEBUG_UPDATES 1
 
 //--------- Hub ---------//
 
 void Hub_setDefaultCallbacks(Hub * hub)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] Hub_setDefaultCallbacks\n");
+	#endif
+	
 	hub->initialise = (void * const)&doNothing;
 	hub->dispose 	= (void * const)&doNothing;
 	hub->suspend 	= (void * const)&doNothing;
@@ -14,8 +19,8 @@ void Hub_setDefaultCallbacks(Hub * hub)
 
 void Hub_update(Hub * const this)
 {
-	#ifdef ARC_DEBUG
-	printf("Hub_update\n");
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC] Hub_update...\n");
 	#endif
 	
 	//update apps
@@ -25,10 +30,18 @@ void Hub_update(Hub * const this)
 		if (app->updating)
 			App_update(app);
 	}
+	
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC] ...Hub_update\n");
+	#endif
 }
 
 void Hub_dispose(Hub * const this)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] Hub_dispose..."); 
+	#endif// ARC_DEBUG_ONEOFFS
+	
 	for (int i = 0; i < this->appsCount; i++)
 	{
 		App * app = this->apps[i];
@@ -39,12 +52,18 @@ void Hub_dispose(Hub * const this)
 	this->dispose((void *)this);
 	
 	//this->initialised = false;
-	printf ("Hub_dispose done."); 
 	//free(this); //hub object is not a pointer!
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Hub_dispose"); 
+	#endif// ARC_DEBUG_ONEOFFS
 }
 
 void Hub_suspend(Hub * const this)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] Hub_suspend...");
+	#endif// ARC_DEBUG_ONEOFFS
 	for (int i = 0; i < this->appsCount; i++)
 	{
 		App * app = this->apps[i];
@@ -54,11 +73,16 @@ void Hub_suspend(Hub * const this)
 
 	this->suspend((void *)this);
 	
-	printf ("Hub_suspend done.");
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Hub_suspend");
+	#endif// ARC_DEBUG_ONEOFFS
 }
 
 void Hub_resume(Hub * const this)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] Hub_resume...");
+	#endif// ARC_DEBUG_ONEOFFS
 	for (int i = 0; i < this->appsCount; i++)
 	{
 		App * app = this->apps[i];
@@ -68,19 +92,28 @@ void Hub_resume(Hub * const this)
 	
 	this->resume((void *)this);
 	
-	printf ("Hub_resume done.");
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Hub_resume");
+	#endif// ARC_DEBUG_ONEOFFS
 }
 
 App * const Hub_addApp(Hub * const this, App * const app)
 {
-	printf("app0");
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] Hub_addApp... (app id=%s)\n", app->id);
+	#endif
 	if (this->appsCount < APPS_MAX)
 	{
-		printf("app1");
 		this->apps[this->appsCount++] = app;
-		printf("app2");
 		app->hub = this;
-		printf("app->id? %s\n", app->id);
+		//#ifdef ARC_DEBUG_ONEOFFS
+		//LOGI("[ARC] App added with ID %s\n", app->id);
+		//#endif// ARC_DEBUG_ONEOFFS
+		
+		#ifdef ARC_DEBUG_ONEOFFS
+		LOGI("[ARC] ...Hub_getApp (app id=%s)\n", app->id);
+		#endif
+		
 		return app;
 	}
 	return NULL;
@@ -88,42 +121,59 @@ App * const Hub_addApp(Hub * const this, App * const app)
 
 App * const Hub_getApp(Hub * const this, const char * const id)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] Hub_getApp... (app id=%s)\n", id);
+	#endif
+	
 	for (int i = 0; i < this->appsCount; i++)
 	{
 		App * app = this->apps[i];
 		if (strcmp(id, app->id) == 0)
+		{
+			#ifdef ARC_DEBUG_ONEOFFS
+			LOGI("[ARC] ...Hub_getApp (app id=%s)\n", id);
+			#endif
+			
 			return app;
+		}
 	}
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Hub_getApp (app id=%s)\n", id);
+	#endif
+	
 	return NULL;
 }
 
 //--------- App ---------//
-App * App_construct()//App ** app)
+App * App_construct(const char * id)//App ** app)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] App_construct...(id=%s)\n", id);
+	#endif
+	
 	//TODO ifdef GCC, link destruct() via attr cleanup 
 	//#ifdef __GNUC__
 	//App * app __attribute__((cleanup (App_destruct))) = malloc(sizeof(App));
 	//#else //no auto destructor!
-	App * app = malloc(sizeof(App));
+	App * app = calloc(1, sizeof(App));
 	//#endif//__GNUC__
 	*app = appEmpty;
+	app->id = id;
 	app->initialise = (void * const)&doNothing;
 	app->dispose 	= (void * const)&doNothing;
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...App_construct (id=%s)\n", id);
+	#endif
 	
 	return app;
 }
 
-/*
-void App_destruct(App ** app) //pointer-to-pointer required for __attribute__ cleanup
-{
-	LOGI("destruct %s", (*app)->id);
-	free(*app);
-}
-*/
 void App_update(App * const this)
 {
-	#ifdef ARC_DEBUG
-	printf("App_update\n");
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC] App_update... (id=%s)\n", this->id);
 	#endif
 	
 	Ctrl * ctrl = this->ctrl;
@@ -135,6 +185,10 @@ void App_update(App * const this)
 	if (view->updating)
 		View_update(view);
 	Ctrl_updatePost(ctrl); //abstract
+	
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC] ...App_update (id=%s)\n", this->id);
+	#endif
 }
 
 void App_initialise(App * const this)
@@ -147,8 +201,8 @@ void App_initialise(App * const this)
 
 void App_start(App * const this)
 {
-	#ifdef ARC_DEBUG
-	printf("App_start\n");
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] App_start... (id=%s)\n", this->id);
 	#endif
 	
 	if (!this->updating)
@@ -158,96 +212,98 @@ void App_start(App * const this)
 		
 		if (!this->initialised)
 		{
+			//TODO make all LOGE, not LOGI!
+			
 			//for now, check ALL on initialisation (TODO - move to relevant sections and IFDEF DEBUG)
 			if(!this->initialise)
 			{
-				printf ("App_start - Error: missing initialise function.\n"); 
+				LOGI("[ARC] App_start - Error: missing initialise function.\n"); 
 				exit(1);
 			}
 			
 			if(!this->dispose)
 			{
-				printf ("App_start - Error: missing dispose function.\n"); 
+				LOGI("[ARC] App_start - Error: missing dispose function.\n"); 
 				exit(1);
 			}
 			
 			/*
 			if(!this->input)
 			{
-				printf ("App_start - Error: missing input function.\n"); 
+				LOGI("[ARC] App_start - Error: missing input function.\n"); 
 				exit(1);
 			}
 			
 			if(!this->start)
 			{
-				printf ("App_start - Error: missing start function.\n"); 
+				LOGI("[ARC] App_start - Error: missing start function.\n"); 
 				exit(1);
 			}
 			
 			if(!this->stop)
 			{
-				printf ("App_start - Error: missing stop function.\n"); 
+				LOGI("[ARC] App_start - Error: missing stop function.\n"); 
 				exit(1);
 			}
 			*/
 			if(!this->initialise)
 			{
-				printf ("App_start - Error: missing initialise function.\n"); 
+				LOGI("[ARC] App_start - Error: missing initialise function.\n"); 
 				exit(1);
 			}
 			
 			if(!this->dispose)
 			{
-				printf ("App_start - Error: missing dispose function.\n"); 
+				LOGI("[ARC] App_start - Error: missing dispose function.\n"); 
 				exit(1);
 			}
 			
 			if(!this->model)
 			{
-				printf ("App_start - Error: missing model.\n"); 
+				LOGI("[ARC] App_start - Error: missing model.\n"); 
 				exit(1);
 			}
 			
 			if(!this->view)
 			{
-				printf ("App_start - Error: missing view.\n"); 
+				LOGI("[ARC] App_start - Error: missing view.\n"); 
 				exit(1);
 			}
 			else
 			{
 				if (!this->view->start)
 				{
-					printf ("App_start - Error: missing view start function.\n"); 
+					LOGI("[ARC] App_start - Error: missing view start function.\n"); 
 					exit(1);
 				}
 				
 				if (!this->view->stop)
 				{
-					printf ("App_start - Error: missing view stop function.\n"); 
+					LOGI("[ARC] App_start - Error: missing view stop function.\n"); 
 					exit(1);
 				}
 				
 				if (!this->view->initialise)
 				{
-					printf ("App_start - Error: missing view initialise function.\n"); 
+					LOGI("[ARC] App_start - Error: missing view initialise function.\n"); 
 					exit(1);
 				}
 				
 				if (!this->view->dispose)
 				{
-					printf ("App_start - Error: missing view dispose function.\n"); 
+					LOGI("[ARC] App_start - Error: missing view dispose function.\n"); 
 					exit(1);
 				}
 				
 				if (!this->view->update)
 				{
-					printf ("App_start - Error: missing view update function.\n"); 
+					LOGI("[ARC] App_start - Error: missing view update function.\n"); 
 					exit(1);
 				}
 				
 				if (!this->view->updatePost)
 				{
-					printf ("App_start - Error: missing view updatePost function.\n"); 
+					LOGI("[ARC] App_start - Error: missing view updatePost function.\n"); 
 					exit(1);
 				}
 				
@@ -256,56 +312,56 @@ void App_start(App * const this)
 			
 			if(!this->ctrl)
 			{
-				printf ("App_start - Error: missing ctrl.\n"); 
+				LOGI("[ARC] App_start - Error: missing ctrl.\n"); 
 				exit(1);
 			}
 			else
 			{
 				if (!this->ctrl->mustStart)
 				{
-					printf ("App_start - Error: missing ctrl mustStart function.\n"); 
+					LOGI("[ARC] App_start - Error: missing ctrl mustStart function.\n"); 
 					exit(1);
 				}
 				
 				if (!this->ctrl->mustStop)
 				{
-					printf ("App_start - Error: missing ctrl mustStop function.\n"); 
+					LOGI("[ARC] App_start - Error: missing ctrl mustStop function.\n"); 
 					exit(1);
 				}
 				
 				if (!this->ctrl->start)
 				{
-					printf ("App_start - Error: missing ctrl start function.\n"); 
+					LOGI("[ARC] App_start - Error: missing ctrl start function.\n"); 
 					exit(1);
 				}
 				
 				if (!this->ctrl->stop)
 				{
-					printf ("App_start - Error: missing ctrl stop function.\n"); 
+					LOGI("[ARC] App_start - Error: missing ctrl stop function.\n"); 
 					exit(1);
 				}
 				
 				if (!this->ctrl->initialise)
 				{
-					printf ("App_start - Error: missing ctrl initialise function.\n"); 
+					LOGI("[ARC] App_start - Error: missing ctrl initialise function.\n"); 
 					exit(1);
 				}
 				
 				if (!this->ctrl->dispose)
 				{
-					printf ("App_start - Error: missing ctrl dispose function.\n"); 
+					LOGI("[ARC] App_start - Error: missing ctrl dispose function.\n"); 
 					exit(1);
 				}
 				
 				if (!this->ctrl->update)
 				{
-					printf ("App_start - Error: missing ctrl update function.\n"); 
+					LOGI("[ARC] App_start - Error: missing ctrl update function.\n"); 
 					exit(1);
 				}
 				
 				if (!this->ctrl->updatePost)
 				{
-					printf ("App_start - Error: missing ctrl updatePost function.\n"); 
+					LOGI("[ARC] App_start - Error: missing ctrl updatePost function.\n"); 
 					exit(1);
 				}
 			}
@@ -318,13 +374,13 @@ void App_start(App * const this)
 		/*
 		if (!ctrl->initialised)
 		{
-			printf ("App_start - Error: ctrl has not been initialised.\n"); 
+			LOGI("[ARC] App_start - Error: ctrl has not been initialised.\n"); 
 			exit(1);
 		}
 		
 		if (!view->initialised)
 		{
-			printf ("App_start - Error: view has not been initialised.\n"); 
+			LOGI("[ARC] App_start - Error: view has not been initialised.\n"); 
 			exit(1);
 		}
 		*/
@@ -334,12 +390,16 @@ void App_start(App * const this)
 		ctrl->start((void *)ctrl);
 		view->start((void *)view);
 	}
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...App_start (id=%s)\n", this->id);
+	#endif
 }
 
 void App_stop(App * const this)
 {
-	#ifdef ARC_DEBUG
-	printf("App_stop\n");
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] App_stop... (id=%s)\n", this->id);
 	#endif
 	
 	Ctrl * ctrl = this->ctrl;
@@ -349,10 +409,18 @@ void App_stop(App * const this)
 	view->stop((void *)view);
 	
 	this->updating = false;
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...App_stop (id=%s)\n", this->id);
+	#endif
 }
 
 void App_dispose(App * const this)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] App_dispose... (id=%s)\n", this->id);
+	#endif//ARC_DEBUG_ONEOFFS
+	
 	Ctrl * ctrl = this->ctrl;
 	View * view = this->view;
 
@@ -364,41 +432,69 @@ void App_dispose(App * const this)
 	this->dispose((void *)this);
 	this->initialised = false;
 	free(this);
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...App_dispose (id=%s)\n", this->id);
+	#endif//ARC_DEBUG_ONEOFFS
 }
 
 void App_suspend(App * const this)
-{	
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] App_suspend... (id=%s)\n", this->id);
+	#endif//ARC_DEBUG_ONEOFFS
+	
 	View_suspend(this->view);
 	
 	this->ctrl->suspend((void *)this);
 	
-	printf ("App_suspend done.");
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...App_suspend (id=%s)\n", this->id);
+	#endif//ARC_DEBUG_ONEOFFS
 }
 
 void App_resume(App * const this)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] App_resume... (id=%s)\n", this->id);
+	#endif//ARC_DEBUG_ONEOFFS
+	
 	View_resume(this->view);
 
 	this->ctrl->resume((void *)this);
 
-	printf ("App_resume done.");
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...App_resume (id=%s)\n", this->id);
+	#endif//ARC_DEBUG_ONEOFFS
 }
 
 //--------- Ctrl ---------//
-Ctrl * Ctrl_construct(size_t sizeofSubclass)
+Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] Ctrl_construct...(id=%s)\n", id);
+	#endif
+	
 	//since we can't pass in a type,
 	//allocate full size of the "subclass" - this is fine as "base"
 	//struct is situated from zero in this allocated space
-	Ctrl * ctrl = malloc(sizeofSubclass);
-	memset(ctrl, 0, 	 sizeofSubclass);
+	Ctrl * ctrl = calloc(1, sizeofSubclass);
+	ctrl->id = id;
 	Ctrl_setDefaultCallbacks(ctrl);
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Ctrl_construct(id=%s)\n", id);
+	#endif
 	
 	return ctrl;
 }
 
 void Ctrl_setDefaultCallbacks(Ctrl * const this)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] Ctrl_setDefaultCallbacks (id=%s)\n", this->id);
+	#endif
+	
 	this->mustStart = (void * const)&doNothing;
 	this->mustStop 	= (void * const)&doNothing;
 	this->start 	= (void * const)&doNothing;
@@ -413,54 +509,118 @@ void Ctrl_setDefaultCallbacks(Ctrl * const this)
 
 void Ctrl_start(Ctrl * const this)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] Ctrl_start... (id=%s)\n", this->id);
+	#endif
+	
 	this->start((void *)this);
 	this->updating = true;
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Ctrl_start (id=%s)\n", this->id);
+	#endif
 }
 
 void Ctrl_stop(Ctrl * const this)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] Ctrl_stop... (id=%s)\n", this->id);
+	#endif
+	
 	this->stop((void *)this);
 	this->updating = false;
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Ctrl_stop (id=%s)\n", this->id);
+	#endif
 }
 
 void Ctrl_suspend(Ctrl * const this)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] Ctrl_suspend... (id=%s)\n", this->id);
+	#endif
+	
 	this->suspend(this);
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Ctrl_suspend (id=%s)\n", this->id);
+	#endif
 }
 
 void Ctrl_resume(Ctrl * const this)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] Ctrl_resume... (id=%s)\n", this->id);
+	#endif
+	
 	this->resume(this);	
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Ctrl_resume (id=%s)\n", this->id);
+	#endif
 }
 
 void Ctrl_initialise(Ctrl * const this)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] Ctrl_initialise... (id=%s)\n", this->id);
+	#endif
+	
 	this->initialise(this);
 	
 	this->initialised = true;
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Ctrl_initialise (id=%s)\n", this->id);
+	#endif
 }
 
 void Ctrl_update(Ctrl * const this)
 {
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC] Ctrl_update... (id=%s)\n", this->id);
+	#endif
+	
 	this->update(this);//deltaSec
+	
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC] ...Ctrl_update (id=%s)\n", this->id);
+	#endif
 }
 
 void Ctrl_updatePost(Ctrl * const this)
 {
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC] Ctrl_updatePost... (id=%s)\n", this->id);
+	#endif
+	
 	this->updatePost(this);//deltaSec
+	
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC] ...Ctrl_updatePost (id=%s)\n", this->id);
+	#endif
 }
 
 void Ctrl_dispose(Ctrl * const this)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] Ctrl_dispose... (id=%s)\n", this->id);
+	#endif
+	
 	this->dispose(this);
 	this->initialised = false;
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Ctrl_dispose (id=%s)\n", this->id);
+	#endif
 }
 
 //--------- View ---------//
 void View_setDefaultCallbacks(View * const this)
 {
-	#ifdef ARC_DEBUG
-	printf("View_construct %s!\n", this->id);
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] View_setDefaultCallbacks (id=%s)\n", this->id);
 	#endif
 	
 	//null id
@@ -476,32 +636,60 @@ void View_setDefaultCallbacks(View * const this)
 	this->onParentResize 	= (void * const)&doNothing;
 }
 
-View * View_construct(size_t sizeofSubclass)
+View * View_construct(const char * id, size_t sizeofSubclass)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] View_construct... (id=%s)\n", id);
+	#endif
+	
 	//since we can't pass in a type,
 	//allocate full size of the "subclass" - this is fine as "base"
 	//struct is situated from zero in this allocated space
-	View * view = malloc(sizeofSubclass);
-	memset(view, 0, 	 sizeofSubclass);
+	View * view = calloc(1, sizeofSubclass);
+	view->id = id;
 	View_setDefaultCallbacks(view);
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...View_construct (id=%s)\n", id);
+	#endif
 	
 	return view;
 }
 
 void View_start(View * const this)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] View_start... (id=%s)\n", this->id);
+	#endif
+	
 	this->start((void *)this);
 	this->updating = true;
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...View_start (id=%s)\n", this->id);
+	#endif
 }
 
 void View_stop(View * const this)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] View_stop... (id=%s)\n", this->id);
+	#endif
+	
 	this->stop((void *)this);
 	this->updating = false;
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...View_stop (id=%s)\n", this->id);
+	#endif
 }
 
 void View_suspend(View * const this)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] View_suspend... (id=%s)\n", this->id);
+	#endif
+	
 	for (int i = 0; i < this->childrenCount; i++)
 	{
 		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
@@ -509,10 +697,18 @@ void View_suspend(View * const this)
 	}
 	
 	this->suspend(this);
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...View_suspend (id=%s)\n", this->id);
+	#endif
 }
 
 void View_resume(View * const this)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] View_resume... (id=%s)\n", this->id);
+	#endif
+	
 	for (int i = 0; i < this->childrenCount; i++)
 	{
 		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
@@ -520,13 +716,17 @@ void View_resume(View * const this)
 	}
 	
 	this->resume(this);	
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...View_resume (id=%s)\n", this->id);
+	#endif
 }
 
 
 void View_initialise(View * const this)
 {
-	#ifdef ARC_DEBUG
-	printf("View_initialise %s!\n", this->id);
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] View_initialise... (id=%s)\n", this->id);
 	#endif
 	
 	this->initialise(this);
@@ -538,10 +738,18 @@ void View_initialise(View * const this)
 		View * child = (View *) this->childrenByZ[i];
 		View_initialise(child);//deltaSec //only works if enabled
 	}
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...View_initialise (id=%s)\n", this->id);
+	#endif
 }
 
 void View_update(View * const this)
 {
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC] View_update... (id=%s)\n", this->id);
+	#endif
+	
 	this->update(this);//deltaSec
 
 	for (int i = 0; i < this->childrenCount; i++)
@@ -552,12 +760,16 @@ void View_update(View * const this)
 	}
 	
 	this->updatePost(this);//deltaSec
+	
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC] ...View_update (id=%s)\n", this->id);
+	#endif
 }
 
 void View_dispose(View * const this)
 {
-	#ifdef ARC_DEBUG
-	printf("View_dispose\n");
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] View_dispose... (id=%s)\n", this->id);
 	#endif
 	
 	for (int i = 0; i < this->childrenCount; i++)
@@ -567,27 +779,54 @@ void View_dispose(View * const this)
 	}
 	this->dispose(this);
 	this->initialised = false;
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...View_dispose (id=%s)\n", this->id);
+	#endif
 }
 
 View * View_getChild(View * const this, char * id)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] View_getChild... (id=%s) (child id=%s)\n", this->id, id);
+	#endif
+	
 	for (int i = 0; i < this->childrenCount; i++)
 	{
 		View * child = (View *) this->childrenByZ[i];
 		if (strcmp(id, child->id) == 0)
+		{
+			#ifdef ARC_DEBUG_ONEOFFS
+			LOGI("[ARC] ...View_getChild (id=%s) (child id=%s)\n", this->id, id);
+			#endif
+			
 			return child;
+		}
 	}
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...View_getChild (id=%s) (child id=%s)\n", this->id, id);
+	#endif
+	
 	return NULL;
 }
 
 View * View_addChild(View * const this, View * const child)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] View_addChild... (id=%s) (child id=%s)\n", this->id, child->id);
+	#endif
+	
 	child->parent = this;
 	if (this->root)
 		child->root = this->root;
 	else
 		child->root = this;
 
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...View_addChild (id=%s) (child id=%s)\n", this->id, child->id);
+	#endif
+	
 	if (this->childrenCount == VIEW_CHILDREN_MAX)
 		return NULL;
 	else
@@ -631,6 +870,10 @@ bool View_isRoot(View * const this)
 
 void View_onParentResizeRecurse(View * const this)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] View_onParentResizeRecurse... (id=%s)\n", this->id);
+	#endif
+	
 	this->onParentResize(this);
 	
 	for (int i = 0; i < this->childrenCount; i++)
@@ -640,8 +883,12 @@ void View_onParentResizeRecurse(View * const this)
 		//depth first - update child and then recurse to its children
 		
 		View_onParentResizeRecurse(child);
-	}	
+	}
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...View_onParentResizeRecurse (id=%s)\n", this->id);
+	#endif
 }
 
 //--------- misc ---------//
-void doNothing(void * const this){/*printf("doNothing\n");*/}
+void doNothing(void * const this){/*LOGI("[ARC] doNothing\n");*/}

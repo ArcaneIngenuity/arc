@@ -82,6 +82,8 @@ const struct View viewEmpty; ///< Used to set instance to empty / zero all its m
 /// A Ctrl operates on a model. In arc, models need no specific type; they can be anything (and are internally denoted as void *). Ctrl writes new model state by reading extant model state, inputs and View state.
 typedef struct Ctrl
 {
+	char * id; ///< ID used for Arc debugging mode.
+	
 	bool updating; ///< Should this have Ctrl_update() called on it every frame?
 	bool initialised; ///< True after first initialisation. If re-initialisation is required, manually reset this to false.
 	void * model; ///< The model associated with this View. May or may not be the same as this View's App's (complete) model, depending on \link Configuration \endlink.
@@ -159,7 +161,7 @@ const struct Hub hubEmpty; ///< Used to set instance to empty / zero all its mem
 
 //FINAL/BASE METHODS
 
-Ctrl * 		Ctrl_construct(size_t sizeofSubclass); ///< \memberof Ctrl Constructs the Ctrl and sets all callbacks to do nothing.
+Ctrl * 		Ctrl_construct(const char * id, size_t sizeofSubclass); ///< \memberof Ctrl Constructs the Ctrl and sets all callbacks to do nothing.
 void 		Ctrl_setDefaultCallbacks(Ctrl * const this); ///< \memberof Ctrl Sets all Ctrl's callbacks to do nothing.
 //bool 		Ctrl_mustStart(Ctrl * const this); ///< \memberof Ctrl
 //bool 		Ctrl_mustStop(Ctrl * const this); ///< \memberof Ctrl
@@ -171,7 +173,7 @@ void 		Ctrl_updatePost(Ctrl * const this); ///< \memberof Ctrl \memberof Ctrl Po
 void 		Ctrl_dispose(Ctrl * const this); ///< \memberof Ctrl Disposes of the Ctrl using \link dispose \endlink.
 
 
-View * 		View_construct(size_t sizeofSubclass); ///< \memberof View Constructs the View and sets all callbacks to do nothing.
+View * 		View_construct(const char * id, size_t sizeofSubclass); ///< \memberof View Constructs the View and sets all callbacks to do nothing.
 void 		View_setDefaultCallbacks(View * const this); ///< \memberof View Sets all View's callbacks to do nothing.
 void 		View_start(View * const this); ///< \memberof View Starts the View using \link start \endlink.
 void 		View_stop(View * const this); ///< \memberof View Stops the View using \link stop \endlink.
@@ -186,8 +188,8 @@ View * 		View_getChild(View * const this, char * id); ///< \memberof View Gets a
 View *		View_addChild(View * const this, View * const child); ///< \memberof View Adds a child to this View, using its \link id \endlink.
 //TODO... View * View_removeChild(View * const this, View * const child); //first get child by ID
 //ArrayResult View_swapChildren(View * const this, int indexFrom, int indexTo);
-
-void App_destruct(App ** app);
+App * 		App_construct(const char * id);
+void 		App_dispose(App * const this);
 void 		App_initialise(App * const this); ///< \memberof App Initialises the App using \link initialise \endlink.
 void 		App_update(App * const this); ///< \memberof App Updates the App using \link update \endlink.
 void 		App_suspend(App * const this); ///< \memberof App Has the App's View%s and Ctrl%s \link suspend \endlink operations due to a loss of rendering context.
