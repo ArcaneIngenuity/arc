@@ -583,6 +583,10 @@ View * View_getChild(View * const this, char * id)
 View * View_addChild(View * const this, View * const child)
 {
 	child->parent = this;
+	if (this->root)
+		child->root = this->root;
+	else
+		child->root = this;
 
 	if (this->childrenCount == VIEW_CHILDREN_MAX)
 		return NULL;

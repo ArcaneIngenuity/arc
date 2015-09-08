@@ -50,6 +50,7 @@ typedef struct View
 	int width; 
 	int height;
 	
+	struct View * root;
 	struct View * parent; ///< View's parent View, if any.
 	struct View * childrenByZ[VIEW_CHILDREN_MAX]; ///< View's children, where index is Z-order (Z is the stacking/draw order, i.e. goes positive out of screen).
 	int childrenCount; ///< The number of child Views held by this parent View. Negative for invalid return values (e.g. on seek).
