@@ -610,6 +610,7 @@ void Ctrl_dispose(Ctrl * const this)
 	
 	this->dispose(this);
 	this->initialised = false;
+	free(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Ctrl_dispose (id=%s)\n", this->id);
@@ -779,6 +780,7 @@ void View_dispose(View * const this)
 	}
 	this->dispose(this);
 	this->initialised = false;
+	free(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...View_dispose (id=%s)\n", this->id);
