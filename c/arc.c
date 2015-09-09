@@ -418,7 +418,8 @@ void App_stop(App * const this)
 void App_dispose(App * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] App_dispose... (id=%s)\n", this->id);
+	const char * id = this->id;
+	LOGI("[ARC] App_dispose... (id=%s)\n", id);
 	#endif//ARC_DEBUG_ONEOFFS
 	
 	Ctrl * ctrl = this->ctrl;
@@ -434,7 +435,7 @@ void App_dispose(App * const this)
 	free(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...App_dispose (id=%s)\n", this->id);
+	LOGI("[ARC] ...App_dispose (id=%s)\n", id);
 	#endif//ARC_DEBUG_ONEOFFS
 }
 
@@ -605,7 +606,8 @@ void Ctrl_updatePost(Ctrl * const this)
 void Ctrl_dispose(Ctrl * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] Ctrl_dispose... (id=%s)\n", this->id);
+	const char * id = this->id;
+	LOGI("[ARC] Ctrl_dispose... (id=%s)\n", id);
 	#endif
 	
 	this->dispose(this);
@@ -613,7 +615,7 @@ void Ctrl_dispose(Ctrl * const this)
 	free(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_dispose (id=%s)\n", this->id);
+	LOGI("[ARC] ...Ctrl_dispose (id=%s)\n", id);
 	#endif
 }
 
@@ -770,7 +772,8 @@ void View_update(View * const this)
 void View_dispose(View * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] View_dispose... (id=%s)\n", this->id);
+	const char * id = this->id;
+	LOGI("[ARC] View_dispose... (id=%s)\n", id);
 	#endif
 	
 	for (int i = 0; i < this->childrenCount; i++)
@@ -783,7 +786,7 @@ void View_dispose(View * const this)
 	free(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_dispose (id=%s)\n", this->id);
+	LOGI("[ARC] ...View_dispose (id=%s)\n", id);
 	#endif
 }
 
