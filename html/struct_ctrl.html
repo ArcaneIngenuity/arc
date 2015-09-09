@@ -102,11 +102,23 @@ $(document).ready(function(){initNavTree('struct_ctrl.html','');});
  <a href="struct_ctrl.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="arc_8h_source.html">arc.h</a>&gt;</code></p>
+<div class="dynheader">
+Collaboration diagram for Ctrl:</div>
+<div class="dyncontent">
+<div class="center"><img src="struct_ctrl__coll__graph.png" border="0" usemap="#_ctrl_coll__map" alt="Collaboration graph"/></div>
+<map name="_ctrl_coll__map" id="_ctrl_coll__map">
+<area shape="rect" id="node3" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub..." alt="" coords="61,112,107,139"/>
+<area shape="rect" id="node2" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. " alt="" coords="5,201,51,228"/>
+<area shape="rect" id="node4" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. " alt="" coords="112,14,163,41"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a41e7d9964874b956aabcf8c9663aa6fb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_ctrl.html">Ctrl</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#a41e7d9964874b956aabcf8c9663aa6fb">Ctrl_construct</a> (size_t sizeofSubclass)</td></tr>
-<tr class="separator:a41e7d9964874b956aabcf8c9663aa6fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5cf3e5bf980e5783084f6e77a603d62"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_ctrl.html">Ctrl</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#af5cf3e5bf980e5783084f6e77a603d62">Ctrl_construct</a> (const char *<a class="el" href="struct_ctrl.html#a9b0497953c253f848a66791cabe72481">id</a>, size_t sizeofSubclass)</td></tr>
+<tr class="separator:af5cf3e5bf980e5783084f6e77a603d62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74a39aa4ba538408d4172c9e750db071"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#a74a39aa4ba538408d4172c9e750db071">Ctrl_destruct</a> (<a class="el" href="struct_ctrl.html">Ctrl</a> *const this)</td></tr>
+<tr class="separator:a74a39aa4ba538408d4172c9e750db071"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac18a3d45b28b3e133e0cfc00f1e4886b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#ac18a3d45b28b3e133e0cfc00f1e4886b">Ctrl_setDefaultCallbacks</a> (<a class="el" href="struct_ctrl.html">Ctrl</a> *const this)</td></tr>
 <tr class="separator:ac18a3d45b28b3e133e0cfc00f1e4886b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8778c5a9981282bc95856d5776cdfd17"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#a8778c5a9981282bc95856d5776cdfd17">Ctrl_start</a> (<a class="el" href="struct_ctrl.html">Ctrl</a> *const this)</td></tr>
@@ -117,11 +129,20 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aaf3d0a388f1e1cde8b9dd12483854dd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7c3e32486ea528ccf6f7e16e6727dff8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#a7c3e32486ea528ccf6f7e16e6727dff8">Ctrl_update</a> (<a class="el" href="struct_ctrl.html">Ctrl</a> *const this)</td></tr>
 <tr class="separator:a7c3e32486ea528ccf6f7e16e6727dff8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab22987c9256f1219204e3d77e7d73da3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#ab22987c9256f1219204e3d77e7d73da3">Ctrl_dispose</a> (<a class="el" href="struct_ctrl.html">Ctrl</a> *const this)</td></tr>
-<tr class="separator:ab22987c9256f1219204e3d77e7d73da3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac405c34c283c8e4da67025e6ad7e338b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#ac405c34c283c8e4da67025e6ad7e338b">Ctrl_updatePost</a> (<a class="el" href="struct_ctrl.html">Ctrl</a> *const this)</td></tr>
+<tr class="separator:ac405c34c283c8e4da67025e6ad7e338b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
+<tr class="memitem:a9b0497953c253f848a66791cabe72481"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#a9b0497953c253f848a66791cabe72481">id</a></td></tr>
+<tr class="memdesc:a9b0497953c253f848a66791cabe72481"><td class="mdescLeft">&#160;</td><td class="mdescRight">ID used for Arc debugging mode.  <a href="#a9b0497953c253f848a66791cabe72481">More...</a><br /></td></tr>
+<tr class="separator:a9b0497953c253f848a66791cabe72481"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5445e0e8b2564b7469a5aef7969d8b7"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="struct_hub.html">Hub</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#ae5445e0e8b2564b7469a5aef7969d8b7">hub</a></td></tr>
+<tr class="memdesc:ae5445e0e8b2564b7469a5aef7969d8b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> which owns and manages this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>'s owning <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>.  <a href="#ae5445e0e8b2564b7469a5aef7969d8b7">More...</a><br /></td></tr>
+<tr class="separator:ae5445e0e8b2564b7469a5aef7969d8b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c5c2618488a31a2452b5b3e47406fcc"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="struct_app.html">App</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#a2c5c2618488a31a2452b5b3e47406fcc">app</a></td></tr>
+<tr class="memdesc:a2c5c2618488a31a2452b5b3e47406fcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> which owns and manages this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>.  <a href="#a2c5c2618488a31a2452b5b3e47406fcc">More...</a><br /></td></tr>
+<tr class="separator:a2c5c2618488a31a2452b5b3e47406fcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abee9c102754aadf04b1c1d72da4d9ab8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#abee9c102754aadf04b1c1d72da4d9ab8">updating</a></td></tr>
 <tr class="memdesc:abee9c102754aadf04b1c1d72da4d9ab8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Should this have <a class="el" href="struct_ctrl.html#a7c3e32486ea528ccf6f7e16e6727dff8">Ctrl_update()</a> called on it every frame?  <a href="#abee9c102754aadf04b1c1d72da4d9ab8">More...</a><br /></td></tr>
 <tr class="separator:abee9c102754aadf04b1c1d72da4d9ab8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -169,16 +190,26 @@ Public Attributes</h2></td></tr>
  Sub-Ctrls may be accessed through the <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>'s root <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>.<br />
  A <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> operates on a model. In arc, models need no specific type; they can be anything (and are internally denoted as void *). <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> writes new model state by reading extant model state, inputs and <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> state. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a41e7d9964874b956aabcf8c9663aa6fb"></a>
+<a class="anchor" id="af5cf3e5bf980e5783084f6e77a603d62"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="struct_ctrl.html">Ctrl</a> * Ctrl_construct </td>
           <td>(</td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>sizeofSubclass</em></td><td>)</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>sizeofSubclass</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -186,12 +217,12 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ab22987c9256f1219204e3d77e7d73da3"></a>
+<a class="anchor" id="a74a39aa4ba538408d4172c9e750db071"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void Ctrl_dispose </td>
+          <td class="memname">void Ctrl_destruct </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="struct_ctrl.html">Ctrl</a> *const&#160;</td>
           <td class="paramname"><em>this</em></td><td>)</td>
@@ -204,9 +235,9 @@ Public Attributes</h2></td></tr>
 <p><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="struct_ctrl_ab22987c9256f1219204e3d77e7d73da3_icgraph.png" border="0" usemap="#struct_ctrl_ab22987c9256f1219204e3d77e7d73da3_icgraph" alt=""/></div>
-<map name="struct_ctrl_ab22987c9256f1219204e3d77e7d73da3_icgraph" id="struct_ctrl_ab22987c9256f1219204e3d77e7d73da3_icgraph">
-<area shape="rect" id="node2" href="arc_8c.html#a941b058d3a7e415e9eca4ac7dc8a825e" title="App_dispose" alt="" coords="176,5,273,32"/>
+<div class="center"><img src="struct_ctrl_a74a39aa4ba538408d4172c9e750db071_icgraph.png" border="0" usemap="#struct_ctrl_a74a39aa4ba538408d4172c9e750db071_icgraph" alt=""/></div>
+<map name="struct_ctrl_a74a39aa4ba538408d4172c9e750db071_icgraph" id="struct_ctrl_a74a39aa4ba538408d4172c9e750db071_icgraph">
+<area shape="rect" id="node2" href="arc_8c.html#a4b2e8607525b433b717f083316dc83e8" title="App_destruct" alt="" coords="177,5,276,32"/>
 </map>
 </div>
 </p>
@@ -260,7 +291,7 @@ Here is the caller graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="struct_ctrl_ac18a3d45b28b3e133e0cfc00f1e4886b_icgraph.png" border="0" usemap="#struct_ctrl_ac18a3d45b28b3e133e0cfc00f1e4886b_icgraph" alt=""/></div>
 <map name="struct_ctrl_ac18a3d45b28b3e133e0cfc00f1e4886b_icgraph" id="struct_ctrl_ac18a3d45b28b3e133e0cfc00f1e4886b_icgraph">
-<area shape="rect" id="node2" href="arc_8c.html#a7914b4bab1f24ba15c2a22a978ed1251" title="Ctrl_construct" alt="" coords="245,5,348,32"/>
+<area shape="rect" id="node2" href="arc_8c.html#ab9d52c0570945e6c25f9fb0d392bd9f4" title="Ctrl_construct" alt="" coords="245,5,348,32"/>
 </map>
 </div>
 </p>
@@ -338,7 +369,48 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
+<a class="anchor" id="ac405c34c283c8e4da67025e6ad7e338b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Ctrl_updatePost </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_ctrl.html">Ctrl</a> *const&#160;</td>
+          <td class="paramname"><em>this</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Post-updates the <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> using <a class="el" href="struct_ctrl.html#af546250c0d813441d5057856608fb569">updatePost</a>. </p>
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="struct_ctrl_ac405c34c283c8e4da67025e6ad7e338b_icgraph.png" border="0" usemap="#struct_ctrl_ac405c34c283c8e4da67025e6ad7e338b_icgraph" alt=""/></div>
+<map name="struct_ctrl_ac405c34c283c8e4da67025e6ad7e338b_icgraph" id="struct_ctrl_ac405c34c283c8e4da67025e6ad7e338b_icgraph">
+<area shape="rect" id="node2" href="arc_8c.html#a63512392b291279280fe9f5e4b62a871" title="App_update" alt="" coords="196,5,287,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
 <h2 class="groupheader">Member Data Documentation</h2>
+<a class="anchor" id="a2c5c2618488a31a2452b5b3e47406fcc"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct <a class="el" href="struct_app.html">App</a>* Ctrl::app</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> which owns and manages this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>. </p>
+
+</div>
+</div>
 <a class="anchor" id="ad5befadd9260f6bf480475f0ac5a7237"></a>
 <div class="memitem">
 <div class="memproto">
@@ -350,6 +422,34 @@ Here is the caller graph for this function:</div>
 </div><div class="memdoc">
 
 <p>User-supplied callback for when this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> <a class="el" href="struct_ctrl.html#ad5befadd9260f6bf480475f0ac5a7237" title="User-supplied callback for when this Ctrl dispose()s of its resources. ">dispose()</a>s of its resources. </p>
+
+</div>
+</div>
+<a class="anchor" id="ae5445e0e8b2564b7469a5aef7969d8b7"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct <a class="el" href="struct_hub.html">Hub</a>* Ctrl::hub</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> which owns and manages this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>'s owning <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>. </p>
+
+</div>
+</div>
+<a class="anchor" id="a9b0497953c253f848a66791cabe72481"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* Ctrl::id</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>ID used for Arc debugging mode. </p>
 
 </div>
 </div>

@@ -1,11 +1,12 @@
 var searchData=
 [
-  ['app',['App',['../struct_app.html',1,'App'],['../struct_service.html#ab3a80d3ffc6862d493391c2172a84762',1,'Service::app()'],['../arc_8h.html#a9387c4f86a2963de44de2483f44aae79',1,'App():&#160;arc.h']]],
-  ['app_5fconstruct',['App_construct',['../arc_8c.html#ace948c611cfff3d238d6a4af072479ef',1,'arc.c']]],
-  ['app_5fdestruct',['App_destruct',['../arc_8h.html#a2a776b44ac40755ca240c06c9c634bba',1,'arc.h']]],
-  ['app_5fdispose',['App_dispose',['../struct_app.html#a941b058d3a7e415e9eca4ac7dc8a825e',1,'App::App_dispose()'],['../arc_8c.html#a941b058d3a7e415e9eca4ac7dc8a825e',1,'App_dispose():&#160;arc.c']]],
+  ['app',['App',['../struct_app.html',1,'App'],['../struct_ctrl.html#a2c5c2618488a31a2452b5b3e47406fcc',1,'Ctrl::app()'],['../struct_service.html#ab3a80d3ffc6862d493391c2172a84762',1,'Service::app()'],['../arc_8h.html#a9387c4f86a2963de44de2483f44aae79',1,'App():&#160;arc.h']]],
+  ['app_5fconstruct',['App_construct',['../struct_app.html#a7d64f2db93197e7b53f81883a1764e61',1,'App::App_construct()'],['../arc_8c.html#a5d0a1605e5367822a151869bf99a2c28',1,'App_construct():&#160;arc.c']]],
+  ['app_5fdestruct',['App_destruct',['../struct_app.html#a4b2e8607525b433b717f083316dc83e8',1,'App::App_destruct()'],['../arc_8c.html#a4b2e8607525b433b717f083316dc83e8',1,'App_destruct():&#160;arc.c']]],
   ['app_5finitialise',['App_initialise',['../struct_app.html#a3aa2dee87d568d9ff409244bb158061c',1,'App::App_initialise()'],['../arc_8c.html#a3aa2dee87d568d9ff409244bb158061c',1,'App_initialise():&#160;arc.c']]],
   ['app_5fresume',['App_resume',['../struct_app.html#ade7157aa1dfd2f872dacadc90e526d7e',1,'App::App_resume()'],['../arc_8c.html#ade7157aa1dfd2f872dacadc90e526d7e',1,'App_resume():&#160;arc.c']]],
+  ['app_5fsetctrl',['App_setCtrl',['../struct_app.html#a74c4673945403422e2aa4fb940b9cd7f',1,'App::App_setCtrl()'],['../arc_8c.html#a74c4673945403422e2aa4fb940b9cd7f',1,'App_setCtrl():&#160;arc.c']]],
+  ['app_5fsetview',['App_setView',['../struct_app.html#a18b2e2349745439477f94423cbe93036',1,'App::App_setView()'],['../arc_8c.html#aa0d68b85eff16879f4de3a4989bbea54',1,'App_setView():&#160;arc.c']]],
   ['app_5fstart',['App_start',['../struct_app.html#aa45dc4bd81e6ac74778bb1fc591b2de5',1,'App::App_start()'],['../arc_8c.html#aa45dc4bd81e6ac74778bb1fc591b2de5',1,'App_start():&#160;arc.c']]],
   ['app_5fstop',['App_stop',['../struct_app.html#af12a5f973f86bfdde9746470217982d9',1,'App::App_stop()'],['../arc_8c.html#af12a5f973f86bfdde9746470217982d9',1,'App_stop():&#160;arc.c']]],
   ['app_5fsuspend',['App_suspend',['../struct_app.html#abd58b661beaf40e522f43c92c1db1252',1,'App::App_suspend()'],['../arc_8c.html#abd58b661beaf40e522f43c92c1db1252',1,'App_suspend():&#160;arc.c']]],
@@ -15,5 +16,6 @@ var searchData=
   ['apps_5fmax',['APPS_MAX',['../arc_8h.html#a3e1ce4b671ebb9d21296995f5a68f7af',1,'arc.h']]],
   ['appscount',['appsCount',['../struct_hub.html#ac4d6de9dff6dbc23707e47375cff4ac4',1,'Hub']]],
   ['arc_2ec',['arc.c',['../arc_8c.html',1,'']]],
-  ['arc_2eh',['arc.h',['../arc_8h.html',1,'']]]
+  ['arc_2eh',['arc.h',['../arc_8h.html',1,'']]],
+  ['arc_5fdebug_5foneoffs',['ARC_DEBUG_ONEOFFS',['../arc_8c.html#ae21b149ca52378033e787066670c573d',1,'arc.c']]]
 ];

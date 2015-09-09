@@ -168,8 +168,6 @@ Typedefs</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a2a776b44ac40755ca240c06c9c634bba"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="arc_8h.html#a2a776b44ac40755ca240c06c9c634bba">App_destruct</a> (<a class="el" href="struct_app.html">App</a> **app)</td></tr>
-<tr class="separator:a2a776b44ac40755ca240c06c9c634bba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70fd043a7af77f79290b0853d23991eb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="arc_8h.html#a70fd043a7af77f79290b0853d23991eb">doNothing</a> (void *const this)</td></tr>
 <tr class="memdesc:a70fd043a7af77f79290b0853d23991eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">A null-pattern callback which is the default when no user-defined callback has yet been supplied (prevents null pointer crashes).  <a href="#a70fd043a7af77f79290b0853d23991eb">More...</a><br /></td></tr>
 <tr class="separator:a70fd043a7af77f79290b0853d23991eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -191,8 +189,6 @@ Variables</h2></td></tr>
 <tr class="memitem:a3ef285bc64f3db267483387a5b4597b9"><td class="memItemLeft" align="right" valign="top">const struct <a class="el" href="struct_hub.html">Hub</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="arc_8h.html#a3ef285bc64f3db267483387a5b4597b9">hubEmpty</a></td></tr>
 <tr class="memdesc:a3ef285bc64f3db267483387a5b4597b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used to set instance to empty / zero all its members, as a convenience to be used instead of memset(.., 0, ..).  <a href="#a3ef285bc64f3db267483387a5b4597b9">More...</a><br /></td></tr>
 <tr class="separator:a3ef285bc64f3db267483387a5b4597b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aadbf1e465faab09ba519dd233a50c7cf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_hub.html">Hub</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="arc_8h.html#aadbf1e465faab09ba519dd233a50c7cf">hub</a></td></tr>
-<tr class="separator:aadbf1e465faab09ba519dd233a50c7cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a class="anchor" id="a3e1ce4b671ebb9d21296995f5a68f7af"></a>
@@ -328,22 +324,6 @@ Variables</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="a2a776b44ac40755ca240c06c9c634bba"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void App_destruct </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="struct_app.html">App</a> **&#160;</td>
-          <td class="paramname"><em>app</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="a70fd043a7af77f79290b0853d23991eb"></a>
 <div class="memitem">
 <div class="memproto">
@@ -365,9 +345,11 @@ Here is the caller graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="arc_8h_a70fd043a7af77f79290b0853d23991eb_icgraph.png" border="0" usemap="#arc_8h_a70fd043a7af77f79290b0853d23991eb_icgraph" alt=""/></div>
 <map name="arc_8h_a70fd043a7af77f79290b0853d23991eb_icgraph" id="arc_8h_a70fd043a7af77f79290b0853d23991eb_icgraph">
-<area shape="rect" id="node2" href="arc_8c.html#ace948c611cfff3d238d6a4af072479ef" title="App_construct" alt="" coords="166,5,273,32"/>
-<area shape="rect" id="node3" href="arc_8c.html#ac18a3d45b28b3e133e0cfc00f1e4886b" title="Ctrl_setDefaultCallbacks" alt="" coords="137,56,301,83"/>
-<area shape="rect" id="node4" href="arc_8c.html#a1d3c721c3f2a38f3941a86c8771ea6cb" title="View_setDefaultCallbacks" alt="" coords="133,107,305,133"/>
+<area shape="rect" id="node2" href="arc_8c.html#ae77a6a04e6c47627b958cc275247a713" title="Hub_setDefaultCallbacks" alt="" coords="136,5,303,32"/>
+<area shape="rect" id="node3" href="arc_8c.html#af8dd37acd79e76daef01deb5622da348" title="Hub_construct" alt="" coords="166,56,273,83"/>
+<area shape="rect" id="node4" href="arc_8c.html#a5d0a1605e5367822a151869bf99a2c28" title="App_construct" alt="" coords="166,107,273,133"/>
+<area shape="rect" id="node5" href="arc_8c.html#ac18a3d45b28b3e133e0cfc00f1e4886b" title="Ctrl_setDefaultCallbacks" alt="" coords="137,157,301,184"/>
+<area shape="rect" id="node6" href="arc_8c.html#a1d3c721c3f2a38f3941a86c8771ea6cb" title="View_setDefaultCallbacks" alt="" coords="133,208,305,235"/>
 </map>
 </div>
 </p>
@@ -400,18 +382,6 @@ Here is the caller graph for this function:</div>
 </div><div class="memdoc">
 
 <p>Used to set instance to empty / zero all its members, as a convenience to be used instead of memset(.., 0, ..). </p>
-
-</div>
-</div>
-<a class="anchor" id="aadbf1e465faab09ba519dd233a50c7cf"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="struct_hub.html">Hub</a> hub</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
 
 </div>
 </div>

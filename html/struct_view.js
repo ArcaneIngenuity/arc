@@ -1,9 +1,8 @@
 var struct_view =
 [
-    [ "Ctrl_updatePost", "struct_view.html#ac405c34c283c8e4da67025e6ad7e338b", null ],
     [ "View_addChild", "struct_view.html#ae62a9018f9b845cf6ff6f46baf853d40", null ],
-    [ "View_construct", "struct_view.html#a1589505fe33a936b945a2764c751af14", null ],
-    [ "View_dispose", "struct_view.html#ae7c5a1caf43ec38c225c333d0ca0ff57", null ],
+    [ "View_construct", "struct_view.html#a4a5ce09fff40e32104f8d475b2e6c54c", null ],
+    [ "View_destruct", "struct_view.html#a50b6261f66003768bd82066bf2304ecd", null ],
     [ "View_getChild", "struct_view.html#a22ca314a3c74ba5a7c54c2f7a9b73de7", null ],
     [ "View_initialise", "struct_view.html#a3961f4a9135495200a4778ad1fd23282", null ],
     [ "View_isRoot", "struct_view.html#a90c9498e382410aed3de9b4d29a89837", null ],
@@ -25,6 +24,7 @@ var struct_view =
     [ "onParentResize", "struct_view.html#afbcb9956338ce2d9708e759e3c67308e", null ],
     [ "parent", "struct_view.html#ae0eff71afdec360c2ccc4eb738a9d4eb", null ],
     [ "resume", "struct_view.html#acea56f0d3fcce710bacd2ee597a3a504", null ],
+    [ "root", "struct_view.html#afe179f7dfb63e2c188d972008e006ff8", null ],
     [ "start", "struct_view.html#a48190f92eedd6e10d71a84e27ed6ee0e", null ],
     [ "stop", "struct_view.html#a5f7a1268dad187b7742fa8089d7a79c8", null ],
     [ "suspend", "struct_view.html#a4ea02ebe6cc657f066e5c89584e2431d", null ],

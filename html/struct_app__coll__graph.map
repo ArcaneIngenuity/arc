@@ -1,5 +1,5 @@
 <map id="App" name="App">
-<area shape="rect" id="node2" href="$struct_hub.html" title="A central point from which all Apps may be managed / updated. " alt="" coords="133,187,179,213"/>
-<area shape="rect" id="node3" href="$struct_view.html" title="A View with specific output (and possibly input) functionality in an App. " alt="" coords="5,7,56,33"/>
-<area shape="rect" id="node4" href="$struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. " alt="" coords="177,7,220,33"/>
+<area shape="rect" id="node2" href="$struct_hub.html" title="A central point from which all Apps may be managed / updated. " alt="" coords="5,201,51,228"/>
+<area shape="rect" id="node4" href="$struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. " alt="" coords="77,291,120,317"/>
+<area shape="rect" id="node3" href="$struct_view.html" title="A View with specific output (and possibly input) functionality in an App. " alt="" coords="51,14,101,41"/>
 </map>

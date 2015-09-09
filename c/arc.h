@@ -9,30 +9,25 @@ Source is available [here](https://github.com/ArcaneIngenuity/arc "arc").
 #define ARC_H
 
 #include <stdbool.h>
-//#include <limits.h> //for INT_MIN
+
 #include <stdlib.h>
 #include <stdio.h>
 
 #include "log/log.h"
-
-//(REMOVE ME) collection definitions *before* inclusion of arc.h! (definitions in header lead to multiple definitions due to this: http://stackoverflow.com/questions/14425262/why-include-guards-do-not-prevent-multiple-function-definitions)
 
 #define VIEW_CHILDREN_MAX 8
 #define SERVICES_MAX 16
 #define APPS_MAX 4
 #define DEVICES_MAX 16
 
+//declarations, since some of these struct types have circular refs back up to the struct types that hold refs to them.
 /*
-typdef enum
-ArrayResult
-{
-	NOT_FOUND = INT_MIN,
-	ARRAY_FULL,
-	ARRAY_EMPTY
-	//any non-negative value means "OK" and may also indicate an index returned (depending on function).
-} ArrayResult;
+struct Hub;
+struct App;
+struct Ctrl;
+struct View;
+//struct Service;
 */
-
 
 /// A View with specific output (and possibly input) functionality in an App.
 
@@ -46,19 +41,21 @@ typedef struct View
 {
 	//TODO fix this!
 	char * id; ///< (unimplemented) ID by which a View is retrieved from its App->viewsById.
+	struct Hub * hub; ///< \brief The Hub which owns and manages this View's owner App.
+	struct App * app; ///< \brief The App which owns and manages this View.
 	
-	int width; 
-	int height;
+	bool updating; ///< Should this have View_update() called on it every frame?
+	bool initialised; ///< True after first initialise. If re- initialise is required, this should be manually reset to false.
+	void * model; ///< The model associated with this View. May or may not be the same as this View's App's model, depending on \link Configuration \endlink.
 	
 	struct View * root;
 	struct View * parent; ///< View's parent View, if any.
 	struct View * childrenByZ[VIEW_CHILDREN_MAX]; ///< View's children, where index is Z-order (Z is the stacking/draw order, i.e. goes positive out of screen).
 	int childrenCount; ///< The number of child Views held by this parent View. Negative for invalid return values (e.g. on seek).
 	
-	bool updating; ///< Should this have View_update() called on it every frame?
-	bool initialised; ///< True after first initialisation. If re-initialisation is required, this should be manually reset to false.
-	void * model; ///< The model associated with this View. May or may not be the same as this View's App's model, depending on \link Configuration \endlink.
-	
+	int width; ///< Width of this View. (NEEDS REVIEW - should be float to accommodate any user units; perhaps should be in user subclass of View)
+	int height; ///< Height of this View. (NEEDS REVIEW - should be float to accommodate any user units; perhaps should be in user subclass of View)
+
 	void (*start)(struct View * const this); ///< \brief User-supplied callback for when this View start()s.
 	void (*stop)(struct View * const this); ///< \brief User-supplied callback for when this View stop()s.
 	void (*suspend)(struct View * const this); ///< \brief User-supplied callback for when this View must suspend() due to a loss of rendering context.
@@ -70,7 +67,6 @@ typedef struct View
 	void (*onParentResize)(struct View * const this); ///< \brief User-supplied callback for when this View's parent is resized. Root View resize is handled by some external (platform-specific) callback.
 	//void (*enable)(struct View * const this); //start
 	//void (*disable)(struct View * const this); //stop
-	//bool updating; //start/stop
 } View;
 const struct View viewEmpty; ///< Used to set instance to empty / zero all its members, as a convenience to be used instead of memset(.., 0, ..).
 
@@ -83,6 +79,8 @@ const struct View viewEmpty; ///< Used to set instance to empty / zero all its m
 typedef struct Ctrl
 {
 	char * id; ///< ID used for Arc debugging mode.
+	struct Hub * hub; ///< \brief The Hub which owns and manages this Ctrl's owner App.
+	struct App * app; ///< \brief The App which owns and manages this Ctrl.
 	
 	bool updating; ///< Should this have Ctrl_update() called on it every frame?
 	bool initialised; ///< True after first initialisation. If re-initialisation is required, manually reset this to false.
@@ -98,7 +96,6 @@ typedef struct Ctrl
 	void (*dispose)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl dispose()s of its resources.
 	void (*update)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl update()s, i.e. update this Ctrl before any of its App's View%s update.
 	void (*updatePost)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl updatePost()s, i.e. update this Ctrl after any of its App's View%s update.
-
 } Ctrl;
 const struct Ctrl ctrlEmpty; ///< Used to set instance to empty / zero all its members, as a convenience to be used instead of memset(.., 0, ..).
 
@@ -108,8 +105,9 @@ const struct Ctrl ctrlEmpty; ///< Used to set instance to empty / zero all its m
 /// If an App is to be run less frequently than specified by the rate dictated by its Hub, this can be handled in App_update by only updating full update logic when some accumulator reaches a certain amount of elapsed time or frames.
 typedef struct App
 {
-	char * id; ///< ID by which an App may be retrieved from its Hub (TODO); irrelevant except where updating multiple apps through the same Hub. (NEEDS REVIEW, apps go into indexed slots)
-	struct Hub * hub; //in spite of typedef, use struct due to circular ref App->Hub TODO remove this ref, and allow Apps to send messages up to DJ?
+	char * id; ///< \brief ID by which an App may be retrieved from its Hub (TODO); irrelevant except where updating multiple apps through the same Hub. (NEEDS REVIEW, apps go into indexed slots)
+	struct Hub * hub; ///< \brief The Hub which owns and manages this App.
+	//in spite of typedef, use struct due to circular ref App->Hub TODO remove this ref, and allow Apps to send messages up to DJ?
 	//struct Map services;
 	
 	bool updating; ///< Should this have App_update() called on it every frame?
@@ -162,6 +160,7 @@ const struct Hub hubEmpty; ///< Used to set instance to empty / zero all its mem
 //FINAL/BASE METHODS
 
 Ctrl * 		Ctrl_construct(const char * id, size_t sizeofSubclass); ///< \memberof Ctrl Constructs the Ctrl and sets all callbacks to do nothing.
+void 		Ctrl_destruct(Ctrl * const this); ///< \memberof Ctrl Disposes of the Ctrl using \link dispose \endlink.
 void 		Ctrl_setDefaultCallbacks(Ctrl * const this); ///< \memberof Ctrl Sets all Ctrl's callbacks to do nothing.
 //bool 		Ctrl_mustStart(Ctrl * const this); ///< \memberof Ctrl
 //bool 		Ctrl_mustStop(Ctrl * const this); ///< \memberof Ctrl
@@ -170,10 +169,9 @@ void 		Ctrl_stop(Ctrl * const this); ///< \memberof Ctrl Stops the Ctrl using \l
 void		Ctrl_initialise(Ctrl * const this); ///< \memberof Ctrl Initialises the Ctrl using \link initialise \endlink.
 void 		Ctrl_update(Ctrl * const this); ///< \memberof Ctrl Updates the Ctrl using \link update \endlink.
 void 		Ctrl_updatePost(Ctrl * const this); ///< \memberof Ctrl \memberof Ctrl Post-updates the Ctrl using \link updatePost \endlink.
-void 		Ctrl_dispose(Ctrl * const this); ///< \memberof Ctrl Disposes of the Ctrl using \link dispose \endlink.
-
 
 View * 		View_construct(const char * id, size_t sizeofSubclass); ///< \memberof View Constructs the View and sets all callbacks to do nothing.
+void 		View_destruct(View * const this); ///< \memberof View Disposes of the View and its children, depth-first, using \link dispose \endlink.
 void 		View_setDefaultCallbacks(View * const this); ///< \memberof View Sets all View's callbacks to do nothing.
 void 		View_start(View * const this); ///< \memberof View Starts the View using \link start \endlink.
 void 		View_stop(View * const this); ///< \memberof View Stops the View using \link stop \endlink.
@@ -181,28 +179,28 @@ void 		View_suspend(View * const this); ///< \memberof View Has this View and it
 void 		View_resume(View * const this); ///< \memberof View Has this View and its children %s \link resume \endlink operations due to regaining rendering context.
 void 		View_initialise(View * const this); ///< \memberof View Initialises the View using \link initialise \endlink.
 void 		View_update(View * const this); ///< \memberof View Updates the View using \link update \endlink.
-void 		View_dispose(View * const this); ///< \memberof View Disposes of the View and its children, depth-first, using \link dispose \endlink.
 bool 		View_isRoot(View * const this); ///< \memberof View Is this the root View? (i.e. attached directly to \link App \endlink)
-void 		View_onParentResizeRecurse(View * const this); ///< \memberof View What to do when parent resizes, using \link onParentResize \endlink.
+void 		View_onParentResize(View * const this); ///< \memberof View What to do when parent resizes, using \link onParentResize \endlink.
 View * 		View_getChild(View * const this, char * id); ///< \memberof View Gets a child of this View by its \link id \endlink.
 View *		View_addChild(View * const this, View * const child); ///< \memberof View Adds a child to this View, using its \link id \endlink.
 //TODO... View * View_removeChild(View * const this, View * const child); //first get child by ID
-//ArrayResult View_swapChildren(View * const this, int indexFrom, int indexTo);
-App * 		App_construct(const char * id);
-void 		App_dispose(App * const this);
-void 		App_initialise(App * const this); ///< \memberof App Initialises the App using \link initialise \endlink.
+//bool View_swapChildren(View * const this, int indexFrom, int indexTo);
+App * 		App_construct(const char * id); ///< \memberof App Constructs the App and sets all callbacks to do nothing.
+void 		App_destruct(App * const this); ///< \memberof App Destructs the App after disposing/destructing its Views and Ctrls, optionally using \link dispose \endlink. (NEEDS REVIEW, 2ND CLAUSE)
+void 		App_initialise(App * const this); ///< \memberof App Initialises the App (and its attached Views and Ctrls, recursively) using \link initialise \endlink.
 void 		App_update(App * const this); ///< \memberof App Updates the App using \link update \endlink.
 void 		App_suspend(App * const this); ///< \memberof App Has the App's View%s and Ctrl%s \link suspend \endlink operations due to a loss of rendering context.
 void 		App_resume(App * const this); ///< \memberof App Has the App's View%s and Ctrl%s \link resume \endlink operations due to regaining rendering context.
 void 		App_start(App * const this); ///< \memberof App Starts the App using \link start \endlink.
 void 		App_stop(App * const this); ///< \memberof App Stops the App using \link stop \endlink.
-void 		App_dispose(App * const this); ///< \memberof App Disposes of the App and its Views and Ctrls, optionally using \link dispose \endlink. (NEEDS REVIEW, 2ND CLAUSE)
+void 		App_setCtrl(App * app, Ctrl * ctrl); ///< \memberof App Sets the root Ctrl for the App, and reciprocally sets \link Ctrl.app \endlink and \link Ctrl.hub \endlink.
+void 		App_setView(App * app, View * ciew); ///< \memberof App Sets the root View for the App, and reciprocally sets \link View.app \endlink and \link View.hub \endlink.
 //TODO... void App_addService(App * const this, const char * id, Service * service);
 //TODO... void App_removeService(App * const this, const char * id);
 
-void 		Hub_construct(Hub * const this, int appsCount); ///< \memberof Hub Constructs the Hub using \link construct \endlink. (NEEDS REVIEW, UNUSED?)
-void 		Hub_initialise(Hub * const this); ///< \memberof Hub Initialises context that affects all App s held by the Hub (e.g. OpenGL, OpenAL), using \link initialise \endlink.
-void 		Hub_dispose(Hub * const this); ///< \memberof Hub Disposes of context that affects all App s held by the Hub (e.g. OpenGL, OpenAL), using \link dispose \endlink.
+Hub * 		Hub_construct(); ///< \memberof Hub Constructs the Hub.
+void 		Hub_destruct(Hub * const this); ///< \memberof Hub Destructs the Hub after \link App_destruct \endlink ing its App%s (e.g. OpenGL, OpenAL), optionally using \link dispose \endlink.
+void 		Hub_initialise(Hub * const this); ///< \memberof Hub Initialises context that affects all App%s held by the Hub (e.g. OpenGL, OpenAL), using \link initialise \endlink.
 void 		Hub_update(Hub * const this); ///< \memberof Hub Updates all Apps within the Hub.
 void 		Hub_suspend(Hub * const this); ///< \memberof Hub Has all App%s \link suspend \endlink operations due to a loss of rendering context.
 void 		Hub_resume(Hub * const this); ///< \memberof Hub Has all App%s \link resume \endlink operations due to regaining rendering context.

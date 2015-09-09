@@ -107,14 +107,18 @@ Collaboration diagram for App:</div>
 <div class="dyncontent">
 <div class="center"><img src="struct_app__coll__graph.png" border="0" usemap="#_app_coll__map" alt="Collaboration graph"/></div>
 <map name="_app_coll__map" id="_app_coll__map">
-<area shape="rect" id="node2" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. " alt="" coords="133,187,179,213"/>
-<area shape="rect" id="node3" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. " alt="" coords="5,7,56,33"/>
-<area shape="rect" id="node4" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. " alt="" coords="177,7,220,33"/>
+<area shape="rect" id="node2" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. " alt="" coords="5,201,51,228"/>
+<area shape="rect" id="node4" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. " alt="" coords="77,291,120,317"/>
+<area shape="rect" id="node3" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. " alt="" coords="51,14,101,41"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:a7d64f2db93197e7b53f81883a1764e61"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_app.html">App</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#a7d64f2db93197e7b53f81883a1764e61">App_construct</a> (const char *<a class="el" href="struct_app.html#a33230f9825bcd27e9fad19a4182c3c3d">id</a>)</td></tr>
+<tr class="separator:a7d64f2db93197e7b53f81883a1764e61"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b2e8607525b433b717f083316dc83e8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#a4b2e8607525b433b717f083316dc83e8">App_destruct</a> (<a class="el" href="struct_app.html">App</a> *const this)</td></tr>
+<tr class="separator:a4b2e8607525b433b717f083316dc83e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3aa2dee87d568d9ff409244bb158061c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#a3aa2dee87d568d9ff409244bb158061c">App_initialise</a> (<a class="el" href="struct_app.html">App</a> *const this)</td></tr>
 <tr class="separator:a3aa2dee87d568d9ff409244bb158061c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a63512392b291279280fe9f5e4b62a871"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#a63512392b291279280fe9f5e4b62a871">App_update</a> (<a class="el" href="struct_app.html">App</a> *const this)</td></tr>
@@ -127,8 +131,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aa45dc4bd81e6ac74778bb1fc591b2de5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af12a5f973f86bfdde9746470217982d9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#af12a5f973f86bfdde9746470217982d9">App_stop</a> (<a class="el" href="struct_app.html">App</a> *const this)</td></tr>
 <tr class="separator:af12a5f973f86bfdde9746470217982d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a941b058d3a7e415e9eca4ac7dc8a825e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#a941b058d3a7e415e9eca4ac7dc8a825e">App_dispose</a> (<a class="el" href="struct_app.html">App</a> *const this)</td></tr>
-<tr class="separator:a941b058d3a7e415e9eca4ac7dc8a825e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74c4673945403422e2aa4fb940b9cd7f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#a74c4673945403422e2aa4fb940b9cd7f">App_setCtrl</a> (<a class="el" href="struct_app.html">App</a> *app, <a class="el" href="struct_ctrl.html">Ctrl</a> *<a class="el" href="struct_app.html#ac9152e04baee7d793b917643d6738589">ctrl</a>)</td></tr>
+<tr class="separator:a74c4673945403422e2aa4fb940b9cd7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18b2e2349745439477f94423cbe93036"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#a18b2e2349745439477f94423cbe93036">App_setView</a> (<a class="el" href="struct_app.html">App</a> *app, <a class="el" href="struct_ctrl.html">Ctrl</a> *<a class="el" href="struct_app.html#ac9152e04baee7d793b917643d6738589">ctrl</a>)</td></tr>
+<tr class="separator:a18b2e2349745439477f94423cbe93036"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -136,6 +142,7 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a33230f9825bcd27e9fad19a4182c3c3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">ID by which an <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> may be retrieved from its <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> (TODO); irrelevant except where updating multiple apps through the same <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a>. (NEEDS REVIEW, apps go into indexed slots)  <a href="#a33230f9825bcd27e9fad19a4182c3c3d">More...</a><br /></td></tr>
 <tr class="separator:a33230f9825bcd27e9fad19a4182c3c3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a99380fa222bde921aeb805420f0c1a94"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="struct_hub.html">Hub</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#a99380fa222bde921aeb805420f0c1a94">hub</a></td></tr>
+<tr class="memdesc:a99380fa222bde921aeb805420f0c1a94"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> which owns and manages this <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>.  <a href="#a99380fa222bde921aeb805420f0c1a94">More...</a><br /></td></tr>
 <tr class="separator:a99380fa222bde921aeb805420f0c1a94"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5785e3a367ea6f28371942c0cb4cc1b8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_app.html#a5785e3a367ea6f28371942c0cb4cc1b8">updating</a></td></tr>
 <tr class="memdesc:a5785e3a367ea6f28371942c0cb4cc1b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Should this have <a class="el" href="struct_app.html#a63512392b291279280fe9f5e4b62a871">App_update()</a> called on it every frame?  <a href="#a5785e3a367ea6f28371942c0cb4cc1b8">More...</a><br /></td></tr>
@@ -163,12 +170,29 @@ Public Attributes</h2></td></tr>
 <div class="textblock"><p>An application that consists of model, <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a>s and <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>s; resides within a global application <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a>. </p>
 <p>Often, only a single <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> will be required within the (singleton)<a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a>. If an <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> is to be run less frequently than specified by the rate dictated by its <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a>, this can be handled in App_update by only updating full update logic when some accumulator reaches a certain amount of elapsed time or frames. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a941b058d3a7e415e9eca4ac7dc8a825e"></a>
+<a class="anchor" id="a7d64f2db93197e7b53f81883a1764e61"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void App_dispose </td>
+          <td class="memname"><a class="el" href="struct_app.html">App</a> * App_construct </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Constructs the <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> and sets all callbacks to do nothing. </p>
+
+</div>
+</div>
+<a class="anchor" id="a4b2e8607525b433b717f083316dc83e8"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void App_destruct </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="struct_app.html">App</a> *const&#160;</td>
           <td class="paramname"><em>this</em></td><td>)</td>
@@ -176,14 +200,14 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Disposes of the <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> and its Views and Ctrls, optionally using <a class="el" href="struct_app.html#a7cb4cfb86c7ccfa589c7a054ed421e95">dispose</a>. (NEEDS REVIEW, 2ND CLAUSE) </p>
+<p>Destructs the <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> after disposing/destructing its Views and Ctrls, optionally using <a class="el" href="struct_app.html#a7cb4cfb86c7ccfa589c7a054ed421e95">dispose</a>. (NEEDS REVIEW, 2ND CLAUSE) </p>
 
 <p><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="struct_app_a941b058d3a7e415e9eca4ac7dc8a825e_icgraph.png" border="0" usemap="#struct_app_a941b058d3a7e415e9eca4ac7dc8a825e_icgraph" alt=""/></div>
-<map name="struct_app_a941b058d3a7e415e9eca4ac7dc8a825e_icgraph" id="struct_app_a941b058d3a7e415e9eca4ac7dc8a825e_icgraph">
-<area shape="rect" id="node2" href="arc_8c.html#af7523a2dd8f519fac400b767cfe81a67" title="Hub_dispose" alt="" coords="181,5,279,32"/>
+<div class="center"><img src="struct_app_a4b2e8607525b433b717f083316dc83e8_icgraph.png" border="0" usemap="#struct_app_a4b2e8607525b433b717f083316dc83e8_icgraph" alt=""/></div>
+<map name="struct_app_a4b2e8607525b433b717f083316dc83e8_icgraph" id="struct_app_a4b2e8607525b433b717f083316dc83e8_icgraph">
+<area shape="rect" id="node2" href="arc_8c.html#a3e0cee7316123d93d037f867514d775f" title="Hub_destruct" alt="" coords="184,5,283,32"/>
 </map>
 </div>
 </p>
@@ -203,7 +227,7 @@ Here is the caller graph for this function:</div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Initialises the <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> using <a class="el" href="struct_app.html#aafbb60a6a0d536e315a94813a8c6d3fb">initialise</a>. </p>
+<p>Initialises the <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> (and its attached Views and Ctrls, recursively) using <a class="el" href="struct_app.html#aafbb60a6a0d536e315a94813a8c6d3fb">initialise</a>. </p>
 
 </div>
 </div>
@@ -231,6 +255,60 @@ Here is the caller graph for this function:</div>
 </map>
 </div>
 </p>
+
+</div>
+</div>
+<a class="anchor" id="a74c4673945403422e2aa4fb940b9cd7f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void App_setCtrl </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_app.html">App</a> *&#160;</td>
+          <td class="paramname"><em>app</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_ctrl.html">Ctrl</a> *&#160;</td>
+          <td class="paramname"><em>ctrl</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Sets the root <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> for the <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>, and reciprocally sets <a class="el" href="struct_ctrl.html#a2c5c2618488a31a2452b5b3e47406fcc">Ctrl.app</a> and <a class="el" href="struct_ctrl.html#ae5445e0e8b2564b7469a5aef7969d8b7">Ctrl.hub</a>. </p>
+
+</div>
+</div>
+<a class="anchor" id="a18b2e2349745439477f94423cbe93036"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void App_setView </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_app.html">App</a> *&#160;</td>
+          <td class="paramname"><em>app</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_ctrl.html">Ctrl</a> *&#160;</td>
+          <td class="paramname"><em>ctrl</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Sets the root <a class="el" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. ">View</a> for the <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>, and reciprocally sets <a class="el" href="">View.app</a> and <a class="el" href="">View.hub</a>. </p>
 
 </div>
 </div>
@@ -360,6 +438,8 @@ Here is the caller graph for this function:</div>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>The <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> which owns and manages this <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>. </p>
 
 </div>
 </div>

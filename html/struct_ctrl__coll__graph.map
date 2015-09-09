@@ -1,0 +1,5 @@
+<map id="Ctrl" name="Ctrl">
+<area shape="rect" id="node3" href="$struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub..." alt="" coords="61,112,107,139"/>
+<area shape="rect" id="node2" href="$struct_hub.html" title="A central point from which all Apps may be managed / updated. " alt="" coords="5,201,51,228"/>
+<area shape="rect" id="node4" href="$struct_view.html" title="A View with specific output (and possibly input) functionality in an App. " alt="" coords="112,14,163,41"/>
+</map>

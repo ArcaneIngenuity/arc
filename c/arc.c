@@ -36,26 +36,48 @@ void Hub_update(Hub * const this)
 	#endif
 }
 
-void Hub_dispose(Hub * const this)
+Hub * Hub_construct()
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] Hub_dispose..."); 
+	LOGI("[ARC] Hub_construct...\n");
+	#endif
+	
+	//TODO ifdef GCC, link destruct() via attr cleanup 
+	//#ifdef __GNUC__
+	//App * app __attribute__((cleanup (App_destruct))) = malloc(sizeof(App));
+	//#else //no auto destructor!
+	Hub * hub = calloc(1, sizeof(App));
+	//#endif//__GNUC__
+	hub->initialise = (void * const)&doNothing;
+	hub->dispose 	= (void * const)&doNothing;
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Hub_construct\n");
+	#endif
+	
+	return hub;
+}
+
+void Hub_destruct(Hub * const this)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] Hub_destruct...\n"); 
 	#endif// ARC_DEBUG_ONEOFFS
 	
 	for (int i = 0; i < this->appsCount; i++)
 	{
 		App * app = this->apps[i];
 		if (app)
-			App_dispose(app);
+			App_destruct(app);
 	}
 	
 	this->dispose((void *)this);
 	
 	//this->initialised = false;
-	//free(this); //hub object is not a pointer!
+	free(this); //hub object is not a pointer!
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Hub_dispose"); 
+	LOGI("[ARC] ...Hub_destruct\n"); 
 	#endif// ARC_DEBUG_ONEOFFS
 }
 
@@ -415,18 +437,18 @@ void App_stop(App * const this)
 	#endif
 }
 
-void App_dispose(App * const this)
+void App_destruct(App * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
 	const char * id = this->id;
-	LOGI("[ARC] App_dispose... (id=%s)\n", id);
+	LOGI("[ARC] App_destruct... (id=%s)\n", id);
 	#endif//ARC_DEBUG_ONEOFFS
 	
 	Ctrl * ctrl = this->ctrl;
 	View * view = this->view;
 
-	Ctrl_dispose(ctrl);
-	View_dispose(view);
+	Ctrl_destruct(ctrl);
+	View_destruct(view);
 	
 	//this->services.dispose();
 	
@@ -435,7 +457,7 @@ void App_dispose(App * const this)
 	free(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...App_dispose (id=%s)\n", id);
+	LOGI("[ARC] ...App_destruct (id=%s)\n", id);
 	#endif//ARC_DEBUG_ONEOFFS
 }
 
@@ -469,6 +491,20 @@ void App_resume(App * const this)
 	#endif//ARC_DEBUG_ONEOFFS
 }
 
+void App_setCtrl(App * app, Ctrl * ctrl)
+{
+	app->ctrl = ctrl;
+	ctrl->app = app;
+	ctrl->hub = app->hub;
+}
+
+void App_setView(App * app, View * view)
+{
+	app->view = view;
+	view->app = app;
+	view->hub = app->hub;
+}
+
 //--------- Ctrl ---------//
 Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
 {
@@ -482,6 +518,7 @@ Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
 	Ctrl * ctrl = calloc(1, sizeofSubclass);
 	ctrl->id = id;
 	Ctrl_setDefaultCallbacks(ctrl);
+	
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Ctrl_construct(id=%s)\n", id);
@@ -603,11 +640,11 @@ void Ctrl_updatePost(Ctrl * const this)
 	#endif
 }
 
-void Ctrl_dispose(Ctrl * const this)
+void Ctrl_destruct(Ctrl * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
 	const char * id = this->id;
-	LOGI("[ARC] Ctrl_dispose... (id=%s)\n", id);
+	LOGI("[ARC] Ctrl_destruct... (id=%s)\n", id);
 	#endif
 	
 	this->dispose(this);
@@ -615,7 +652,7 @@ void Ctrl_dispose(Ctrl * const this)
 	free(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_dispose (id=%s)\n", id);
+	LOGI("[ARC] ...Ctrl_destruct (id=%s)\n", id);
 	#endif
 }
 
@@ -769,24 +806,24 @@ void View_update(View * const this)
 	#endif
 }
 
-void View_dispose(View * const this)
+void View_destruct(View * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
 	const char * id = this->id;
-	LOGI("[ARC] View_dispose... (id=%s)\n", id);
+	LOGI("[ARC] View_destruct... (id=%s)\n", id);
 	#endif
 	
 	for (int i = 0; i < this->childrenCount; i++)
 	{
 		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
-		View_dispose(child);
+		View_destruct(child);
 	}
 	this->dispose(this);
 	this->initialised = false;
 	free(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_dispose (id=%s)\n", id);
+	LOGI("[ARC] ...View_destruct (id=%s)\n", id);
 	#endif
 }
 
@@ -873,10 +910,10 @@ bool View_isRoot(View * const this)
 	return this->parent == NULL;
 }
 
-void View_onParentResizeRecurse(View * const this)
+void View_onParentResize(View * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] View_onParentResizeRecurse... (id=%s)\n", this->id);
+	LOGI("[ARC] View_onParentResize... (id=%s)\n", this->id);
 	#endif
 	
 	this->onParentResize(this);
@@ -887,11 +924,11 @@ void View_onParentResizeRecurse(View * const this)
 		
 		//depth first - update child and then recurse to its children
 		
-		View_onParentResizeRecurse(child);
+		View_onParentResize(child);
 	}
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_onParentResizeRecurse (id=%s)\n", this->id);
+	LOGI("[ARC] ...View_onParentResize (id=%s)\n", this->id);
 	#endif
 }
 
