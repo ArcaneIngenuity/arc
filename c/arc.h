@@ -20,15 +20,6 @@ Source is available [here](https://github.com/ArcaneIngenuity/arc "arc").
 #define APPS_MAX 4
 #define DEVICES_MAX 16
 
-//declarations, since some of these struct types have circular refs back up to the struct types that hold refs to them.
-/*
-struct Hub;
-struct App;
-struct Ctrl;
-struct View;
-//struct Service;
-*/
-
 /// A View with specific output (and possibly input) functionality in an App.
 
 /// For every discrete View needed, allocate it and set the appropriate callbacks.<br>
@@ -68,7 +59,6 @@ typedef struct View
 	//void (*enable)(struct View * const this); //start
 	//void (*disable)(struct View * const this); //stop
 } View;
-const struct View viewEmpty; ///< Used to set instance to empty / zero all its members, as a convenience to be used instead of memset(.., 0, ..).
 
 /// Handles specific game / business / simulation logic within an App.
 
@@ -97,7 +87,6 @@ typedef struct Ctrl
 	void (*update)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl update()s, i.e. update this Ctrl before any of its App's View%s update.
 	void (*updatePost)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl updatePost()s, i.e. update this Ctrl after any of its App's View%s update.
 } Ctrl;
-const struct Ctrl ctrlEmpty; ///< Used to set instance to empty / zero all its members, as a convenience to be used instead of memset(.., 0, ..).
 
 /// An application that consists of model, View%s and Ctrl%s; resides within a global application Hub.
 
@@ -119,7 +108,6 @@ typedef struct App
 	void (*initialise)(struct App * const this); ///< \brief User-supplied callback for when this App initialise()s.
 	void (*dispose)(struct App * const this); ///< \brief User-supplied callback for when this App dispose()s of its resources.
 } App;
-const struct App appEmpty; ///< Used to set instance to empty / zero all its members, as a convenience to be used instead of memset(.., 0, ..).
 
 /// Acts as a hybrid View / Ctrl or proxy between View and Ctrl aspects of an App, or as an interface to external mechanisms / event loops.
 
@@ -130,8 +118,7 @@ typedef struct Service
 {
 	struct App * app;
 	void * models;
-} Service; 
-const struct Service serviceEmpty; ///< Used to set instance to empty / zero all its members, as a convenience to be used instead of memset(.., 0, ..).
+} Service;
 
 /// A central point from which all App%s may be managed / updated.
 
@@ -155,7 +142,6 @@ typedef struct Hub
 	void * external; ///< User-defined reference to global state; useful if avoiding global variables.
 
 } Hub;
-const struct Hub hubEmpty; ///< Used to set instance to empty / zero all its members, as a convenience to be used instead of memset(.., 0, ..).
 
 //FINAL/BASE METHODS
 
@@ -212,6 +198,4 @@ App * const Hub_getApp(Hub * const this, const char * const id); ///< \memberof 
 
 void doNothing(void * const this); ///< A null-pattern callback which is the default when no user-defined callback has yet been supplied (prevents null pointer crashes).
 
-//globals
-//Hub hub; //allows every other file to ref as extern, and no requirement to include main from renderer etc.
 #endif //ARC_H

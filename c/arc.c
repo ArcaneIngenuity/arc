@@ -1,7 +1,7 @@
 #include "arc.h"
 
 #define ARC_DEBUG_ONEOFFS 1
-#define ARC_DEBUG_UPDATES 1
+//#define ARC_DEBUG_UPDATES 1
 
 //--------- Hub ---------//
 
@@ -180,7 +180,6 @@ App * App_construct(const char * id)//App ** app)
 	//#else //no auto destructor!
 	App * app = calloc(1, sizeof(App));
 	//#endif//__GNUC__
-	*app = appEmpty;
 	app->id = id;
 	app->initialise = (void * const)&doNothing;
 	app->dispose 	= (void * const)&doNothing;
