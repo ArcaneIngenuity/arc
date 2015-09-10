@@ -1,7 +1,7 @@
 #include "arc.h"
 
 #define ARC_DEBUG_ONEOFFS 1
-//#define ARC_DEBUG_UPDATES 1
+#define ARC_DEBUG_UPDATES 1
 
 //--------- Hub ---------//
 
@@ -46,10 +46,10 @@ Hub * Hub_construct()
 	//#ifdef __GNUC__
 	//App * app __attribute__((cleanup (App_destruct))) = malloc(sizeof(App));
 	//#else //no auto destructor!
-	Hub * hub = calloc(1, sizeof(App));
+	Hub * hub = calloc(1, sizeof(Hub));
 	//#endif//__GNUC__
-	hub->initialise = (void * const)&doNothing;
-	hub->dispose 	= (void * const)&doNothing;
+	
+	Hub_setDefaultCallbacks(hub);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Hub_construct\n");
