@@ -12,8 +12,9 @@ Source is available [here](https://github.com/ArcaneIngenuity/arc "arc").
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
-#include "log/log.h"
+#include "../log/log.h"
 
 #define VIEW_CHILDREN_MAX 8
 #define SERVICES_MAX 16
@@ -31,7 +32,7 @@ Source is available [here](https://github.com/ArcaneIngenuity/arc "arc").
 typedef struct View
 {
 	//TODO fix this!
-	char * id; ///< (unimplemented) ID by which a View is retrieved from its App->viewsById.
+	const char * id; ///< (unimplemented) ID by which a View is retrieved from its App->viewsById.
 	struct Hub * hub; ///< \brief The Hub which owns and manages this View's owner App.
 	struct App * app; ///< \brief The App which owns and manages this View.
 	
@@ -68,7 +69,7 @@ typedef struct View
 /// A Ctrl operates on a model. In arc, models need no specific type; they can be anything (and are internally denoted as void *). Ctrl writes new model state by reading extant model state, inputs and View state.
 typedef struct Ctrl
 {
-	char * id; ///< ID used for Arc debugging mode.
+	const char * id; ///< ID used for Arc debugging mode.
 	struct Hub * hub; ///< \brief The Hub which owns and manages this Ctrl's owner App.
 	struct App * app; ///< \brief The App which owns and manages this Ctrl.
 	
@@ -80,8 +81,8 @@ typedef struct Ctrl
 	void (*mustStop)(struct Ctrl * const this); ///< \brief User-supplied callback for checking when this Ctrl mustStop().
 	void (*start)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl start()s.
 	void (*stop)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl stop()s.
-	void (*suspend)(struct View * const this); ///< \brief User-supplied callback for when this Ctrl must suspend() due to a loss of rendering context.
-	void (*resume)(struct View * const this); ///< \brief User-supplied callback for when this Ctrl must resume() due to regaining rendering context.
+	void (*suspend)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl must suspend() due to a loss of rendering context.
+	void (*resume)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl must resume() due to regaining rendering context.
 	void (*initialise)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl initialise()s.
 	void (*dispose)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl dispose()s of its resources.
 	void (*update)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl update()s, i.e. update this Ctrl before any of its App's View%s update.
@@ -94,7 +95,7 @@ typedef struct Ctrl
 /// If an App is to be run less frequently than specified by the rate dictated by its Hub, this can be handled in App_update by only updating full update logic when some accumulator reaches a certain amount of elapsed time or frames.
 typedef struct App
 {
-	char * id; ///< \brief ID by which an App may be retrieved from its Hub (TODO); irrelevant except where updating multiple apps through the same Hub. (NEEDS REVIEW, apps go into indexed slots)
+	const char * id; ///< \brief ID by which an App may be retrieved from its Hub (TODO); irrelevant except where updating multiple apps through the same Hub. (NEEDS REVIEW, apps go into indexed slots)
 	struct Hub * hub; ///< \brief The Hub which owns and manages this App.
 	//in spite of typedef, use struct due to circular ref App->Hub TODO remove this ref, and allow Apps to send messages up to DJ?
 	//struct Map services;
