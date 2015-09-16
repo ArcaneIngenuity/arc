@@ -38,7 +38,7 @@ Source is available [here](https://github.com/ArcaneIngenuity/arc "arc").
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
+#include "ezxml/ezxml.h"
 #include "../log/log.h"
 
 #define VIEW_CHILDREN_MAX 8
@@ -222,6 +222,8 @@ App * const Hub_getApp(Hub * const this, const char * const id); ///< \memberof 
 //TODO... void Hub_removeApp(Hub * const this, const char * id);
 //TODO... void Hub_addDevice(Hub * const this, const char * id, Device * const device);
 //TODO... void Hub_removeDevice(Hub * const this, const char * id);
+
+void 		Builder_buildFromConfig(Hub * const hub, const char * configFilename); ///< Build the Hub contents from a config file; path should be relative to executable.
 
 void doNothing(void * const this); ///< A null-pattern callback which is the default when no user-defined callback has yet been supplied (prevents null pointer crashes).
 
