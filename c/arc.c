@@ -24,7 +24,7 @@ void Hub_update(Hub * const this)
 	#endif
 	
 	//update apps
-	for (int i = 0; i < this->appsCount; i++)
+	for (int i = 0; i < this->appsCount; ++i)
 	{
 		App * app = this->apps[i]; //read from map of values
 		if (app->updating)
@@ -64,7 +64,7 @@ void Hub_destruct(Hub * const this)
 	LOGI("[ARC] Hub_destruct...\n"); 
 	#endif// ARC_DEBUG_ONEOFFS
 	
-	for (int i = 0; i < this->appsCount; i++)
+	for (int i = 0; i < this->appsCount; ++i)
 	{
 		App * app = this->apps[i];
 		if (app)
@@ -86,7 +86,7 @@ void Hub_suspend(Hub * const this)
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] Hub_suspend...");
 	#endif// ARC_DEBUG_ONEOFFS
-	for (int i = 0; i < this->appsCount; i++)
+	for (int i = 0; i < this->appsCount; ++i)
 	{
 		App * app = this->apps[i];
 		if (app)
@@ -105,7 +105,7 @@ void Hub_resume(Hub * const this)
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] Hub_resume...");
 	#endif// ARC_DEBUG_ONEOFFS
-	for (int i = 0; i < this->appsCount; i++)
+	for (int i = 0; i < this->appsCount; ++i)
 	{
 		App * app = this->apps[i];
 		if (app)
@@ -147,7 +147,7 @@ App * const Hub_getApp(Hub * const this, const char * const id)
 	LOGI("[ARC] Hub_getApp... (app id=%s)\n", id);
 	#endif
 	
-	for (int i = 0; i < this->appsCount; i++)
+	for (int i = 0; i < this->appsCount; ++i)
 	{
 		App * app = this->apps[i];
 		if (strcmp(id, app->id) == 0)
@@ -180,7 +180,7 @@ App * App_construct(const char * id)//App ** app)
 	//#else //no auto destructor!
 	App * app = calloc(1, sizeof(App));
 	//#endif//__GNUC__
-	app->id = id;
+	strcpy(app->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
 	app->initialise = (void * const)&doNothing;
 	app->dispose 	= (void * const)&doNothing;
 	
@@ -439,7 +439,7 @@ void App_stop(App * const this)
 void App_destruct(App * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	const char * id = this->id;
+	char id[64]; strcpy(id, this->id);
 	LOGI("[ARC] App_destruct... (id=%s)\n", id);
 	#endif//ARC_DEBUG_ONEOFFS
 	
@@ -510,12 +510,12 @@ Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] Ctrl_construct...(id=%s)\n", id);
 	#endif
-	
+	LOGI("sizeof ctrl=%u\n", sizeofSubclass);
 	//since we can't pass in a type,
 	//allocate full size of the "subclass" - this is fine as "base"
 	//struct is situated from zero in this allocated space
 	Ctrl * ctrl = calloc(1, sizeofSubclass);
-	ctrl->id = id;
+	strcpy(ctrl->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
 	Ctrl_setDefaultCallbacks(ctrl);
 	
 	
@@ -642,7 +642,7 @@ void Ctrl_updatePost(Ctrl * const this)
 void Ctrl_destruct(Ctrl * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	const char * id = this->id;
+	char id[64]; strcpy(id, this->id);
 	LOGI("[ARC] Ctrl_destruct... (id=%s)\n", id);
 	#endif
 	
@@ -685,7 +685,7 @@ View * View_construct(const char * id, size_t sizeofSubclass)
 	//allocate full size of the "subclass" - this is fine as "base"
 	//struct is situated from zero in this allocated space
 	View * view = calloc(1, sizeofSubclass);
-	view->id = id;
+	strcpy(view->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
 	View_setDefaultCallbacks(view);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -729,7 +729,7 @@ void View_suspend(View * const this)
 	LOGI("[ARC] View_suspend... (id=%s)\n", this->id);
 	#endif
 	
-	for (int i = 0; i < this->childrenCount; i++)
+	for (int i = 0; i < this->childrenCount; ++i)
 	{
 		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
 		View_suspend(child);
@@ -748,7 +748,7 @@ void View_resume(View * const this)
 	LOGI("[ARC] View_resume... (id=%s)\n", this->id);
 	#endif
 	
-	for (int i = 0; i < this->childrenCount; i++)
+	for (int i = 0; i < this->childrenCount; ++i)
 	{
 		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
 		View_resume(child);
@@ -772,7 +772,7 @@ void View_initialise(View * const this)
 	
 	this->initialised = true;
 
-	for (int i = 0; i < this->childrenCount; i++)
+	for (int i = 0; i < this->childrenCount; ++i)
 	{
 		View * child = (View *) this->childrenByZ[i];
 		View_initialise(child);//deltaSec //only works if enabled
@@ -791,7 +791,7 @@ void View_update(View * const this)
 	
 	this->update(this);//deltaSec
 
-	for (int i = 0; i < this->childrenCount; i++)
+	for (int i = 0; i < this->childrenCount; ++i)
 	{
 		View * child = (View *) this->childrenByZ[i];
 		if (child->updating)
@@ -808,11 +808,11 @@ void View_update(View * const this)
 void View_destruct(View * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	const char * id = this->id;
+	char id[64]; strcpy(id, this->id);
 	LOGI("[ARC] View_destruct... (id=%s)\n", id);
 	#endif
 	
-	for (int i = 0; i < this->childrenCount; i++)
+	for (int i = 0; i < this->childrenCount; ++i)
 	{
 		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
 		View_destruct(child);
@@ -832,7 +832,7 @@ View * View_getChild(View * const this, char * id)
 	LOGI("[ARC] View_getChild... (id=%s) (child id=%s)\n", this->id, id);
 	#endif
 	
-	for (int i = 0; i < this->childrenCount; i++)
+	for (int i = 0; i < this->childrenCount; ++i)
 	{
 		View * child = (View *) this->childrenByZ[i];
 		if (strcmp(id, child->id) == 0)
@@ -852,17 +852,31 @@ View * View_getChild(View * const this, char * id)
 	return NULL;
 }
 
+void View_claimAncestry(View * const this, View * const child)
+{
+	child->parent = this;
+	if (this->root)
+		child->root = this->root;
+	else
+		child->root = this;
+	child->app = this->app;
+	child->hub = this->hub;
+	
+	//recurse
+	for (int i = 0; i < child->childrenCount; ++i)
+	{
+		View * grandchild = (View *) child->childrenByZ[i];
+		View_claimAncestry(child, grandchild);
+	}
+}
+
 View * View_addChild(View * const this, View * const child)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] View_addChild... (id=%s) (child id=%s)\n", this->id, child->id);
 	#endif
 	
-	child->parent = this;
-	if (this->root)
-		child->root = this->root;
-	else
-		child->root = this;
+	View_claimAncestry(this, child);
 
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...View_addChild (id=%s) (child id=%s)\n", this->id, child->id);
@@ -917,7 +931,7 @@ void View_onParentResize(View * const this)
 	
 	this->onParentResize(this);
 	
-	for (int i = 0; i < this->childrenCount; i++)
+	for (int i = 0; i < this->childrenCount; ++i)
 	{
 		View * child = (View *) this->childrenByZ[i];
 		
