@@ -102,7 +102,7 @@ Include dependency graph for arc.c:</div>
 <div class="dyncontent">
 <div class="center"><img src="arc_8c__incl.png" border="0" usemap="#c_2arc_8c" alt=""/></div>
 <map name="c_2arc_8c" id="c_2arc_8c">
-<area shape="rect" id="node2" href="arc_8h.html" title="arc.h" alt="" coords="153,80,204,107"/>
+<area shape="rect" id="node2" href="arc_8h.html" title="arc.h" alt="" coords="233,80,284,107"/>
 </map>
 </div>
 </div><table class="memberdecls">
@@ -189,12 +189,14 @@ Functions</h2></td></tr>
 <tr class="separator:a50b6261f66003768bd82066bf2304ecd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a35bce19f98caed40f4fdc2af6027a222"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_view.html">View</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="arc_8c.html#a35bce19f98caed40f4fdc2af6027a222">View_getChild</a> (<a class="el" href="struct_view.html">View</a> *const this, char *id)</td></tr>
 <tr class="separator:a35bce19f98caed40f4fdc2af6027a222"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3f425bbc9ddc51d5511530735a85720"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="arc_8c.html#ae3f425bbc9ddc51d5511530735a85720">View_claimAncestry</a> (<a class="el" href="struct_view.html">View</a> *const this, <a class="el" href="struct_view.html">View</a> *const child)</td></tr>
+<tr class="separator:ae3f425bbc9ddc51d5511530735a85720"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a63746b8be6e9e58e2c403dba7db18a37"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_view.html">View</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="arc_8c.html#a63746b8be6e9e58e2c403dba7db18a37">View_addChild</a> (<a class="el" href="struct_view.html">View</a> *const this, <a class="el" href="struct_view.html">View</a> *const child)</td></tr>
 <tr class="separator:a63746b8be6e9e58e2c403dba7db18a37"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a90c9498e382410aed3de9b4d29a89837"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="arc_8c.html#a90c9498e382410aed3de9b4d29a89837">View_isRoot</a> (<a class="el" href="struct_view.html">View</a> *const this)</td></tr>
 <tr class="separator:a90c9498e382410aed3de9b4d29a89837"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af524fb7519cdb2b72cbb7e1c5abfdbb4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="arc_8c.html#af524fb7519cdb2b72cbb7e1c5abfdbb4">View_onParentResizeRecurse</a> (<a class="el" href="struct_view.html">View</a> *const this)</td></tr>
-<tr class="separator:af524fb7519cdb2b72cbb7e1c5abfdbb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7af3000ae678837aef24826725301de1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="arc_8c.html#a7af3000ae678837aef24826725301de1">View_onParentResize</a> (<a class="el" href="struct_view.html">View</a> *const this)</td></tr>
+<tr class="separator:a7af3000ae678837aef24826725301de1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70fd043a7af77f79290b0853d23991eb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="arc_8c.html#a70fd043a7af77f79290b0853d23991eb">doNothing</a> (void *const this)</td></tr>
 <tr class="memdesc:a70fd043a7af77f79290b0853d23991eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">A null-pattern callback which is the default when no user-defined callback has yet been supplied (prevents null pointer crashes).  <a href="#a70fd043a7af77f79290b0853d23991eb">More...</a><br /></td></tr>
 <tr class="separator:a70fd043a7af77f79290b0853d23991eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -680,10 +682,10 @@ Here is the caller graph for this function:</div>
 <div class="center"><img src="arc_8c_a70fd043a7af77f79290b0853d23991eb_icgraph.png" border="0" usemap="#arc_8c_a70fd043a7af77f79290b0853d23991eb_icgraph" alt=""/></div>
 <map name="arc_8c_a70fd043a7af77f79290b0853d23991eb_icgraph" id="arc_8c_a70fd043a7af77f79290b0853d23991eb_icgraph">
 <area shape="rect" id="node2" href="arc_8c.html#ae77a6a04e6c47627b958cc275247a713" title="Hub_setDefaultCallbacks" alt="" coords="136,5,303,32"/>
-<area shape="rect" id="node3" href="arc_8c.html#af8dd37acd79e76daef01deb5622da348" title="Hub_construct" alt="" coords="166,56,273,83"/>
-<area shape="rect" id="node4" href="arc_8c.html#a5d0a1605e5367822a151869bf99a2c28" title="App_construct" alt="" coords="166,107,273,133"/>
-<area shape="rect" id="node5" href="arc_8c.html#ac18a3d45b28b3e133e0cfc00f1e4886b" title="Ctrl_setDefaultCallbacks" alt="" coords="137,157,301,184"/>
-<area shape="rect" id="node6" href="arc_8c.html#a1d3c721c3f2a38f3941a86c8771ea6cb" title="View_setDefaultCallbacks" alt="" coords="133,208,305,235"/>
+<area shape="rect" id="node4" href="arc_8c.html#a5d0a1605e5367822a151869bf99a2c28" title="App_construct" alt="" coords="166,56,273,83"/>
+<area shape="rect" id="node5" href="arc_8c.html#ac18a3d45b28b3e133e0cfc00f1e4886b" title="Ctrl_setDefaultCallbacks" alt="" coords="137,107,301,133"/>
+<area shape="rect" id="node6" href="arc_8c.html#a1d3c721c3f2a38f3941a86c8771ea6cb" title="View_setDefaultCallbacks" alt="" coords="133,157,305,184"/>
+<area shape="rect" id="node3" href="arc_8c.html#af8dd37acd79e76daef01deb5622da348" title="Hub_construct" alt="" coords="353,5,460,32"/>
 </map>
 </div>
 </p>
@@ -734,7 +736,8 @@ Here is the call graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="arc_8c_af8dd37acd79e76daef01deb5622da348_cgraph.png" border="0" usemap="#arc_8c_af8dd37acd79e76daef01deb5622da348_cgraph" alt=""/></div>
 <map name="arc_8c_af8dd37acd79e76daef01deb5622da348_cgraph" id="arc_8c_af8dd37acd79e76daef01deb5622da348_cgraph">
-<area shape="rect" id="node2" href="arc_8c.html#a70fd043a7af77f79290b0853d23991eb" title="A null&#45;pattern callback which is the default when no user&#45;defined callback has yet been supplied (pre..." alt="" coords="160,5,240,32"/>
+<area shape="rect" id="node2" href="arc_8c.html#ae77a6a04e6c47627b958cc275247a713" title="Hub_setDefaultCallbacks" alt="" coords="160,5,327,32"/>
+<area shape="rect" id="node3" href="arc_8c.html#a70fd043a7af77f79290b0853d23991eb" title="A null&#45;pattern callback which is the default when no user&#45;defined callback has yet been supplied (pre..." alt="" coords="375,5,455,32"/>
 </map>
 </div>
 </p>
@@ -843,6 +846,16 @@ Here is the call graph for this function:</div>
 </div>
 </p>
 
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="arc_8c_ae77a6a04e6c47627b958cc275247a713_icgraph.png" border="0" usemap="#arc_8c_ae77a6a04e6c47627b958cc275247a713_icgraph" alt=""/></div>
+<map name="arc_8c_ae77a6a04e6c47627b958cc275247a713_icgraph" id="arc_8c_ae77a6a04e6c47627b958cc275247a713_icgraph">
+<area shape="rect" id="node2" href="arc_8c.html#af8dd37acd79e76daef01deb5622da348" title="Hub_construct" alt="" coords="220,5,327,32"/>
+</map>
+</div>
+</p>
+
 </div>
 </div>
 <a class="anchor" id="a545db900048b3e0489884cfda68ebd98"></a>
@@ -920,6 +933,52 @@ Here is the call graph for this function:</div>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="arc_8c_a63746b8be6e9e58e2c403dba7db18a37_cgraph.png" border="0" usemap="#arc_8c_a63746b8be6e9e58e2c403dba7db18a37_cgraph" alt=""/></div>
+<map name="arc_8c_a63746b8be6e9e58e2c403dba7db18a37_cgraph" id="arc_8c_a63746b8be6e9e58e2c403dba7db18a37_cgraph">
+<area shape="rect" id="node2" href="arc_8c.html#ae3f425bbc9ddc51d5511530735a85720" title="View_claimAncestry" alt="" coords="160,5,300,32"/>
+</map>
+</div>
+</p>
+
+</div>
+</div>
+<a class="anchor" id="ae3f425bbc9ddc51d5511530735a85720"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void View_claimAncestry </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_view.html">View</a> *const&#160;</td>
+          <td class="paramname"><em>this</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_view.html">View</a> *const&#160;</td>
+          <td class="paramname"><em>child</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="arc_8c_ae3f425bbc9ddc51d5511530735a85720_icgraph.png" border="0" usemap="#arc_8c_ae3f425bbc9ddc51d5511530735a85720_icgraph" alt=""/></div>
+<map name="arc_8c_ae3f425bbc9ddc51d5511530735a85720_icgraph" id="arc_8c_ae3f425bbc9ddc51d5511530735a85720_icgraph">
+<area shape="rect" id="node2" href="arc_8c.html#a63746b8be6e9e58e2c403dba7db18a37" title="View_addChild" alt="" coords="193,5,300,32"/>
+</map>
+</div>
+</p>
 
 </div>
 </div>
@@ -1053,12 +1112,12 @@ Here is the call graph for this function:</div>
 
 </div>
 </div>
-<a class="anchor" id="af524fb7519cdb2b72cbb7e1c5abfdbb4"></a>
+<a class="anchor" id="a7af3000ae678837aef24826725301de1"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void View_onParentResizeRecurse </td>
+          <td class="memname">void View_onParentResize </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="struct_view.html">View</a> *const&#160;</td>
           <td class="paramname"><em>this</em></td><td>)</td>
@@ -1070,9 +1129,9 @@ Here is the call graph for this function:</div>
 <p><div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="arc_8c_af524fb7519cdb2b72cbb7e1c5abfdbb4_cgraph.png" border="0" usemap="#arc_8c_af524fb7519cdb2b72cbb7e1c5abfdbb4_cgraph" alt=""/></div>
-<map name="arc_8c_af524fb7519cdb2b72cbb7e1c5abfdbb4_cgraph" id="arc_8c_af524fb7519cdb2b72cbb7e1c5abfdbb4_cgraph">
-<area shape="rect" id="node2" href="struct_view.html#af524fb7519cdb2b72cbb7e1c5abfdbb4" title="View::View_onParentResize\lRecurse" alt="" coords="251,5,436,47"/>
+<div class="center"><img src="arc_8c_a7af3000ae678837aef24826725301de1_cgraph.png" border="0" usemap="#arc_8c_a7af3000ae678837aef24826725301de1_cgraph" alt=""/></div>
+<map name="arc_8c_a7af3000ae678837aef24826725301de1_cgraph" id="arc_8c_a7af3000ae678837aef24826725301de1_cgraph">
+<area shape="rect" id="node2" href="struct_view.html#a7af3000ae678837aef24826725301de1" title="View::View_onParentResize" alt="" coords="203,5,388,32"/>
 </map>
 </div>
 </p>

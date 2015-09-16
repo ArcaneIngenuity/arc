@@ -107,15 +107,15 @@ Collaboration diagram for Ctrl:</div>
 <div class="dyncontent">
 <div class="center"><img src="struct_ctrl__coll__graph.png" border="0" usemap="#_ctrl_coll__map" alt="Collaboration graph"/></div>
 <map name="_ctrl_coll__map" id="_ctrl_coll__map">
-<area shape="rect" id="node3" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub..." alt="" coords="61,112,107,139"/>
-<area shape="rect" id="node2" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. " alt="" coords="5,201,51,228"/>
-<area shape="rect" id="node4" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. " alt="" coords="112,14,163,41"/>
+<area shape="rect" id="node3" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub..." alt="" coords="52,95,97,121"/>
+<area shape="rect" id="node2" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. " alt="" coords="96,184,141,211"/>
+<area shape="rect" id="node4" href="struct_view.html" title="A View with specific output (and possibly input) functionality in an App. " alt="" coords="5,282,56,309"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:af5cf3e5bf980e5783084f6e77a603d62"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_ctrl.html">Ctrl</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#af5cf3e5bf980e5783084f6e77a603d62">Ctrl_construct</a> (const char *<a class="el" href="struct_ctrl.html#a9b0497953c253f848a66791cabe72481">id</a>, size_t sizeofSubclass)</td></tr>
+<tr class="memitem:af5cf3e5bf980e5783084f6e77a603d62"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_ctrl.html">Ctrl</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#af5cf3e5bf980e5783084f6e77a603d62">Ctrl_construct</a> (const char *<a class="el" href="struct_ctrl.html#aa1f94090a15cfc855d9aa7f420bb4da5">id</a>, size_t sizeofSubclass)</td></tr>
 <tr class="separator:af5cf3e5bf980e5783084f6e77a603d62"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a74a39aa4ba538408d4172c9e750db071"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#a74a39aa4ba538408d4172c9e750db071">Ctrl_destruct</a> (<a class="el" href="struct_ctrl.html">Ctrl</a> *const this)</td></tr>
 <tr class="separator:a74a39aa4ba538408d4172c9e750db071"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -134,11 +134,11 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a9b0497953c253f848a66791cabe72481"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#a9b0497953c253f848a66791cabe72481">id</a></td></tr>
-<tr class="memdesc:a9b0497953c253f848a66791cabe72481"><td class="mdescLeft">&#160;</td><td class="mdescRight">ID used for Arc debugging mode.  <a href="#a9b0497953c253f848a66791cabe72481">More...</a><br /></td></tr>
-<tr class="separator:a9b0497953c253f848a66791cabe72481"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1f94090a15cfc855d9aa7f420bb4da5"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#aa1f94090a15cfc855d9aa7f420bb4da5">id</a> [<a class="el" href="arc_8h.html#a3f463437a2ef7cf90291168c70cf982a">STRLEN_MAX</a>]</td></tr>
+<tr class="memdesc:aa1f94090a15cfc855d9aa7f420bb4da5"><td class="mdescLeft">&#160;</td><td class="mdescRight">ID used for Arc debugging mode.  <a href="#aa1f94090a15cfc855d9aa7f420bb4da5">More...</a><br /></td></tr>
+<tr class="separator:aa1f94090a15cfc855d9aa7f420bb4da5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae5445e0e8b2564b7469a5aef7969d8b7"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="struct_hub.html">Hub</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#ae5445e0e8b2564b7469a5aef7969d8b7">hub</a></td></tr>
-<tr class="memdesc:ae5445e0e8b2564b7469a5aef7969d8b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> which owns and manages this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>'s owning <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>.  <a href="#ae5445e0e8b2564b7469a5aef7969d8b7">More...</a><br /></td></tr>
+<tr class="memdesc:ae5445e0e8b2564b7469a5aef7969d8b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> which owns and manages this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>'s owner <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>.  <a href="#ae5445e0e8b2564b7469a5aef7969d8b7">More...</a><br /></td></tr>
 <tr class="separator:ae5445e0e8b2564b7469a5aef7969d8b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c5c2618488a31a2452b5b3e47406fcc"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="struct_app.html">App</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#a2c5c2618488a31a2452b5b3e47406fcc">app</a></td></tr>
 <tr class="memdesc:a2c5c2618488a31a2452b5b3e47406fcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">The <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a> which owns and manages this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>.  <a href="#a2c5c2618488a31a2452b5b3e47406fcc">More...</a><br /></td></tr>
@@ -164,12 +164,12 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:ad4d1065c8e7111842932f04b23ba4638"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#ad4d1065c8e7111842932f04b23ba4638">stop</a> )(struct <a class="el" href="struct_ctrl.html">Ctrl</a> *const this)</td></tr>
 <tr class="memdesc:ad4d1065c8e7111842932f04b23ba4638"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied callback for when this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> <a class="el" href="struct_ctrl.html#ad4d1065c8e7111842932f04b23ba4638" title="User-supplied callback for when this Ctrl stop()s. ">stop()</a>s.  <a href="#ad4d1065c8e7111842932f04b23ba4638">More...</a><br /></td></tr>
 <tr class="separator:ad4d1065c8e7111842932f04b23ba4638"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9d29a1b1e9118d5178e047bf632e4792"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#a9d29a1b1e9118d5178e047bf632e4792">suspend</a> )(struct <a class="el" href="struct_view.html">View</a> *const this)</td></tr>
-<tr class="memdesc:a9d29a1b1e9118d5178e047bf632e4792"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied callback for when this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> must <a class="el" href="struct_ctrl.html#a9d29a1b1e9118d5178e047bf632e4792" title="User-supplied callback for when this Ctrl must suspend() due to a loss of rendering context...">suspend()</a> due to a loss of rendering context.  <a href="#a9d29a1b1e9118d5178e047bf632e4792">More...</a><br /></td></tr>
-<tr class="separator:a9d29a1b1e9118d5178e047bf632e4792"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3864cd73ae81c97bd12f427c916f16aa"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#a3864cd73ae81c97bd12f427c916f16aa">resume</a> )(struct <a class="el" href="struct_view.html">View</a> *const this)</td></tr>
-<tr class="memdesc:a3864cd73ae81c97bd12f427c916f16aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied callback for when this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> must <a class="el" href="struct_ctrl.html#a3864cd73ae81c97bd12f427c916f16aa" title="User-supplied callback for when this Ctrl must resume() due to regaining rendering context...">resume()</a> due to regaining rendering context.  <a href="#a3864cd73ae81c97bd12f427c916f16aa">More...</a><br /></td></tr>
-<tr class="separator:a3864cd73ae81c97bd12f427c916f16aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a005d41b944df0d2f18eca480725091fa"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#a005d41b944df0d2f18eca480725091fa">suspend</a> )(struct <a class="el" href="struct_ctrl.html">Ctrl</a> *const this)</td></tr>
+<tr class="memdesc:a005d41b944df0d2f18eca480725091fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied callback for when this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> must <a class="el" href="struct_ctrl.html#a005d41b944df0d2f18eca480725091fa" title="User-supplied callback for when this Ctrl must suspend() due to a loss of rendering context...">suspend()</a> due to a loss of rendering context.  <a href="#a005d41b944df0d2f18eca480725091fa">More...</a><br /></td></tr>
+<tr class="separator:a005d41b944df0d2f18eca480725091fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59c0a39fc18ca06ff0baefcb61990014"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#a59c0a39fc18ca06ff0baefcb61990014">resume</a> )(struct <a class="el" href="struct_ctrl.html">Ctrl</a> *const this)</td></tr>
+<tr class="memdesc:a59c0a39fc18ca06ff0baefcb61990014"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied callback for when this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> must <a class="el" href="struct_ctrl.html#a59c0a39fc18ca06ff0baefcb61990014" title="User-supplied callback for when this Ctrl must resume() due to regaining rendering context...">resume()</a> due to regaining rendering context.  <a href="#a59c0a39fc18ca06ff0baefcb61990014">More...</a><br /></td></tr>
+<tr class="separator:a59c0a39fc18ca06ff0baefcb61990014"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8c96ac1c7be3314c85eb9b4b36774f0c"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_ctrl.html#a8c96ac1c7be3314c85eb9b4b36774f0c">initialise</a> )(struct <a class="el" href="struct_ctrl.html">Ctrl</a> *const this)</td></tr>
 <tr class="memdesc:a8c96ac1c7be3314c85eb9b4b36774f0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">User-supplied callback for when this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> <a class="el" href="struct_ctrl.html#a8c96ac1c7be3314c85eb9b4b36774f0c" title="User-supplied callback for when this Ctrl initialise()s. ">initialise()</a>s.  <a href="#a8c96ac1c7be3314c85eb9b4b36774f0c">More...</a><br /></td></tr>
 <tr class="separator:a8c96ac1c7be3314c85eb9b4b36774f0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -435,16 +435,16 @@ Here is the caller graph for this function:</div>
       </table>
 </div><div class="memdoc">
 
-<p>The <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> which owns and manages this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>'s owning <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>. </p>
+<p>The <a class="el" href="struct_hub.html" title="A central point from which all Apps may be managed / updated. ">Hub</a> which owns and manages this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a>'s owner <a class="el" href="struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub...">App</a>. </p>
 
 </div>
 </div>
-<a class="anchor" id="a9b0497953c253f848a66791cabe72481"></a>
+<a class="anchor" id="aa1f94090a15cfc855d9aa7f420bb4da5"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">char* Ctrl::id</td>
+          <td class="memname">char Ctrl::id[<a class="el" href="arc_8h.html#a3f463437a2ef7cf90291168c70cf982a">STRLEN_MAX</a>]</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -523,17 +523,17 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
-<a class="anchor" id="a3864cd73ae81c97bd12f427c916f16aa"></a>
+<a class="anchor" id="a59c0a39fc18ca06ff0baefcb61990014"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void(* Ctrl::resume) (struct <a class="el" href="struct_view.html">View</a> *const this)</td>
+          <td class="memname">void(* Ctrl::resume) (struct <a class="el" href="struct_ctrl.html">Ctrl</a> *const this)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>User-supplied callback for when this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> must <a class="el" href="struct_ctrl.html#a3864cd73ae81c97bd12f427c916f16aa" title="User-supplied callback for when this Ctrl must resume() due to regaining rendering context...">resume()</a> due to regaining rendering context. </p>
+<p>User-supplied callback for when this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> must <a class="el" href="struct_ctrl.html#a59c0a39fc18ca06ff0baefcb61990014" title="User-supplied callback for when this Ctrl must resume() due to regaining rendering context...">resume()</a> due to regaining rendering context. </p>
 
 </div>
 </div>
@@ -565,17 +565,17 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
-<a class="anchor" id="a9d29a1b1e9118d5178e047bf632e4792"></a>
+<a class="anchor" id="a005d41b944df0d2f18eca480725091fa"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void(* Ctrl::suspend) (struct <a class="el" href="struct_view.html">View</a> *const this)</td>
+          <td class="memname">void(* Ctrl::suspend) (struct <a class="el" href="struct_ctrl.html">Ctrl</a> *const this)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>User-supplied callback for when this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> must <a class="el" href="struct_ctrl.html#a9d29a1b1e9118d5178e047bf632e4792" title="User-supplied callback for when this Ctrl must suspend() due to a loss of rendering context...">suspend()</a> due to a loss of rendering context. </p>
+<p>User-supplied callback for when this <a class="el" href="struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. ">Ctrl</a> must <a class="el" href="struct_ctrl.html#a005d41b944df0d2f18eca480725091fa" title="User-supplied callback for when this Ctrl must suspend() due to a loss of rendering context...">suspend()</a> due to a loss of rendering context. </p>
 
 </div>
 </div>

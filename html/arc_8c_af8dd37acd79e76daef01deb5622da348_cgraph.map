@@ -1,3 +1,4 @@
 <map id="Hub_construct" name="Hub_construct">
-<area shape="rect" id="node2" href="$arc_8c.html#a70fd043a7af77f79290b0853d23991eb" title="A null&#45;pattern callback which is the default when no user&#45;defined callback has yet been supplied (pre..." alt="" coords="160,5,240,32"/>
+<area shape="rect" id="node2" href="$arc_8c.html#ae77a6a04e6c47627b958cc275247a713" title="Hub_setDefaultCallbacks" alt="" coords="160,5,327,32"/>
+<area shape="rect" id="node3" href="$arc_8c.html#a70fd043a7af77f79290b0853d23991eb" title="A null&#45;pattern callback which is the default when no user&#45;defined callback has yet been supplied (pre..." alt="" coords="375,5,455,32"/>
 </map>

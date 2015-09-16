@@ -1,7 +1,7 @@
 <map id="doNothing" name="doNothing">
 <area shape="rect" id="node2" href="$arc_8c.html#ae77a6a04e6c47627b958cc275247a713" title="Hub_setDefaultCallbacks" alt="" coords="136,5,303,32"/>
-<area shape="rect" id="node3" href="$arc_8c.html#af8dd37acd79e76daef01deb5622da348" title="Hub_construct" alt="" coords="166,56,273,83"/>
-<area shape="rect" id="node4" href="$arc_8c.html#a5d0a1605e5367822a151869bf99a2c28" title="App_construct" alt="" coords="166,107,273,133"/>
-<area shape="rect" id="node5" href="$arc_8c.html#ac18a3d45b28b3e133e0cfc00f1e4886b" title="Ctrl_setDefaultCallbacks" alt="" coords="137,157,301,184"/>
-<area shape="rect" id="node6" href="$arc_8c.html#a1d3c721c3f2a38f3941a86c8771ea6cb" title="View_setDefaultCallbacks" alt="" coords="133,208,305,235"/>
+<area shape="rect" id="node4" href="$arc_8c.html#a5d0a1605e5367822a151869bf99a2c28" title="App_construct" alt="" coords="166,56,273,83"/>
+<area shape="rect" id="node5" href="$arc_8c.html#ac18a3d45b28b3e133e0cfc00f1e4886b" title="Ctrl_setDefaultCallbacks" alt="" coords="137,107,301,133"/>
+<area shape="rect" id="node6" href="$arc_8c.html#a1d3c721c3f2a38f3941a86c8771ea6cb" title="View_setDefaultCallbacks" alt="" coords="133,157,305,184"/>
+<area shape="rect" id="node3" href="$arc_8c.html#af8dd37acd79e76daef01deb5622da348" title="Hub_construct" alt="" coords="353,5,460,32"/>
 </map>
