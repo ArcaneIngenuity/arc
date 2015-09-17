@@ -1,0 +1,1 @@
+arctyper.exe ../../../cfg/arc.config ../../arctypes
