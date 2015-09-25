@@ -1,3 +1,6 @@
 [submodule "log"]
 	path = log
 	url = https://github.com/ArcaneIngenuity/log.git
+[submodule "c/ezxml"]
+	path = c/ezxml
+	url = https://github.com/lxfontes/ezxml.git
