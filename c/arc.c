@@ -27,6 +27,67 @@
 
 #define ARC_DEBUG_ONEOFFS 1
 //#define ARC_DEBUG_UPDATES 1
+#ifndef ARC_KHASH_TYPES_OFF
+KHASH_DEFINE(StrPtr, 	kh_cstr_t, uintptr_t, kh_str_hash_func, kh_str_hash_equal, 1)
+#endif//ARC_KHASH_TYPES_OFF
+
+static khiter_t k;
+
+
+
+//--------- Pub/Sub ---------//
+
+/// Construct a Pub(lisher). This is usually called by Ctrl.initialise(), or possibly by Ctrl.update().
+Pub * Pub_construct(const char * name)//, void * data)
+{
+	Pub * pubPtr = calloc(1, sizeof(Pub));
+	strcpy(pubPtr->name, name);
+	//pubPtr->data = data;
+	kv_init(pubPtr->subsList);
+	return pubPtr;
+}
+
+/// Publish to the Sub(scriber) list.
+void Pub_lish(Pub * pubPtr, void * info)
+{
+	for (int i = 0; i < kv_size(pubPtr->subsList); i++)
+	{
+		Sub * subPtr = &kv_A(pubPtr->subsList, i);
+		subPtr->handler(subPtr->instance, info);
+	}
+}
+
+/// Sub(scribe) to the Pub(lisher).
+
+/// A Sub(scriber) knows what the data
+void Sub_scribe(Sub * subPtr, Pub * pubPtr)
+{
+	kv_push(Sub, pubPtr->subsList, *subPtr);	
+}
+
+///Convenience method for subscribing to a Pub(lisher) on the associated App.
+void View_subscribe(View * this, const char * pubname, SubHandler handler)
+{
+	App * app = this->app;
+	
+	//get the publisher in question off the app
+	k = kh_get(StrPtr, app->pubsByName, pubname);
+	Pub * pubPtr = kh_val(app->pubsByName, k);
+	
+	//add this and its handler to the Pub as a Sub (copy local scope struct data into subsList entry)
+	Sub sub;
+	sub.instance = this;
+	sub.handler = handler;
+	Sub_scribe(&sub, pubPtr);
+}
+
+///Convenience method for creating a Pub(lisher) on the associated App.
+void Ctrl_createPub(Ctrl * this, const char * name)//, void * data)
+{
+	App * appPtr = this->app;
+	Pub * pubPtr = Pub_construct(name);//, data);
+	kh_set(StrPtr, appPtr->pubsByName, name, pubPtr);
+}
 
 //--------- Hub ---------//
 
@@ -206,6 +267,7 @@ App * App_construct(const char * id)//App ** app)
 	App * app = calloc(1, sizeof(App));
 	//#endif//__GNUC__
 	strcpy(app->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
+	app->pubsByName = kh_init(StrPtr);
 	app->initialise = (void * const)&doNothing;
 	app->dispose 	= (void * const)&doNothing;
 	

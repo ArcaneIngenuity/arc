@@ -39,6 +39,7 @@ Source is available [here](https://github.com/ArcaneIngenuity/arc "arc").
 #include <stdio.h>
 #include <string.h>
 #include "klib/kvec.h"
+#include "klib/khash.h"
 #include "ezxml/ezxml.h"
 #include "../log/log.h"
 
@@ -46,6 +47,43 @@ Source is available [here](https://github.com/ArcaneIngenuity/arc "arc").
 #define APPS_MAX 4
 #define DEVICES_MAX 16
 #define STRLEN_MAX 64
+
+// setup khash for key/value types
+// shorthand way to get the key from hashtable or defVal if not found
+#define kh_get_val(kname, hash, key, defVal) ({k=kh_get(kname, hash, key);(k!=kh_end(hash)?kh_val(hash,k):defVal);})
+
+// shorthand way to set value in hash with single line command.  Returns value
+// returns 0=replaced existing item, 1=bucket empty (new key), 2-adding element previously deleted
+#define kh_set(kname, hash, key, val) ({int ret; k = kh_put(kname, hash,key,&ret); kh_value(hash,k) = val; ret;})
+
+#ifndef KH_DECL_STRPTR
+#define KH_DECL_STRPTR
+static const int StrPtr = 36;
+KHASH_DECLARE(StrPtr, kh_cstr_t, uintptr_t)
+#endif//KH_DECL_STRPTR
+
+/// A function on a Handler (usually a View or Ctrl) that handles the incoming info. The info's type depends on the Publisher in question. 
+typedef void (*SubHandler)(void * this, /*void * context, */void * info);
+
+/// A Sub(scriber) to some Pub(lisher).
+
+/// Couples the function to be called and the struct instance on which it is to be called, into a single structure.
+typedef struct Sub //INTERNAL USE ONLY
+{
+	void * instance; //the ctrl or view that has subscribed to changes on this (sub)model
+	SubHandler handler; //handler - context is Pub's data, subject is the thing created/updated/deleted
+} Sub;
+
+
+/// A Pub(lisher) that publishes to Sub(scriber)s.
+/// One instance hereof handles one specific event type. For more event types, attach more Pubs to the same (sub)model.
+typedef struct Pub
+{
+	char name[STRLEN_MAX];
+	//void * data; //the (sub)model that this Publisher pertains to
+	//khash_t(IntKvec) subListsByCategory; //we notify every sub in a category n, if Pub_lish(pub, n, subject) was called.
+	kvec_t(Sub) subsList;
+} Pub;
 
 /// A View with specific output (and possibly input) functionality in an App.
 
@@ -134,6 +172,8 @@ typedef struct App
 	
 	void (*initialise)(struct App * const this); ///< \brief User-supplied callback for when this App initialise()s.
 	void (*dispose)(struct App * const this); ///< \brief User-supplied callback for when this App dispose()s of its resources.
+	
+	khash_t(StrPtr) * pubsByName;
 } App;
 
 /// Acts as a hybrid View / Ctrl or proxy between View and Ctrl aspects of an App, or as an interface to external mechanisms / event loops.
