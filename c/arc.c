@@ -712,7 +712,7 @@ View * View_construct(const char * id, size_t sizeofSubclass)
 	View * view = calloc(1, sizeofSubclass);
 	strcpy(view->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
 	View_setDefaultCallbacks(view);
-	
+	kv_init(view->childrenByZ);
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...View_construct (id=%s)\n", id);
 	#endif
@@ -754,9 +754,9 @@ void View_suspend(View * const this)
 	LOGI("[ARC] View_suspend... (id=%s)\n", this->id);
 	#endif
 	
-	for (int i = 0; i < this->childrenCount; ++i)
+	for (int i = 0; i < kv_size(this->childrenByZ); ++i)
 	{
-		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
+		View * child = kv_A(this->childrenByZ, i); //NB! dispose in draw order
 		View_suspend(child);
 	}
 	
@@ -773,9 +773,9 @@ void View_resume(View * const this)
 	LOGI("[ARC] View_resume... (id=%s)\n", this->id);
 	#endif
 	
-	for (int i = 0; i < this->childrenCount; ++i)
+	for (int i = 0; i < kv_size(this->childrenByZ); ++i)
 	{
-		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
+		View * child = kv_A(this->childrenByZ, i); //NB! dispose in draw order
 		View_resume(child);
 	}
 	
@@ -797,9 +797,9 @@ void View_initialise(View * const this)
 	
 	this->initialised = true;
 
-	for (int i = 0; i < this->childrenCount; ++i)
+	for (int i = 0; i < kv_size(this->childrenByZ); ++i)
 	{
-		View * child = (View *) this->childrenByZ[i];
+		View * child = kv_A(this->childrenByZ, i); //NB! dispose in draw order
 		View_initialise(child);//deltaSec //only works if enabled
 	}
 	
@@ -816,9 +816,9 @@ void View_update(View * const this)
 	
 	this->update(this);//deltaSec
 
-	for (int i = 0; i < this->childrenCount; ++i)
+	for (int i = 0; i < kv_size(this->childrenByZ); ++i)
 	{
-		View * child = (View *) this->childrenByZ[i];
+		View * child = kv_A(this->childrenByZ, i); //NB! dispose in draw order
 		if (child->updating)
 			View_update(child);//deltaSec
 	}
@@ -837,11 +837,13 @@ void View_destruct(View * const this)
 	LOGI("[ARC] View_destruct... (id=%s)\n", id);
 	#endif
 	
-	for (int i = 0; i < this->childrenCount; ++i)
+	for (int i = 0; i < kv_size(this->childrenByZ); ++i)
 	{
-		View * child = (View *) this->childrenByZ[i]; //NB! dispose in draw order
+		View * child = kv_A(this->childrenByZ, i); //NB! dispose in draw order
 		View_destruct(child);
 	}
+	
+	kv_destroy(this->childrenByZ);
 	this->dispose(this);
 	this->initialised = false;
 	free(this);
@@ -857,9 +859,9 @@ View * View_getChild(View * const this, char * id)
 	LOGI("[ARC] View_getChild... (id=%s) (child id=%s)\n", this->id, id);
 	#endif
 	
-	for (int i = 0; i < this->childrenCount; ++i)
+	for (int i = 0; i < kv_size(this->childrenByZ); ++i)
 	{
-		View * child = (View *) this->childrenByZ[i];
+		View * child = kv_A(this->childrenByZ, i); //NB! dispose in draw order
 		if (strcmp(id, child->id) == 0)
 		{
 			#ifdef ARC_DEBUG_ONEOFFS
@@ -888,9 +890,9 @@ void View_claimAncestry(View * const this, View * const child)
 	child->hub = this->hub;
 	
 	//recurse
-	for (int i = 0; i < child->childrenCount; ++i)
+	for (int i = 0; i < kv_size(child->childrenByZ); ++i)
 	{
-		View * grandchild = (View *) child->childrenByZ[i];
+		View * grandchild = kv_A(this->childrenByZ, i); //NB! dispose in draw order
 		View_claimAncestry(child, grandchild);
 	}
 }
@@ -907,13 +909,9 @@ View * View_addChild(View * const this, View * const child)
 	LOGI("[ARC] ...View_addChild (id=%s) (child id=%s)\n", this->id, child->id);
 	#endif
 	
-	if (this->childrenCount == VIEW_CHILDREN_MAX)
-		return NULL;
-	else
-	{
-		this->childrenByZ[this->childrenCount++] = child;
-		return child;
-	}
+	kv_push(View *, this->childrenByZ, child); //NB! dispose in draw order
+	//this->childrenByZ[this->childrenCount++] = child;
+	return child;
 }
 
 /*
@@ -922,7 +920,7 @@ View_removeChild(View * const this, View * const child)
 {
 	child->parent = NULL;
 
-	if (this->childrenCount == 0)
+	if (kv_size(this->childrenByZ) == 0)
 		return ARRAY_EMPTY;
 	else
 	{
@@ -930,7 +928,7 @@ View_removeChild(View * const this, View * const child)
 		
 		//TODO shift all back
 		
-		this->childrenCount--;
+		kv_size(this->childrenByZ)--;
 		return child;
 	}
 }
@@ -956,9 +954,9 @@ void View_onParentResize(View * const this)
 	
 	this->onParentResize(this);
 	
-	for (int i = 0; i < this->childrenCount; ++i)
+	for (int i = 0; i < kv_size(this->childrenByZ); ++i)
 	{
-		View * child = (View *) this->childrenByZ[i];
+		View * child = kv_A(this->childrenByZ, i); //NB! dispose in draw order
 		
 		//depth first - update child and then recurse to its children
 		

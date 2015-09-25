@@ -38,11 +38,11 @@ Source is available [here](https://github.com/ArcaneIngenuity/arc "arc").
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "klib/kvec.h"
 #include "ezxml/ezxml.h"
 #include "../log/log.h"
 
-#define VIEW_CHILDREN_MAX 8
-#define SERVICES_MAX 16
+//#define SERVICES_MAX 16
 #define APPS_MAX 4
 #define DEVICES_MAX 16
 #define STRLEN_MAX 64
@@ -68,8 +68,8 @@ typedef struct View
 	
 	struct View * root;
 	struct View * parent; ///< View's parent View, if any.
-	struct View * childrenByZ[VIEW_CHILDREN_MAX]; ///< View's children, where index is Z-order (Z is the stacking/draw order, i.e. goes positive out of screen).
-	int childrenCount; ///< The number of child Views held by this parent View. Negative for invalid return values (e.g. on seek).
+	kvec_t(struct View *) childrenByZ; ///< View's children, where index is Z-order (Z is the stacking/draw order, i.e. goes positive out of screen).
+	//int childrenCount; ///< The number of child Views held by this parent View. Negative for invalid return values (e.g. on seek).
 	
 	int width; ///< Width of this View. (NEEDS REVIEW - should be float to accommodate any user units; perhaps should be in user subclass of View)
 	int height; ///< Height of this View. (NEEDS REVIEW - should be float to accommodate any user units; perhaps should be in user subclass of View)
