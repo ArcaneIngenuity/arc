@@ -4,7 +4,7 @@ Refer to the [API documentation](http://arcaneingenuity.github.io/arc/).
 
 Arc is a lightweight applications development framework for realtime apps, specifically geared for games, simulations, and rich user experiences.
 
-Arc is platform-agnostic. You should be able to tie it into any timing, input, or rendering approach, or any engine you please. It has thus far been tested in conjunction with Android, Windows, Linux, GLFW, EGL, OpenGL, WebGL, GSAP, ENet.
+Arc is platform-agnostic. You should be able to tie it into any timing, input, or rendering approach, or any engine you please. It has been tested in conjunction with Android, Windows, Linux, GLFW, EGL, OpenGL, WebGL, GSAP, ENet.
 
 Arc is best suited where you are writing the control loop of your application yourself (typical in traditional games development), rather than where you intend a primarily-event based application structure; but methods are available for adapting event-based aspects to arc's loop-based approach (e.g. GLFW or SDL input).
 
