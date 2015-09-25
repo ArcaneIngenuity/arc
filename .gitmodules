@@ -6,4 +6,4 @@
 	url = https://github.com/lxfontes/ezxml.git
 [submodule "c/klib"]
 	path = c/klib
-	url = https://github.com/attractivechaos/klib.git
+url=https://github.com/ArcaneIngenuity/klib.git
