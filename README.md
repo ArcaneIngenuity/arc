@@ -1,3 +1,5 @@
+**Clone this repository** rather than "Download ZIP" or else you will lack submodule dependencies! (github limitation)
+
 Refer to the [API documentation](http://arcaneingenuity.github.io/arc/).
 
 Arc is a lightweight applications development framework for realtime apps, specifically geared for games, simulations, and rich user experiences.
