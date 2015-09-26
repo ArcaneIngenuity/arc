@@ -38,6 +38,7 @@ Source is available [here](https://github.com/ArcaneIngenuity/arc "arc").
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 #include "klib/kvec.h"
 #include "klib/khash.h"
 #include "ezxml/ezxml.h"

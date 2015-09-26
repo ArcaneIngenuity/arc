@@ -51,6 +51,7 @@ Pub * Pub_construct(const char * name)//, void * data)
 void Pub_lish(Pub * pubPtr, void * info)
 {
 	for (int i = 0; i < kv_size(pubPtr->subsList); i++)
+	for (int i = 0; i < kv_size(pubPtr->subsList); ++i)
 	{
 		Sub * subPtr = &kv_A(pubPtr->subsList, i);
 		subPtr->handler(subPtr->instance, info);
