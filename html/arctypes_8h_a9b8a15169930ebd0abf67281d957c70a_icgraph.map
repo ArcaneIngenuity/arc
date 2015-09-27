@@ -1,0 +1,6 @@
+<map id="addressofDynamic" name="addressofDynamic">
+<area shape="rect" id="node2" href="$arc_8c.html#a39cc74368efd7e4373257acbd95cd15d" title="Builder_addView" alt="" coords="184,5,303,32"/>
+<area shape="rect" id="node3" href="$arc_8c.html#a02a009e78d9a44424acdf49ab30d81b4" title="Builder_buildApp" alt="" coords="351,31,469,57"/>
+<area shape="rect" id="node4" href="$arc_8c.html#a925a5731e24694e61d75fcc66693e686" title="Builder_buildHub" alt="" coords="517,31,637,57"/>
+<area shape="rect" id="node5" href="$arc_8h.html#ab5a5b4cf4a73c298628e35a7caaa9bea" title="Build the Hub contents from a config file; path should be relative to executable. ..." alt="" coords="685,31,849,57"/>
+</map>

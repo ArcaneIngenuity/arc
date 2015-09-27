@@ -63,7 +63,7 @@ static const int StrPtr = 36;
 KHASH_DECLARE(StrPtr, kh_cstr_t, uintptr_t)
 #endif//KH_DECL_STRPTR
 
-/// Describes a method on some object instance (usually a View) that handles a published Event. 
+/// Describes a method on some object instance (usually a View) that handles a published event. 
 typedef void (*SubHandler)(void * this, void * event);
 
 /// A Sub(scriber) to some Pub(lisher).
@@ -71,16 +71,17 @@ typedef void (*SubHandler)(void * this, void * event);
 /// Wraps the subscribing instance, coupled with its SubHandler-conformant method, into a single structure for Pub(lisher) use.
 typedef struct Sub //INTERNAL USE ONLY
 {
-	void * instance; //the ctrl or view that has subscribed to changes on this (sub)model
-	SubHandler handler; //handler - context is Pub's data, subject is the thing created/updated/deleted
+	void * instance; ///< The object instance i.e. the actual subscriber.
+	SubHandler handler; ///< \memberof Sub context is Pub's data, subject is the thing created/updated/deleted
 } Sub;
 
 /// A Pub(lisher) that publishes to Sub(scriber)s.
+
 /// One instance hereof handles one specific event type. For more event types, attach more Pubs to the same (sub)model.
 typedef struct Pub
 {
-	char name[STRLEN_MAX];
-	kvec_t(Sub) subsList;
+	char name[STRLEN_MAX]; ///< The name by which this Pub(lisher) is referenced (used as key).
+	kvec_t(Sub) subsList; ///< The list of Sub(scriber)s to which this Pub(lisher) publishers events.
 } Pub;
 
 /// A View with specific output (and possibly input) functionality in an App.

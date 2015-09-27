@@ -1,0 +1,11 @@
+<map id="Builder_buildApp" name="Builder_buildApp">
+<area shape="rect" id="node2" href="$struct_app.html#a7d64f2db93197e7b53f81883a1764e61" title="App::App_construct" alt="" coords="172,5,309,32"/>
+<area shape="rect" id="node3" href="$arctypes_8h.html#a9b8a15169930ebd0abf67281d957c70a" title="addressofDynamic" alt="" coords="367,56,497,83"/>
+<area shape="rect" id="node4" href="$arctypes_8h.html#a95eb530aec9e1858ea83085c89452356" title="sizeofDynamic" alt="" coords="377,107,487,133"/>
+<area shape="rect" id="node5" href="$arc_8c.html#a39cc74368efd7e4373257acbd95cd15d" title="Builder_addView" alt="" coords="181,157,300,184"/>
+<area shape="rect" id="node9" href="$struct_ctrl.html#af5cf3e5bf980e5783084f6e77a603d62" title="Ctrl::Ctrl_construct" alt="" coords="174,208,307,235"/>
+<area shape="rect" id="node10" href="$struct_app.html#a74c4673945403422e2aa4fb940b9cd7f" title="App::App_setCtrl" alt="" coords="179,259,302,285"/>
+<area shape="rect" id="node6" href="$struct_view.html#a4a5ce09fff40e32104f8d475b2e6c54c" title="View::View_construct" alt="" coords="357,157,507,184"/>
+<area shape="rect" id="node7" href="$struct_app.html#ada8a78fa4b371228ad437d30a23f1d35" title="App::App_setView" alt="" coords="367,208,497,235"/>
+<area shape="rect" id="node8" href="$struct_view.html#ae62a9018f9b845cf6ff6f46baf853d40" title="View::View_addChild" alt="" coords="359,259,505,285"/>
+</map>

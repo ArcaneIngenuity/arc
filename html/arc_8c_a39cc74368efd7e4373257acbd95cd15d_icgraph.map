@@ -1,0 +1,5 @@
+<map id="Builder_addView" name="Builder_addView">
+<area shape="rect" id="node2" href="$arc_8c.html#a02a009e78d9a44424acdf49ab30d81b4" title="Builder_buildApp" alt="" coords="172,5,291,32"/>
+<area shape="rect" id="node3" href="$arc_8c.html#a925a5731e24694e61d75fcc66693e686" title="Builder_buildHub" alt="" coords="339,5,459,32"/>
+<area shape="rect" id="node4" href="$arc_8h.html#ab5a5b4cf4a73c298628e35a7caaa9bea" title="Build the Hub contents from a config file; path should be relative to executable. ..." alt="" coords="507,5,671,32"/>
+</map>

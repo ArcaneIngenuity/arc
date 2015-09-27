@@ -1,0 +1,6 @@
+<map id="View::View_addChild" name="View::View_addChild">
+<area shape="rect" id="node2" href="$arc_8c.html#a39cc74368efd7e4373257acbd95cd15d" title="Builder_addView" alt="" coords="200,5,319,32"/>
+<area shape="rect" id="node3" href="$arc_8c.html#a02a009e78d9a44424acdf49ab30d81b4" title="Builder_buildApp" alt="" coords="367,5,485,32"/>
+<area shape="rect" id="node4" href="$arc_8c.html#a925a5731e24694e61d75fcc66693e686" title="Builder_buildHub" alt="" coords="533,5,653,32"/>
+<area shape="rect" id="node5" href="$arc_8h.html#ab5a5b4cf4a73c298628e35a7caaa9bea" title="Build the Hub contents from a config file; path should be relative to executable. ..." alt="" coords="701,5,865,32"/>
+</map>
