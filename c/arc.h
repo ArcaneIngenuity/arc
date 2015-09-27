@@ -72,7 +72,7 @@ typedef void (*SubHandler)(void * this, void * event);
 typedef struct Sub //INTERNAL USE ONLY
 {
 	void * instance; ///< The object instance i.e. the actual subscriber.
-	SubHandler handler; ///< \memberof Sub context is Pub's data, subject is the thing created/updated/deleted
+	SubHandler handler; ///< The method to call on the instance, to handle a published event.
 } Sub;
 
 /// A Pub(lisher) that publishes to Sub(scriber)s.

@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['handler',['handler',['../struct_sub.html#a032447e239c4449b027ff5fc6b38fdbd',1,'Sub']]],
+  ['handler',['handler',['../struct_sub.html#a0175e0cea8d1585a717a853265548d2d',1,'Sub']]],
   ['height',['height',['../struct_view.html#a6e3e5c18893617490f02166641356746',1,'View']]],
   ['hub',['Hub',['../struct_hub.html',1,'Hub'],['../struct_view.html#a18de1b6492d883920b5afdcd396719ab',1,'View::hub()'],['../struct_ctrl.html#ae5445e0e8b2564b7469a5aef7969d8b7',1,'Ctrl::hub()'],['../struct_app.html#a99380fa222bde921aeb805420f0c1a94',1,'App::hub()'],['../arc_8h.html#aaec1a3a00e2799af290b58ddb9dfb739',1,'Hub():&#160;arc.h']]],
   ['hub_5faddapp',['Hub_addApp',['../struct_hub.html#a3c72d914702e709b541c178cfe4b85df',1,'Hub::Hub_addApp()'],['../arc_8c.html#aa8b2ac070979d557a7e6e34a9fd6f9de',1,'Hub_addApp():&#160;arc.c']]],
