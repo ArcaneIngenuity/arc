@@ -1,8 +1,8 @@
 var searchData=
 [
-  ['main_20page',['Main Page',['../index.html',1,'']]],
-  ['model',['model',['../struct_view.html#a25213ea61e61fd4e97c6f61c4a9479b6',1,'View::model()'],['../struct_ctrl.html#ac32f1ea8f584214a409413207fa31c80',1,'Ctrl::model()'],['../struct_app.html#a6e9a75aed78b10266bf477baeed059b0',1,'App::model()']]],
-  ['models',['models',['../struct_service.html#aa8a0e4d67f252ff6387a1dc003706d90',1,'Service']]],
-  ['muststart',['mustStart',['../struct_ctrl.html#aa124e91f2f2d231ff67e46db836f92d2',1,'Ctrl']]],
-  ['muststop',['mustStop',['../struct_ctrl.html#a2ac570f9d5886681b6cb9fd7a6f9d16b',1,'Ctrl']]]
+  ['id',['id',['../struct_view.html#ae75abbfdd9efcc144a7aa7437ad792d1',1,'View::id()'],['../struct_ctrl.html#aa1f94090a15cfc855d9aa7f420bb4da5',1,'Ctrl::id()'],['../struct_app.html#abf0988437c399d3340e3686c4f2a2f90',1,'App::id()']]],
+  ['implementtypesandfunctions',['implementTypesAndFunctions',['../arctyper_8c.html#adabd57baf4496de70740bde45a9c54af',1,'arctyper.c']]],
+  ['initialise',['initialise',['../struct_view.html#a6bbc0a1d27bfb89270e8f2c7e7d34419',1,'View::initialise()'],['../struct_ctrl.html#a3326e3cd98548c6e399ce581f2becd06',1,'Ctrl::initialise()'],['../struct_app.html#ac03119930be2e8ebed7db73b0072c68b',1,'App::initialise()'],['../struct_hub.html#aaeed2b7b06ae38a3d3cef103fa5046be',1,'Hub::initialise()']]],
+  ['initialised',['initialised',['../struct_view.html#a60ba40ef2ec70f0fd7ddbf3a9ce6d91e',1,'View::initialised()'],['../struct_ctrl.html#a5f0ce877f7becb8421d61b76e9d75e11',1,'Ctrl::initialised()'],['../struct_app.html#a2a69addab05c2f4459becab3c9b753b1',1,'App::initialised()']]],
+  ['instance',['instance',['../struct_sub.html#ac2cacc058408634a9b9b51831c12980f',1,'Sub']]]
 ];

@@ -63,26 +63,23 @@ static const int StrPtr = 36;
 KHASH_DECLARE(StrPtr, kh_cstr_t, uintptr_t)
 #endif//KH_DECL_STRPTR
 
-/// A function on a Handler (usually a View or Ctrl) that handles the incoming info. The info's type depends on the Publisher in question. 
-typedef void (*SubHandler)(void * this, /*void * context, */void * info);
+/// Describes a method on some object instance (usually a View) that handles a published Event. 
+typedef void (*SubHandler)(void * this, void * event);
 
 /// A Sub(scriber) to some Pub(lisher).
 
-/// Couples the function to be called and the struct instance on which it is to be called, into a single structure.
+/// Wraps the subscribing instance, coupled with its SubHandler-conformant method, into a single structure for Pub(lisher) use.
 typedef struct Sub //INTERNAL USE ONLY
 {
 	void * instance; //the ctrl or view that has subscribed to changes on this (sub)model
 	SubHandler handler; //handler - context is Pub's data, subject is the thing created/updated/deleted
 } Sub;
 
-
 /// A Pub(lisher) that publishes to Sub(scriber)s.
 /// One instance hereof handles one specific event type. For more event types, attach more Pubs to the same (sub)model.
 typedef struct Pub
 {
 	char name[STRLEN_MAX];
-	//void * data; //the (sub)model that this Publisher pertains to
-	//khash_t(IntKvec) subListsByCategory; //we notify every sub in a category n, if Pub_lish(pub, n, subject) was called.
 	kvec_t(Sub) subsList;
 } Pub;
 
@@ -222,7 +219,8 @@ void 		Ctrl_start(Ctrl * const this); ///< \memberof Ctrl Starts the Ctrl using 
 void 		Ctrl_stop(Ctrl * const this); ///< \memberof Ctrl Stops the Ctrl using \link stop \endlink.
 void		Ctrl_initialise(Ctrl * const this); ///< \memberof Ctrl Initialises the Ctrl using \link initialise \endlink.
 void 		Ctrl_update(Ctrl * const this); ///< \memberof Ctrl Updates the Ctrl using \link update \endlink.
-void 		Ctrl_updatePost(Ctrl * const this); ///< \memberof Ctrl \memberof Ctrl Post-updates the Ctrl using \link updatePost \endlink.
+void 		Ctrl_updatePost(Ctrl * const this); ///< \memberof Ctrl Post-updates the Ctrl using \link updatePost \endlink.
+void 		Ctrl_createPub(Ctrl * this, const char * name); ///< \memberof Ctrl Convenience method for creating a Pub(lisher) on this Ctrl's associated App.
 
 View * 		View_construct(const char * id, size_t sizeofSubclass); ///< \memberof View Constructs the View and sets all callbacks to do nothing.
 void 		View_destruct(View * const this); ///< \memberof View Disposes of the View and its children, depth-first, using \link dispose \endlink.
@@ -239,6 +237,8 @@ View * 		View_getChild(View * const this, char * id); ///< \memberof View Gets a
 View *		View_addChild(View * const this, View * const child); ///< \memberof View Adds a child to this View, using its \link id \endlink.
 //TODO... View * View_removeChild(View * const this, View * const child); //first get child by ID
 //bool View_swapChildren(View * const this, int indexFrom, int indexTo);
+void 		View_subscribe(View * this, const char * pubname, SubHandler handler); ///< \memberof View Convenience method for subscribing to a Pub(lisher) on this View's associated App.
+
 App * 		App_construct(const char * id); ///< \memberof App Constructs the App and sets all callbacks to do nothing.
 void 		App_destruct(App * const this); ///< \memberof App Destructs the App after disposing/destructing its Views and Ctrls, optionally using \link dispose \endlink. (NEEDS REVIEW, 2ND CLAUSE)
 void 		App_initialise(App * const this); ///< \memberof App Initialises the App (and its attached Views and Ctrls, recursively) using \link initialise \endlink.

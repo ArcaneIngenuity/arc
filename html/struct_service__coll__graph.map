@@ -1,6 +1,6 @@
 <map id="Service" name="Service">
-<area shape="rect" id="node2" href="$struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub..." alt="" coords="216,5,261,32"/>
-<area shape="rect" id="node3" href="$struct_hub.html" title="A central point from which all Apps may be managed / updated. " alt="" coords="249,95,295,121"/>
-<area shape="rect" id="node4" href="$struct_view.html" title="A View with specific output (and possibly input) functionality in an App. " alt="" coords="164,193,215,219"/>
-<area shape="rect" id="node5" href="$struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. " alt="" coords="332,193,375,219"/>
+<area shape="rect" id="node2" href="$struct_app.html" title="An application that consists of model, Views and Ctrls; resides within a global application Hub..." alt="" coords="221,5,267,32"/>
+<area shape="rect" id="node3" href="$struct_hub.html" title="A central point from which all Apps may be managed / updated. " alt="" coords="254,95,301,121"/>
+<area shape="rect" id="node4" href="$struct_view.html" title="A View with specific output (and possibly input) functionality in an App. " alt="" coords="175,185,225,212"/>
+<area shape="rect" id="node5" href="$struct_ctrl.html" title="Handles specific game / business / simulation logic within an App. " alt="" coords="332,185,375,212"/>
 </map>

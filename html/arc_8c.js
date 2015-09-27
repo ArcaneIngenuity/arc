@@ -11,7 +11,12 @@ var arc_8c =
     [ "App_stop", "arc_8c.html#af12a5f973f86bfdde9746470217982d9", null ],
     [ "App_suspend", "arc_8c.html#abd58b661beaf40e522f43c92c1db1252", null ],
     [ "App_update", "arc_8c.html#a63512392b291279280fe9f5e4b62a871", null ],
+    [ "Builder_addView", "arc_8c.html#a39cc74368efd7e4373257acbd95cd15d", null ],
+    [ "Builder_buildApp", "arc_8c.html#a02a009e78d9a44424acdf49ab30d81b4", null ],
+    [ "Builder_buildFromConfig", "arc_8c.html#ab5a5b4cf4a73c298628e35a7caaa9bea", null ],
+    [ "Builder_buildHub", "arc_8c.html#a925a5731e24694e61d75fcc66693e686", null ],
     [ "Ctrl_construct", "arc_8c.html#ab9d52c0570945e6c25f9fb0d392bd9f4", null ],
+    [ "Ctrl_createPub", "arc_8c.html#a67a93ca5203eec6150c373761fd68a03", null ],
     [ "Ctrl_destruct", "arc_8c.html#a74a39aa4ba538408d4172c9e750db071", null ],
     [ "Ctrl_initialise", "arc_8c.html#aaf3d0a388f1e1cde8b9dd12483854dd3", null ],
     [ "Ctrl_resume", "arc_8c.html#ac2462bc255488c380aa1994f6b6523e0", null ],
@@ -30,6 +35,9 @@ var arc_8c =
     [ "Hub_setDefaultCallbacks", "arc_8c.html#ae77a6a04e6c47627b958cc275247a713", null ],
     [ "Hub_suspend", "arc_8c.html#a545db900048b3e0489884cfda68ebd98", null ],
     [ "Hub_update", "arc_8c.html#aa9dd34f865269547e24d66a2943b1d2a", null ],
+    [ "Pub_construct", "arc_8c.html#afde6d75883af4892a68a10c15a157794", null ],
+    [ "Pub_lish", "arc_8c.html#a2d85f2cc14e995a92bc322b01c1d3aeb", null ],
+    [ "Sub_scribe", "arc_8c.html#a4f9d1d1873846972fcc957f53252cb2d", null ],
     [ "View_addChild", "arc_8c.html#a63746b8be6e9e58e2c403dba7db18a37", null ],
     [ "View_claimAncestry", "arc_8c.html#ae3f425bbc9ddc51d5511530735a85720", null ],
     [ "View_construct", "arc_8c.html#a0a3c1a6b5b59b4aa3e64f0b3b955675a", null ],
@@ -42,6 +50,8 @@ var arc_8c =
     [ "View_setDefaultCallbacks", "arc_8c.html#a1d3c721c3f2a38f3941a86c8771ea6cb", null ],
     [ "View_start", "arc_8c.html#a6f84d25ea279f5658fce4e3bc3b5bcb4", null ],
     [ "View_stop", "arc_8c.html#a42a8dd43d13ad07962878f61524c48e6", null ],
+    [ "View_subscribe", "arc_8c.html#a2d250bf507a8ca4d50ee0b31705bfc5e", null ],
     [ "View_suspend", "arc_8c.html#a6447e55f2358f2e46a819fee523f2685", null ],
-    [ "View_update", "arc_8c.html#ad83babf4c22c4e7aa6270711c6be24fc", null ]
+    [ "View_update", "arc_8c.html#ad83babf4c22c4e7aa6270711c6be24fc", null ],
+    [ "k", "arc_8c.html#a92d16c73611ce1f3fb0e0b8aed56f6b0", null ]
 ];

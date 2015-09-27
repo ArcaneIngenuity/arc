@@ -1,7 +1,4 @@
 var searchData=
 [
-  ['readme',['README',['../md__r_e_a_d_m_e.html',1,'']]],
-  ['readme_2emd',['README.md',['../_r_e_a_d_m_e_8md.html',1,'']]],
-  ['resume',['resume',['../struct_view.html#acea56f0d3fcce710bacd2ee597a3a504',1,'View::resume()'],['../struct_ctrl.html#a59c0a39fc18ca06ff0baefcb61990014',1,'Ctrl::resume()'],['../struct_hub.html#a8abbf06a8080334d17fb6039cc49b8d0',1,'Hub::resume()']]],
-  ['root',['root',['../struct_view.html#afe179f7dfb63e2c188d972008e006ff8',1,'View']]]
+  ['name',['name',['../struct_pub.html#aa876c521637ea138b7c1e20eabe571cd',1,'Pub']]]
 ];

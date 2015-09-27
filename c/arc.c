@@ -66,30 +66,6 @@ void Sub_scribe(Sub * subPtr, Pub * pubPtr)
 	kv_push(Sub, pubPtr->subsList, *subPtr);	
 }
 
-///Convenience method for subscribing to a Pub(lisher) on the associated App.
-void View_subscribe(View * this, const char * pubname, SubHandler handler)
-{
-	App * app = this->app;
-	
-	//get the publisher in question off the app
-	k = kh_get(StrPtr, app->pubsByName, pubname);
-	Pub * pubPtr = kh_val(app->pubsByName, k);
-	
-	//add this and its handler to the Pub as a Sub (copy local scope struct data into subsList entry)
-	Sub sub;
-	sub.instance = this;
-	sub.handler = handler;
-	Sub_scribe(&sub, pubPtr);
-}
-
-///Convenience method for creating a Pub(lisher) on the associated App.
-void Ctrl_createPub(Ctrl * this, const char * name)//, void * data)
-{
-	App * appPtr = this->app;
-	Pub * pubPtr = Pub_construct(name);//, data);
-	kh_set(StrPtr, appPtr->pubsByName, name, pubPtr);
-}
-
 //--------- Hub ---------//
 
 void Hub_setDefaultCallbacks(Hub * hub)
@@ -743,6 +719,13 @@ void Ctrl_destruct(Ctrl * const this)
 	#endif
 }
 
+void Ctrl_createPub(Ctrl * this, const char * name)
+{
+	App * appPtr = this->app;
+	Pub * pubPtr = Pub_construct(name);
+	kh_set(StrPtr, appPtr->pubsByName, name, pubPtr);
+}
+
 //--------- View ---------//
 void View_setDefaultCallbacks(View * const this)
 {
@@ -1029,6 +1012,21 @@ void View_onParentResize(View * const this)
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...View_onParentResize (id=%s)\n", this->id);
 	#endif
+}
+
+void View_subscribe(View * this, const char * pubname, SubHandler handler)
+{
+	App * app = this->app;
+	
+	//get the publisher in question off the app
+	k = kh_get(StrPtr, app->pubsByName, pubname);
+	Pub * pubPtr = kh_val(app->pubsByName, k);
+	
+	//add this and its handler to the Pub as a Sub (copy local scope struct data into subsList entry)
+	Sub sub;
+	sub.instance = this;
+	sub.handler = handler;
+	Sub_scribe(&sub, pubPtr);
 }
 
 //-------- Builder -------//

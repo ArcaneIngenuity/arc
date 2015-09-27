@@ -10,9 +10,9 @@ var struct_hub =
     [ "Hub_update", "struct_hub.html#aa9dd34f865269547e24d66a2943b1d2a", null ],
     [ "apps", "struct_hub.html#ab2185d4bf91fb9150159e0cb8bc730da", null ],
     [ "appsCount", "struct_hub.html#ac4d6de9dff6dbc23707e47375cff4ac4", null ],
-    [ "dispose", "struct_hub.html#a254a4f0fb54497f22e33cf59a1f07283", null ],
+    [ "dispose", "struct_hub.html#ab858842e6384e4b4412cba2bc00824fd", null ],
     [ "external", "struct_hub.html#a7a1e66abb321327655e1e59e6238a742", null ],
-    [ "initialise", "struct_hub.html#a0043944ff0afcdcfc3422cdaad6426e8", null ],
-    [ "resume", "struct_hub.html#a8abbf06a8080334d17fb6039cc49b8d0", null ],
-    [ "suspend", "struct_hub.html#a9701f064b2f1a8066eef51417d029532", null ]
+    [ "initialise", "struct_hub.html#aaeed2b7b06ae38a3d3cef103fa5046be", null ],
+    [ "resume", "struct_hub.html#a0d0bf6e5f0f7d86c8e0da4f9ab58437b", null ],
+    [ "suspend", "struct_hub.html#ad8ab4e18be71da47816e4dfb855612a4", null ]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['dispose',['dispose',['../struct_view.html#aeff06c0bcdbea52889194c13c0583fe4',1,'View::dispose()'],['../struct_ctrl.html#ad5befadd9260f6bf480475f0ac5a7237',1,'Ctrl::dispose()'],['../struct_app.html#a7cb4cfb86c7ccfa589c7a054ed421e95',1,'App::dispose()'],['../struct_hub.html#a254a4f0fb54497f22e33cf59a1f07283',1,'Hub::dispose()']]]
+  ['dispose',['dispose',['../struct_view.html#a66b6586b8c5a262db20fa7fa69e70201',1,'View::dispose()'],['../struct_ctrl.html#afb8c942fc07b1fdae1e250274eb2b1eb',1,'Ctrl::dispose()'],['../struct_app.html#a1815642e29dc24fbdac54574162312de',1,'App::dispose()'],['../struct_hub.html#ab858842e6384e4b4412cba2bc00824fd',1,'Hub::dispose()']]]
 ];

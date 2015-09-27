@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['update',['update',['../struct_view.html#a17ddb9186426d8803f16da7735849fd3',1,'View::update()'],['../struct_ctrl.html#a27d08cea5d4c43159298eecfc71d1aae',1,'Ctrl::update()']]],
-  ['updatepost',['updatePost',['../struct_view.html#a67efa6a772aa7e036e51f1dbc2a4b673',1,'View::updatePost()'],['../struct_ctrl.html#af546250c0d813441d5057856608fb569',1,'Ctrl::updatePost()']]],
-  ['updating',['updating',['../struct_view.html#a49ba564eb2080ac333c280d36555c985',1,'View::updating()'],['../struct_ctrl.html#abee9c102754aadf04b1c1d72da4d9ab8',1,'Ctrl::updating()'],['../struct_app.html#a5785e3a367ea6f28371942c0cb4cc1b8',1,'App::updating()']]]
+  ['resume',['resume',['../struct_view.html#aa7e19bd0ac9f02c2e0540767648a8c2f',1,'View::resume()'],['../struct_ctrl.html#ab446aafd643af1154e828af4d4a46f79',1,'Ctrl::resume()'],['../struct_hub.html#a0d0bf6e5f0f7d86c8e0da4f9ab58437b',1,'Hub::resume()']]],
+  ['root',['root',['../struct_view.html#afe179f7dfb63e2c188d972008e006ff8',1,'View']]]
 ];

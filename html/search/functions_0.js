@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['addressofdynamic',['addressofDynamic',['../arctypes_8h.html#a9b8a15169930ebd0abf67281d957c70a',1,'arctypes.h']]],
   ['app_5fconstruct',['App_construct',['../struct_app.html#a7d64f2db93197e7b53f81883a1764e61',1,'App::App_construct()'],['../arc_8c.html#a5d0a1605e5367822a151869bf99a2c28',1,'App_construct():&#160;arc.c']]],
   ['app_5fdestruct',['App_destruct',['../struct_app.html#a4b2e8607525b433b717f083316dc83e8',1,'App::App_destruct()'],['../arc_8c.html#a4b2e8607525b433b717f083316dc83e8',1,'App_destruct():&#160;arc.c']]],
   ['app_5finitialise',['App_initialise',['../struct_app.html#a3aa2dee87d568d9ff409244bb158061c',1,'App::App_initialise()'],['../arc_8c.html#a3aa2dee87d568d9ff409244bb158061c',1,'App_initialise():&#160;arc.c']]],

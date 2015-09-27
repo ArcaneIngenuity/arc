@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['addressofdynamic',['addressofDynamic',['../arctypes_8h.html#a9b8a15169930ebd0abf67281d957c70a',1,'arctypes.h']]],
   ['app',['App',['../struct_app.html',1,'App'],['../struct_view.html#a9326d229d248189507397dbb9c5774c9',1,'View::app()'],['../struct_ctrl.html#a2c5c2618488a31a2452b5b3e47406fcc',1,'Ctrl::app()'],['../struct_service.html#ab3a80d3ffc6862d493391c2172a84762',1,'Service::app()'],['../arc_8h.html#a9387c4f86a2963de44de2483f44aae79',1,'App():&#160;arc.h']]],
   ['app_5fconstruct',['App_construct',['../struct_app.html#a7d64f2db93197e7b53f81883a1764e61',1,'App::App_construct()'],['../arc_8c.html#a5d0a1605e5367822a151869bf99a2c28',1,'App_construct():&#160;arc.c']]],
   ['app_5fdestruct',['App_destruct',['../struct_app.html#a4b2e8607525b433b717f083316dc83e8',1,'App::App_destruct()'],['../arc_8c.html#a4b2e8607525b433b717f083316dc83e8',1,'App_destruct():&#160;arc.c']]],
@@ -16,5 +17,7 @@ var searchData=
   ['appscount',['appsCount',['../struct_hub.html#ac4d6de9dff6dbc23707e47375cff4ac4',1,'Hub']]],
   ['arc_2ec',['arc.c',['../arc_8c.html',1,'']]],
   ['arc_2eh',['arc.h',['../arc_8h.html',1,'']]],
-  ['arc_5fdebug_5foneoffs',['ARC_DEBUG_ONEOFFS',['../arc_8c.html#ae21b149ca52378033e787066670c573d',1,'arc.c']]]
+  ['arc_5fdebug_5foneoffs',['ARC_DEBUG_ONEOFFS',['../arc_8c.html#ae21b149ca52378033e787066670c573d',1,'arc.c']]],
+  ['arctyper_2ec',['arctyper.c',['../arctyper_8c.html',1,'']]],
+  ['arctypes_2eh',['arctypes.h',['../arctypes_8h.html',1,'']]]
 ];
