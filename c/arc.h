@@ -161,7 +161,7 @@ typedef struct App
 	char id[STRLEN_MAX]; ///< \brief ID by which an App may be retrieved from its Hub (TODO); irrelevant except where updating multiple apps through the same Hub. (NEEDS REVIEW, apps go into indexed slots)
 	struct Hub * hub; ///< \brief The Hub which owns and manages this App.
 	//in spite of typedef, use struct due to circular ref App->Hub TODO remove this ref, and allow Apps to send messages up to DJ?
-	//struct Map services;
+	//struct khash_t(StrPtr) services;
 	
 	bool updating; ///< Should this have App_update() called on it every frame?
 	bool initialised; ///< True after first initialisation. If re-initialisation is required, manually reset this to false.
