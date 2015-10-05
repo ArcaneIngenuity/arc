@@ -869,18 +869,32 @@ View * Builder_addView(App * app, View * view, ezxml_t viewXml, void * model, ez
 {
 	View * subview;
 	ezxml_t subviewXml;
+	const char * name;
 	const char * modelClass = ezxml_attr(modelXml, "class");
 	const char * viewClass = ezxml_attr(viewXml, "class");
 	
 	view = View_construct(ezxml_attr(viewXml, "id"), sizeofDynamic(viewClass));
 	view->model 			= model;
-	view->start				= addressofDynamic(ezxml_attr(viewXml, "initialise"));
-	view->stop				= addressofDynamic(ezxml_attr(viewXml, "start"));
-	view->initialise		= addressofDynamic(ezxml_attr(viewXml, "stop"));
-	view->dispose 			= addressofDynamic(ezxml_attr(viewXml, "dispose"));
-	view->update 			= addressofDynamic(ezxml_attr(viewXml, "update"));
-	view->onParentResize 	= addressofDynamic(ezxml_attr(viewXml, "onParentResize"));
 	
+	name = ezxml_attr(viewXml, "onParentResize");
+	if (name) view->onParentResize = addressofDynamic(name);
+	name = ezxml_attr(viewXml, "start");
+	if (name) view->start = addressofDynamic(name);
+	name = ezxml_attr(viewXml, "stop");
+	if (name) view->stop = addressofDynamic(name);
+	name = ezxml_attr(viewXml, "update");
+	if (name) view->update = addressofDynamic(name);
+	name = ezxml_attr(viewXml, "updatePost");
+	if (name) view->updatePost = addressofDynamic(name);
+	name = ezxml_attr(viewXml, "initialise");
+	if (name) view->initialise = addressofDynamic(name);
+	name = ezxml_attr(viewXml, "dispose");
+	if (name) view->dispose = addressofDynamic(name);
+	name = ezxml_attr(viewXml, "suspend");
+	if (name) view->suspend = addressofDynamic(name);
+	name = ezxml_attr(viewXml, "resume");
+	if (name) view->resume = addressofDynamic(name);
+
 	if (app)
 		App_setView(app, view); //must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
 	
@@ -904,11 +918,19 @@ App * Builder_buildApp(ezxml_t appXml)
 	void * model;
 	View * view;
 	Ctrl * ctrl;
+	const char * name;
 	
 	//app (create)
 	App * app = App_construct(ezxml_attr(appXml, "id"));
-	app->initialise = addressofDynamic(ezxml_attr(appXml, "initialise"));
-	app->dispose 	= addressofDynamic(ezxml_attr(appXml, "dispose"));
+	
+	name = ezxml_attr(appXml, "initialise");
+	if (name) app->initialise = addressofDynamic(name);
+	name = ezxml_attr(appXml, "dispose");
+	if (name) app->dispose = addressofDynamic(name);
+	name = ezxml_attr(appXml, "suspend");
+	if (name) app->suspend = addressofDynamic(name);
+	name = ezxml_attr(appXml, "resume");
+	if (name) app->resume = addressofDynamic(name);
 	
 	//model
 	modelXml = ezxml_child(appXml, "model");
@@ -922,32 +944,51 @@ App * Builder_buildApp(ezxml_t appXml)
 	#ifdef DESKTOP
 	//View_addChild((View *)mainView, (View *)terminalView);
 	#endif//DESKTOP
-		
+	
 	//ctrl
 	ctrlXml = ezxml_child(appXml, "ctrl");
 	ctrlClass = ezxml_attr(ctrlXml, "class");
 	ctrl = Ctrl_construct(ezxml_attr(ctrlXml, "id"), sizeofDynamic(ctrlClass));
 	ctrl->model 	= model;
-
-	ctrl->start 	= addressofDynamic(ezxml_attr(ctrlXml, "start"));
-	ctrl->stop 		= addressofDynamic(ezxml_attr(ctrlXml, "stop"));
-	ctrl->initialise= addressofDynamic(ezxml_attr(ctrlXml, "initialise"));
-	ctrl->dispose 	= addressofDynamic(ezxml_attr(ctrlXml, "dispose"));
-	ctrl->update 	= addressofDynamic(ezxml_attr(ctrlXml, "update"));
-	ctrl->updatePost= addressofDynamic(ezxml_attr(ctrlXml, "updatePost"));
+	
+	name = ezxml_attr(ctrlXml, "mustStart");
+	if (name) ctrl->mustStart = addressofDynamic(name);
+	name = ezxml_attr(ctrlXml, "mustStop");
+	if (name) ctrl->mustStop = addressofDynamic(name);
+	name = ezxml_attr(ctrlXml, "start");
+	if (name) ctrl->start = addressofDynamic(name);
+	name = ezxml_attr(ctrlXml, "stop");
+	if (name) ctrl->stop = addressofDynamic(name);
+	name = ezxml_attr(ctrlXml, "update");
+	if (name) ctrl->update = addressofDynamic(name);
+	name = ezxml_attr(ctrlXml, "updatePost");
+	if (name) ctrl->updatePost= addressofDynamic(name);
+	name = ezxml_attr(ctrlXml, "initialise");
+	if (name) ctrl->initialise= addressofDynamic(name);
+	name = ezxml_attr(ctrlXml, "dispose");
+	if (name) ctrl->dispose = addressofDynamic(name);
+	name = ezxml_attr(ctrlXml, "suspend");
+	if (name) ctrl->suspend = addressofDynamic(name);
+	name = ezxml_attr(ctrlXml, "resume");
+	if (name) ctrl->resume= addressofDynamic(name);
+	
 	App_setCtrl(app, ctrl);
 	
 	return app;
 }
 
 void Builder_buildHub(Hub * hub, ezxml_t hubXml)
-{	
-	/*
-	hub->initialise = addressofDynamic(ezxml_attr(appXml, "initialise"));
-	hub->dispose 	= addressofDynamic(ezxml_attr(appXml, "dispose"));
-	hub->suspend 	= addressofDynamic(ezxml_attr(appXml, "suspend"));
-	hub->resume 	= addressofDynamic(ezxml_attr(appXml, "resume"));
-	*/
+{
+	const char * name;
+	
+	name = ezxml_attr(hubXml, "initialise");
+	if (name) hub->initialise = addressofDynamic(name);
+	name = ezxml_attr(hubXml, "dispose");
+	if (name) hub->dispose = addressofDynamic(name);
+	name = ezxml_attr(hubXml, "suspend");
+	if (name) hub->suspend = addressofDynamic(name);
+	name = ezxml_attr(hubXml, "resume");
+	if (name) hub->resume = addressofDynamic(name);
 	
 	ezxml_t appsXml = ezxml_child(hubXml, "apps");
 	
