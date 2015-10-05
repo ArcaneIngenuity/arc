@@ -874,7 +874,9 @@ View * Builder_addView(App * app, View * view, ezxml_t viewXml, void * model, ez
 	
 	view = View_construct(ezxml_attr(viewXml, "id"), sizeofDynamic(viewClass));
 	view->model 			= model;
-	view->initialise		= addressofDynamic(ezxml_attr(viewXml, "initialise"));
+	view->start				= addressofDynamic(ezxml_attr(viewXml, "initialise"));
+	view->stop				= addressofDynamic(ezxml_attr(viewXml, "start"));
+	view->initialise		= addressofDynamic(ezxml_attr(viewXml, "stop"));
 	view->dispose 			= addressofDynamic(ezxml_attr(viewXml, "dispose"));
 	view->update 			= addressofDynamic(ezxml_attr(viewXml, "update"));
 	view->onParentResize 	= addressofDynamic(ezxml_attr(viewXml, "onParentResize"));
@@ -925,9 +927,10 @@ App * Builder_buildApp(ezxml_t appXml)
 	ctrlXml = ezxml_child(appXml, "ctrl");
 	ctrlClass = ezxml_attr(ctrlXml, "class");
 	ctrl = Ctrl_construct(ezxml_attr(ctrlXml, "id"), sizeofDynamic(ctrlClass));
-	ctrl->model = model;
-	ctrl->start = addressofDynamic(ezxml_attr(ctrlXml, "start"));
-	ctrl->stop = addressofDynamic(ezxml_attr(ctrlXml, "stop"));
+	ctrl->model 	= model;
+
+	ctrl->start 	= addressofDynamic(ezxml_attr(ctrlXml, "start"));
+	ctrl->stop 		= addressofDynamic(ezxml_attr(ctrlXml, "stop"));
 	ctrl->initialise= addressofDynamic(ezxml_attr(ctrlXml, "initialise"));
 	ctrl->dispose 	= addressofDynamic(ezxml_attr(ctrlXml, "dispose"));
 	ctrl->update 	= addressofDynamic(ezxml_attr(ctrlXml, "update"));
@@ -939,6 +942,13 @@ App * Builder_buildApp(ezxml_t appXml)
 
 void Builder_buildHub(Hub * hub, ezxml_t hubXml)
 {	
+	/*
+	hub->initialise = addressofDynamic(ezxml_attr(appXml, "initialise"));
+	hub->dispose 	= addressofDynamic(ezxml_attr(appXml, "dispose"));
+	hub->suspend 	= addressofDynamic(ezxml_attr(appXml, "suspend"));
+	hub->resume 	= addressofDynamic(ezxml_attr(appXml, "resume"));
+	*/
+	
 	ezxml_t appsXml = ezxml_child(hubXml, "apps");
 	
 	for (ezxml_t appXml = ezxml_child(appsXml, "app"); appXml; appXml = appXml->next)
