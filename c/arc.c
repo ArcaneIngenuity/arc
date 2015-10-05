@@ -454,7 +454,6 @@ void App_start(App * const this)
 			//this->initialise((void *)this);
 		}
 		
-		this->updating = true;
 		/*
 		if (!ctrl->initialised)
 		{
@@ -471,8 +470,8 @@ void App_start(App * const this)
 		
 		Ctrl_start(ctrl);
 		View_start(view);
-		ctrl->start((void *)ctrl);
-		view->start((void *)view);
+		
+		this->updating = true;
 	}
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -489,8 +488,8 @@ void App_stop(App * const this)
 	Ctrl * ctrl = this->ctrl;
 	View * view = this->view;
 	
-	ctrl->stop((void *)ctrl);
-	view->stop((void *)view);
+	Ctrl_stop(ctrl);
+	View_stop(view);
 	
 	this->updating = false;
 	
