@@ -1,1 +1,1 @@
-arctyper.exe ../../../cfg/arc.config ../../arctypes
+arctyper.exe ../../../cfg/arc.config ../../wa/arctypes

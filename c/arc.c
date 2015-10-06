@@ -277,7 +277,8 @@ void App_update(App * const this)
 
 void App_initialise(App * const this)
 {
-	this->initialise((void *)this);	
+	this->initialise((void *)this);
+	this->initialised = true;
 	
 	Ctrl_initialise(this->ctrl);
 	View_initialise(this->view); //initialises all descendants too
@@ -288,192 +289,20 @@ void App_start(App * const this)
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] App_start... (id=%s)\n", this->id);
 	#endif
-	
 	if (!this->updating)
 	{
-		Ctrl * ctrl = this->ctrl;
-		View * view = this->view;
-		
-		if (!this->initialised)
+		if (this->initialised)
+		{
+			Ctrl * ctrl = this->ctrl;
+			Ctrl_start(ctrl); //it is left to Ctrls to start Views
+			this->updating = true;
+		}
+		else
 		{
 			//TODO make all LOGE, not LOGI!
-			
-			//for now, check ALL on initialisation (TODO - move to relevant sections and IFDEF DEBUG)
-			if(!this->initialise)
-			{
-				LOGI("[ARC] App_start - Error: missing initialise function.\n"); 
-				exit(1);
-			}
-			
-			if(!this->dispose)
-			{
-				LOGI("[ARC] App_start - Error: missing dispose function.\n"); 
-				exit(1);
-			}
-			
-			/*
-			if(!this->input)
-			{
-				LOGI("[ARC] App_start - Error: missing input function.\n"); 
-				exit(1);
-			}
-			
-			if(!this->start)
-			{
-				LOGI("[ARC] App_start - Error: missing start function.\n"); 
-				exit(1);
-			}
-			
-			if(!this->stop)
-			{
-				LOGI("[ARC] App_start - Error: missing stop function.\n"); 
-				exit(1);
-			}
-			*/
-			if(!this->initialise)
-			{
-				LOGI("[ARC] App_start - Error: missing initialise function.\n"); 
-				exit(1);
-			}
-			
-			if(!this->dispose)
-			{
-				LOGI("[ARC] App_start - Error: missing dispose function.\n"); 
-				exit(1);
-			}
-			
-			if(!this->model)
-			{
-				LOGI("[ARC] App_start - Error: missing model.\n"); 
-				exit(1);
-			}
-			
-			if(!this->view)
-			{
-				LOGI("[ARC] App_start - Error: missing view.\n"); 
-				exit(1);
-			}
-			else
-			{
-				if (!this->view->start)
-				{
-					LOGI("[ARC] App_start - Error: missing view start function.\n"); 
-					exit(1);
-				}
-				
-				if (!this->view->stop)
-				{
-					LOGI("[ARC] App_start - Error: missing view stop function.\n"); 
-					exit(1);
-				}
-				
-				if (!this->view->initialise)
-				{
-					LOGI("[ARC] App_start - Error: missing view initialise function.\n"); 
-					exit(1);
-				}
-				
-				if (!this->view->dispose)
-				{
-					LOGI("[ARC] App_start - Error: missing view dispose function.\n"); 
-					exit(1);
-				}
-				
-				if (!this->view->update)
-				{
-					LOGI("[ARC] App_start - Error: missing view update function.\n"); 
-					exit(1);
-				}
-				
-				if (!this->view->updatePost)
-				{
-					LOGI("[ARC] App_start - Error: missing view updatePost function.\n"); 
-					exit(1);
-				}
-				
-				//TODO recurse view children.
-			}
-			
-			if(!this->ctrl)
-			{
-				LOGI("[ARC] App_start - Error: missing ctrl.\n"); 
-				exit(1);
-			}
-			else
-			{
-				if (!this->ctrl->mustStart)
-				{
-					LOGI("[ARC] App_start - Error: missing ctrl mustStart function.\n"); 
-					exit(1);
-				}
-				
-				if (!this->ctrl->mustStop)
-				{
-					LOGI("[ARC] App_start - Error: missing ctrl mustStop function.\n"); 
-					exit(1);
-				}
-				
-				if (!this->ctrl->start)
-				{
-					LOGI("[ARC] App_start - Error: missing ctrl start function.\n"); 
-					exit(1);
-				}
-				
-				if (!this->ctrl->stop)
-				{
-					LOGI("[ARC] App_start - Error: missing ctrl stop function.\n"); 
-					exit(1);
-				}
-				
-				if (!this->ctrl->initialise)
-				{
-					LOGI("[ARC] App_start - Error: missing ctrl initialise function.\n"); 
-					exit(1);
-				}
-				
-				if (!this->ctrl->dispose)
-				{
-					LOGI("[ARC] App_start - Error: missing ctrl dispose function.\n"); 
-					exit(1);
-				}
-				
-				if (!this->ctrl->update)
-				{
-					LOGI("[ARC] App_start - Error: missing ctrl update function.\n"); 
-					exit(1);
-				}
-				
-				if (!this->ctrl->updatePost)
-				{
-					LOGI("[ARC] App_start - Error: missing ctrl updatePost function.\n"); 
-					exit(1);
-				}
-			}
-			
-			//initialise app
-			//this->initialise((void *)this);
+			LOGI("[ARC] App_start - Error: App has not been initialised.\n"); 
 		}
-		
-		/*
-		if (!ctrl->initialised)
-		{
-			LOGI("[ARC] App_start - Error: ctrl has not been initialised.\n"); 
-			exit(1);
-		}
-		
-		if (!view->initialised)
-		{
-			LOGI("[ARC] App_start - Error: view has not been initialised.\n"); 
-			exit(1);
-		}
-		*/
-		
-		Ctrl_start(ctrl);
-		View_start(view);
-		
-		this->updating = true;
 	}
-	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...App_start (id=%s)\n", this->id);
 	#endif
@@ -757,6 +586,7 @@ View * View_construct(const char * id, size_t sizeofSubclass)
 	strcpy(view->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
 	View_setDefaultCallbacks(view);
 	kv_init(view->childrenByZ);
+	//view->subStatusesByName = kh_init(StrPtr);
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...View_construct (id=%s)\n", id);
 	#endif
@@ -1027,22 +857,44 @@ void View_subscribe(View * this, const char * pubname, SubHandler handler)
 	Sub_scribe(&sub, pubPtr);
 }
 
+void View_listen(View * const this)
+{
+	
+	
+}
+
 //-------- Builder -------//
 
 View * Builder_addView(App * app, View * view, ezxml_t viewXml, void * model, ezxml_t modelXml)
 {
 	View * subview;
 	ezxml_t subviewXml;
+	const char * name;
 	const char * modelClass = ezxml_attr(modelXml, "class");
 	const char * viewClass = ezxml_attr(viewXml, "class");
 	
 	view = View_construct(ezxml_attr(viewXml, "id"), sizeofDynamic(viewClass));
 	view->model 			= model;
-	view->initialise		= addressofDynamic(ezxml_attr(viewXml, "initialise"));
-	view->dispose 			= addressofDynamic(ezxml_attr(viewXml, "dispose"));
-	view->update 			= addressofDynamic(ezxml_attr(viewXml, "update"));
-	view->onParentResize 	= addressofDynamic(ezxml_attr(viewXml, "onParentResize"));
 	
+	name = ezxml_attr(viewXml, "onParentResize");
+	if (name) view->onParentResize = addressofDynamic(name);
+	name = ezxml_attr(viewXml, "start");
+	if (name) view->start = addressofDynamic(name);
+	name = ezxml_attr(viewXml, "stop");
+	if (name) view->stop = addressofDynamic(name);
+	name = ezxml_attr(viewXml, "update");
+	if (name) view->update = addressofDynamic(name);
+	name = ezxml_attr(viewXml, "updatePost");
+	if (name) view->updatePost = addressofDynamic(name);
+	name = ezxml_attr(viewXml, "initialise");
+	if (name) view->initialise = addressofDynamic(name);
+	name = ezxml_attr(viewXml, "dispose");
+	if (name) view->dispose = addressofDynamic(name);
+	name = ezxml_attr(viewXml, "suspend");
+	if (name) view->suspend = addressofDynamic(name);
+	name = ezxml_attr(viewXml, "resume");
+	if (name) view->resume = addressofDynamic(name);
+
 	if (app)
 		App_setView(app, view); //must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
 	
@@ -1066,11 +918,19 @@ App * Builder_buildApp(ezxml_t appXml)
 	void * model;
 	View * view;
 	Ctrl * ctrl;
+	const char * name;
 	
 	//app (create)
 	App * app = App_construct(ezxml_attr(appXml, "id"));
-	app->initialise = addressofDynamic(ezxml_attr(appXml, "initialise"));
-	app->dispose 	= addressofDynamic(ezxml_attr(appXml, "dispose"));
+	
+	name = ezxml_attr(appXml, "initialise");
+	if (name) app->initialise = addressofDynamic(name);
+	name = ezxml_attr(appXml, "dispose");
+	if (name) app->dispose = addressofDynamic(name);
+	name = ezxml_attr(appXml, "suspend");
+	if (name) app->suspend = addressofDynamic(name);
+	name = ezxml_attr(appXml, "resume");
+	if (name) app->resume = addressofDynamic(name);
 	
 	//model
 	modelXml = ezxml_child(appXml, "model");
@@ -1084,23 +944,52 @@ App * Builder_buildApp(ezxml_t appXml)
 	#ifdef DESKTOP
 	//View_addChild((View *)mainView, (View *)terminalView);
 	#endif//DESKTOP
-		
+	
 	//ctrl
 	ctrlXml = ezxml_child(appXml, "ctrl");
 	ctrlClass = ezxml_attr(ctrlXml, "class");
 	ctrl = Ctrl_construct(ezxml_attr(ctrlXml, "id"), sizeofDynamic(ctrlClass));
 	ctrl->model 	= model;
-	ctrl->initialise= addressofDynamic(ezxml_attr(ctrlXml, "initialise"));
-	ctrl->dispose 	= addressofDynamic(ezxml_attr(ctrlXml, "dispose"));
-	ctrl->update 	= addressofDynamic(ezxml_attr(ctrlXml, "update"));
-	ctrl->updatePost= addressofDynamic(ezxml_attr(ctrlXml, "updatePost"));
+	
+	name = ezxml_attr(ctrlXml, "mustStart");
+	if (name) ctrl->mustStart = addressofDynamic(name);
+	name = ezxml_attr(ctrlXml, "mustStop");
+	if (name) ctrl->mustStop = addressofDynamic(name);
+	name = ezxml_attr(ctrlXml, "start");
+	if (name) ctrl->start = addressofDynamic(name);
+	name = ezxml_attr(ctrlXml, "stop");
+	if (name) ctrl->stop = addressofDynamic(name);
+	name = ezxml_attr(ctrlXml, "update");
+	if (name) ctrl->update = addressofDynamic(name);
+	name = ezxml_attr(ctrlXml, "updatePost");
+	if (name) ctrl->updatePost= addressofDynamic(name);
+	name = ezxml_attr(ctrlXml, "initialise");
+	if (name) ctrl->initialise= addressofDynamic(name);
+	name = ezxml_attr(ctrlXml, "dispose");
+	if (name) ctrl->dispose = addressofDynamic(name);
+	name = ezxml_attr(ctrlXml, "suspend");
+	if (name) ctrl->suspend = addressofDynamic(name);
+	name = ezxml_attr(ctrlXml, "resume");
+	if (name) ctrl->resume= addressofDynamic(name);
+	
 	App_setCtrl(app, ctrl);
 	
 	return app;
 }
 
 void Builder_buildHub(Hub * hub, ezxml_t hubXml)
-{	
+{
+	const char * name;
+	
+	name = ezxml_attr(hubXml, "initialise");
+	if (name) hub->initialise = addressofDynamic(name);
+	name = ezxml_attr(hubXml, "dispose");
+	if (name) hub->dispose = addressofDynamic(name);
+	name = ezxml_attr(hubXml, "suspend");
+	if (name) hub->suspend = addressofDynamic(name);
+	name = ezxml_attr(hubXml, "resume");
+	if (name) hub->resume = addressofDynamic(name);
+	
 	ezxml_t appsXml = ezxml_child(hubXml, "apps");
 	
 	for (ezxml_t appXml = ezxml_child(appsXml, "app"); appXml; appXml = appXml->next)

@@ -171,6 +171,8 @@ typedef struct App
 	
 	void (*initialise)(struct App * const this); ///< \brief User-supplied callback for when this App initialise()s.
 	void (*dispose)(struct App * const this); ///< \brief User-supplied callback for when this App dispose()s of its resources.
+	void (*suspend)(struct App * const this); ///< \brief User-supplied callback for when this App must suspend() due to a loss of rendering context.
+	void (*resume)(struct App * const this); ///< \brief User-supplied callback for when this App must resume() due to regaining rendering context.
 	
 	khash_t(StrPtr) * pubsByName;
 } App;
@@ -202,7 +204,7 @@ typedef struct Hub
 	//TODO Builder
 	void (*initialise)(struct Hub * const this); ///< \brief User-supplied callback for when this Hub initialise()s.
 	void (*dispose)(struct Hub * const this); ///< \brief User-supplied callback for when this Hub dispose()s of its resources.
-	void (*suspend)(struct Hub * const this); ///< \brief User-supplied callback for when this Ctrl must suspend() due to a loss of rendering context.
+	void (*suspend)(struct Hub * const this); ///< \brief User-supplied callback for when this Hub must suspend() due to a loss of rendering context.
 	void (*resume)(struct Hub * const this); ///< \brief User-supplied callback for when this Hub must resume() due to regaining rendering context.
 	
 	void * external; ///< User-defined reference to global state; useful if avoiding global variables.
