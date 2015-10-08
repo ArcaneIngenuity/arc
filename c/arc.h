@@ -43,6 +43,7 @@ Source is available [here](https://github.com/ArcaneIngenuity/arc "arc").
 #include "klib/khash.h"
 #include "ezxml/ezxml.h"
 #include "../log/log.h"
+#include "arctypes.h"
 
 //#define SERVICES_MAX 16
 #define APPS_MAX 4
