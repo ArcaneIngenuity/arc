@@ -865,6 +865,8 @@ void View_listen(View * const this)
 
 //-------- Builder -------//
 
+typedef void * (*BuildFunction) (ezxml_t xml);
+
 View * Builder_addView(App * app, View * view, ezxml_t viewXml, void * model, ezxml_t modelXml)
 {
 	View * subview;
@@ -908,9 +910,16 @@ View * Builder_addView(App * app, View * view, ezxml_t viewXml, void * model, ez
 	return view;
 }
 
+ezxml_t ezxml_child_any(ezxml_t xml)
+{
+    xml = (xml) ? xml->child : NULL;
+    //while (xml) xml = xml->sibling;
+    return xml;
+}
+#include "../../wa/InputResponseManager.h"
 App * Builder_buildApp(ezxml_t appXml)
 {
-	ezxml_t modelXml, viewXml, subviewXml, rootctrlXml, ctrlXml;
+	ezxml_t modelXml, viewXml, subviewXml, rootctrlXml, ctrlXml, elementXml;
 	const char * modelClass;
 	const char * ctrlClass;
 	char string[STRLEN_MAX];
@@ -971,6 +980,36 @@ App * Builder_buildApp(ezxml_t appXml)
 	if (name) ctrl->suspend = addressofDynamic(name);
 	name = ezxml_attr(ctrlXml, "resume");
 	if (name) ctrl->resume= addressofDynamic(name);
+	
+	//TODO find custom elements and build them using their name as a key into a map provided for each element type
+	LOGI("::\n");
+	for (elementXml = ezxml_child_any(ctrlXml); elementXml; elementXml = elementXml->sibling)
+	{
+		LOGI("element name is %s", ezxml_name(elementXml));
+		
+		//TODO replace with referencing into a khash_t by xml element name, and checking if the result (custom parser) is non-null
+		if (strcmp(ezxml_name(elementXml), "commands") == 0)
+		{
+			//#ifdef DESKTOP
+			LOGI("creating commands...\n");
+			
+
+			//InputResponseManager * p;
+			
+			char * bytesStart = (char *) ctrl;
+			
+			size_t bytesOffset = offsetofDynamic(ctrlClass, "inputResponseManager");
+			LOGI("offset=%u\n", bytesOffset);
+			LOGI("sizeof=%u\n", sizeof(Ctrl));
+			
+			char * member = bytesStart + bytesOffset;
+			*(intptr_t *)member = (char *) InputResponseManager_fromConfigXML(elementXml);
+			
+			//LOGI("inputResponseManager->test=%d\n", p->test);
+		}
+		
+	}
+	
 	
 	App_setCtrl(app, ctrl);
 	
