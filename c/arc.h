@@ -140,6 +140,8 @@ typedef struct Ctrl
 	bool updating; ///< Should this have Ctrl_update() called on it every frame?
 	bool initialised; ///< True after first initialisation. If re-initialisation is required, manually reset this to false.
 	void * model; ///< The model associated with this View. May or may not be the same as this View's App's (complete) model, depending on \link Configuration \endlink.
+	//kvec_t(void *) configs; ///< Custom configs included in this Ctrl's markup, if any.
+	khash_t(StrPtr) * modulesById;
 	
 	void (*mustStart)(struct Ctrl * const this); ///< \brief User-supplied callback for checking when this Ctrl mustStart().
 	void (*mustStop)(struct Ctrl * const this); ///< \brief User-supplied callback for checking when this Ctrl mustStop().
@@ -269,7 +271,7 @@ App * const Hub_getApp(Hub * const this, const char * const id); ///< \memberof 
 //TODO... void Hub_removeDevice(Hub * const this, const char * id);
 
 void 		Builder_buildFromConfig(Hub * const hub, const char * configFilename); ///< Build the Hub contents from a config file; path should be relative to executable.
-
+typedef void * (*ConstructModuleFromConfigXML)(ezxml_t xml);
 void doNothing(void * const this); ///< A null-pattern callback which is the default when no user-defined callback has yet been supplied (prevents null pointer crashes).
 
 #endif //ARC_H

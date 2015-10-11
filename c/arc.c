@@ -408,7 +408,8 @@ Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
 	Ctrl * ctrl = calloc(1, sizeofSubclass);
 	strcpy(ctrl->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
 	Ctrl_setDefaultCallbacks(ctrl);
-	
+	//kv_init(ctrl->configs);
+	ctrl->modulesById = kh_init(StrPtr);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Ctrl_construct(id=%s)\n", id);
@@ -916,10 +917,10 @@ ezxml_t ezxml_child_any(ezxml_t xml)
     //while (xml) xml = xml->sibling;
     return xml;
 }
-#include "../../wa/InputResponseManager.h"
+#include "../../wa/InputResponder.h"
 App * Builder_buildApp(ezxml_t appXml)
 {
-	ezxml_t modelXml, viewXml, subviewXml, rootctrlXml, ctrlXml, elementXml;
+	ezxml_t modelXml, viewXml, subviewXml, rootctrlXml, ctrlXml, elementXml, elementXmlCopy;
 	const char * modelClass;
 	const char * ctrlClass;
 	char string[STRLEN_MAX];
@@ -982,34 +983,19 @@ App * Builder_buildApp(ezxml_t appXml)
 	if (name) ctrl->resume= addressofDynamic(name);
 	
 	//TODO find custom elements and build them using their name as a key into a map provided for each element type
-	LOGI("::\n");
-	for (elementXml = ezxml_child_any(ctrlXml); elementXml; elementXml = elementXml->sibling)
+	for (elementXml = ezxml_child_any(ctrlXml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
 	{
-		LOGI("element name is %s", ezxml_name(elementXml));
-		
-		//TODO replace with referencing into a khash_t by xml element name, and checking if the result (custom parser) is non-null
-		if (strcmp(ezxml_name(elementXml), "commands") == 0)
+		elementXmlCopy = elementXml;
+		while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
 		{
-			//#ifdef DESKTOP
-			LOGI("creating commands...\n");
-			
-
-			//InputResponseManager * p;
-			
-			char * bytesStart = (char *) ctrl;
-			
-			size_t bytesOffset = offsetofDynamic(ctrlClass, "inputResponseManager");
-			LOGI("offset=%u\n", bytesOffset);
-			LOGI("sizeof=%u\n", sizeof(Ctrl));
-			
-			char * member = bytesStart + bytesOffset;
-			*(intptr_t *)member = (char *) InputResponseManager_fromConfigXML(elementXml);
-			
-			//LOGI("inputResponseManager->test=%d\n", p->test);
+			//LOGI("element name is %s", ezxml_name(elementXmlCopy));
+			ConstructModuleFromConfigXML constructor = addressofDynamic(ezxml_attr(elementXmlCopy, "constructor"));
+			void * module = constructor(elementXmlCopy);
+			kh_set(StrPtr, ctrl->modulesById, ezxml_attr(elementXmlCopy, "id"), module);
+			//kv_push(void *, ctrl->modules, module);
+			elementXmlCopy = elementXmlCopy->next;
 		}
-		
 	}
-	
 	
 	App_setCtrl(app, ctrl);
 	
@@ -1034,8 +1020,6 @@ void Builder_buildHub(Hub * hub, ezxml_t hubXml)
 	for (ezxml_t appXml = ezxml_child(appsXml, "app"); appXml; appXml = appXml->next)
 	{
 		App * app = Builder_buildApp(appXml);
-		
-		//fprintf(f, "\tHub_addApp(hub, app);\n");
 		Hub_addApp(hub, app);
 	}
 }
