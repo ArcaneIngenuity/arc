@@ -917,7 +917,7 @@ ezxml_t ezxml_child_any(ezxml_t xml)
     //while (xml) xml = xml->sibling;
     return xml;
 }
-#include "../../wa/InputResponder.h"
+
 App * Builder_buildApp(ezxml_t appXml)
 {
 	ezxml_t modelXml, viewXml, subviewXml, rootctrlXml, ctrlXml, elementXml, elementXmlCopy;
