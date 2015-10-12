@@ -70,7 +70,7 @@ typedef void (*SubHandler)(void * this, void * event);
 /// A Sub(scriber) to some Pub(lisher).
 
 /// Wraps the subscribing instance, coupled with its SubHandler-conformant method, into a single structure for Pub(lisher) use.
-typedef struct Sub //INTERNAL USE ONLY
+typedef struct Sub
 {
 	void * instance; ///< The object instance i.e. the actual subscriber.
 	SubHandler handler; ///< The method to call on the instance, to handle a published event.
@@ -85,7 +85,14 @@ typedef struct Pub
 	kvec_t(Sub) subsList; ///< The list of Sub(scriber)s to which this Pub(lisher) publishers events.
 } Pub;
 
-/// A View with specific output (and possibly input) functionality in an App.
+
+/// Base class for a user-defined extension created from config.
+typedef struct Extension
+{
+	char id[STRLEN_MAX]; ///< ID by which a user extension is retrieved from its owning View, Ctrl, App or Hub's ->extensionsById.
+} Extension;
+
+/// Base class for a user-defined view that has specific rendering responsibilities.
 
 /// For every discrete View needed, allocate it and set the appropriate callbacks.<br>
 /// When implementing a View this way, remember that it should be monolithic and represent a conceptual viewport that may be activated / deactivated, rather than every instance of something visible. Examples: in a game, a View might be the first person renderer rather than every instance of a game character; in a UI application, a View is better suited to representing a specific UI panel rather than each of the many controls within that Panel.<br>
@@ -125,7 +132,7 @@ typedef struct View
 	//void (*disable)(struct View * const this); //stop
 } View;
 
-/// Handles specific game / business / simulation logic within an App.
+/// Base class for a user-defined controller that handles specific game / business / simulation logic within an App.
 
 /// For every discrete Ctrl needed, allocate it and set the appropriate callbacks.<br>
 /// A Ctrl instance may then be added to an App by setting App.ctrl; this will be the root Ctrl. Often, this will be the only Ctrl needed; though in some cases the user may prefer to use sub-%Ctrl%s attached to root.<br>
@@ -141,7 +148,7 @@ typedef struct Ctrl
 	bool initialised; ///< True after first initialisation. If re-initialisation is required, manually reset this to false.
 	void * model; ///< The model associated with this View. May or may not be the same as this View's App's (complete) model, depending on \link Configuration \endlink.
 	//kvec_t(void *) configs; ///< Custom configs included in this Ctrl's markup, if any.
-	khash_t(StrPtr) * modulesById;
+	khash_t(StrPtr) * extensionsById;
 	
 	void (*mustStart)(struct Ctrl * const this); ///< \brief User-supplied callback for checking when this Ctrl mustStart().
 	void (*mustStop)(struct Ctrl * const this); ///< \brief User-supplied callback for checking when this Ctrl mustStop().
@@ -180,7 +187,7 @@ typedef struct App
 	khash_t(StrPtr) * pubsByName;
 } App;
 
-/// Acts as a hybrid View / Ctrl or proxy between View and Ctrl aspects of an App, or as an interface to external mechanisms / event loops.
+/// Base class for a user-defined service that acts as a hybrid View / Ctrl or proxy between View and Ctrl aspects of an App, or as an interface to external mechanisms / event loops.
 
 /// For every discrete Ctrl needed, allocate it and set the appropriate callbacks.<br>
 /// When considering implementing a Service, bear in mind that their ideal is use is to tie into external mechanisms that don't obey the same timing as Hub_update (and thus App_update). A less desirable (but often necessary) use of Service%s is where View and Ctrl logic cannot be cleanly separated; for example, where an external library conflates these two aspects, or where user code cannot reasonably decouple the two, such as vertex data being used both for collision (Ctrl) and rendering (View) logic.
@@ -271,7 +278,7 @@ App * const Hub_getApp(Hub * const this, const char * const id); ///< \memberof 
 //TODO... void Hub_removeDevice(Hub * const this, const char * id);
 
 void 		Builder_buildFromConfig(Hub * const hub, const char * configFilename); ///< Build the Hub contents from a config file; path should be relative to executable.
-typedef void * (*ConstructModuleFromConfigXML)(ezxml_t xml);
+typedef void * (*ExtensionFromConfigXML)(ezxml_t xml);
 void doNothing(void * const this); ///< A null-pattern callback which is the default when no user-defined callback has yet been supplied (prevents null pointer crashes).
 
 #endif //ARC_H

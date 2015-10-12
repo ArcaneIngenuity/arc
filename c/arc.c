@@ -409,7 +409,7 @@ Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
 	strcpy(ctrl->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
 	Ctrl_setDefaultCallbacks(ctrl);
 	//kv_init(ctrl->configs);
-	ctrl->modulesById = kh_init(StrPtr);
+	ctrl->extensionsById = kh_init(StrPtr);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Ctrl_construct(id=%s)\n", id);
@@ -989,10 +989,13 @@ App * Builder_buildApp(ezxml_t appXml)
 		while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
 		{
 			//LOGI("element name is %s", ezxml_name(elementXmlCopy));
-			ConstructModuleFromConfigXML constructor = addressofDynamic(ezxml_attr(elementXmlCopy, "constructor"));
-			void * module = constructor(elementXmlCopy);
-			kh_set(StrPtr, ctrl->modulesById, ezxml_attr(elementXmlCopy, "id"), module);
-			//kv_push(void *, ctrl->modules, module);
+			ExtensionFromConfigXML constructor = addressofDynamic(ezxml_attr(elementXmlCopy, "constructor"));
+			void * extension = constructor(elementXmlCopy);
+			
+			strcpy(((Extension *)extension)->id, ezxml_attr(elementXmlCopy, "id"));
+			
+			kh_set(StrPtr, ctrl->extensionsById, ((Extension *)extension)->id, extension);
+			//kv_push(void *, ctrl->extensions, extension);
 			elementXmlCopy = elementXmlCopy->next;
 		}
 	}
