@@ -62,7 +62,7 @@ void implementTypesAndFunctions(FILE * hFile, const char * types[], int * typesC
 	}
 	fprintf(hFile, "\t}\n");
 	
-	fprintf(hFile, "\tLOGI(\"function name not found: %%s.\\n\", name);\n");
+	fprintf(hFile, "\tLOGI(\"[ARC] Function name not found: %%s.\\n\", name);\n");
 	fprintf(hFile, "\texit(1);\n");
 	
 	fprintf(hFile, "}\n");
@@ -77,7 +77,7 @@ void implementTypesAndFunctions(FILE * hFile, const char * types[], int * typesC
 		fprintf(hFile, "\tif (strcmp(name, \"%s\") == 0) return sizeof(%s);\n", type, type);
 	}
 
-	fprintf(hFile, "\tLOGI(\"type name not found: %%s.\\n\", name);\n");
+	fprintf(hFile, "\tLOGI(\"[ARC] Class name not found: %%s.\\n\", name);\n");
 	fprintf(hFile, "\treturn NULL;\n");
 	fprintf(hFile, "}\n");
 	
