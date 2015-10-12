@@ -410,6 +410,7 @@ Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
 	Ctrl_setDefaultCallbacks(ctrl);
 	//kv_init(ctrl->configs);
 	ctrl->extensionsById = kh_init(StrPtr);
+	//ctrl->construct(ctrl);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Ctrl_construct(id=%s)\n", id);
@@ -986,30 +987,7 @@ App * Builder_buildApp(ezxml_t appXml)
 	ctrl->model 	= model;
 	
 	FOREACH_CTRL_FUNCTION(GENERATE_ASSIGN_METHOD, ctrl)
-	
-	/*
-	name = ezxml_attr(ctrlXml, "mustStart");
-	if (name) ctrl->mustStart = addressofDynamic(name);
-	name = ezxml_attr(ctrlXml, "mustStop");
-	if (name) ctrl->mustStop = addressofDynamic(name);
-	name = ezxml_attr(ctrlXml, "start");
-	if (name) ctrl->start = addressofDynamic(name);
-	name = ezxml_attr(ctrlXml, "stop");
-	if (name) ctrl->stop = addressofDynamic(name);
-	name = ezxml_attr(ctrlXml, "update");
-	if (name) ctrl->update = addressofDynamic(name);
-	name = ezxml_attr(ctrlXml, "updatePost");
-	if (name) ctrl->updatePost= addressofDynamic(name);
-	name = ezxml_attr(ctrlXml, "initialise");
-	if (name) ctrl->initialise= addressofDynamic(name);
-	name = ezxml_attr(ctrlXml, "dispose");
-	if (name) ctrl->dispose = addressofDynamic(name);
-	name = ezxml_attr(ctrlXml, "suspend");
-	if (name) ctrl->suspend = addressofDynamic(name);
-	name = ezxml_attr(ctrlXml, "resume");
-	if (name) ctrl->resume= addressofDynamic(name);
-	*/
-	
+
 	//TODO find custom elements and build them using their name as a key into a map provided for each element type
 	for (elementXml = ezxml_child_any(ctrlXml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
 	{
