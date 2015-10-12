@@ -868,51 +868,62 @@ void View_listen(View * const this)
 
 typedef void * (*BuildFunction) (ezxml_t xml);
 
+#define FOREACH_CTRL_FUNCTION(HANDLER, T) \
+	HANDLER(mustStart, T) \
+	HANDLER(mustStop, T) \
+	HANDLER(start, T) \
+	HANDLER(stop, T) \
+	HANDLER(update, T) \
+	HANDLER(updatePost, T) \
+	HANDLER(initialise, T) \
+	HANDLER(dispose, T) \
+	HANDLER(suspend, T) \
+	HANDLER(resume, T)
+	//HANDLER(construct, T) \
+	//HANDLER(destruct, T)
 
-#define FOREACH_VIEW_FUNCTION(HANDLER) \
-	HANDLER(onParentResize) \
-	HANDLER(start) \
-	HANDLER(stop) \
-	HANDLER(update) \
-	HANDLER(updatePost) \
-	HANDLER(initialise) \
-	HANDLER(dispose) \
-	HANDLER(suspend) \
-	HANDLER(resume)
+#define FOREACH_VIEW_FUNCTION(HANDLER, T) \
+	HANDLER(onParentResize, T) \
+	HANDLER(start, T) \
+	HANDLER(stop, T) \
+	HANDLER(update, T) \
+	HANDLER(updatePost, T) \
+	HANDLER(initialise, T) \
+	HANDLER(dispose, T) \
+	HANDLER(suspend, T) \
+	HANDLER(resume, T)
 
-#define GENERATE_ENUM(value) value,
-#define GENERATE_STRING(value) #value,
-#define GENERATE_KH(value) k = kh_put(StrInt,stringToKey,#value,&ret); kh_value(stringToKey,k) = c; c++;
-#define GENERATE_ASSIGN_FUNCTION(value) name = ezxml_attr(viewXml, #value); \
-	if (name) 	view->value = addressofDynamic(name); \
+#define GENERATE_ASSIGN_METHOD(value, T) name = ezxml_attr(T##Xml, #value); \
+	if (name) 	T->value = addressofDynamic(name); \
 	else \
 	{ \
-		strcpy(nameAssembled, viewClass); \
+		strcpy(nameAssembled, T##Class); \
 		strcat(nameAssembled, "_"); \
 		strcat(nameAssembled, #value); \
-		view->value = addressofDynamic(nameAssembled); \
-		if (!view->value) \
-			view->value = &doNothing; \
+		T->value = addressofDynamic(nameAssembled); \
+		if (!T->value) \
+			T->value = &doNothing; \
 	}
 
+#define GENERATE_CTRL_ASSIGN_METHOD(value, type) name = ezxml_attr(ctrlXml, #value); \
 
 View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model, ezxml_t modelXml)
 {
-	View * subview;
 	ezxml_t subviewXml;
-	const char * name;
 	char nameAssembled[STRLEN_MAX];
+	const char * name;
 	const char * modelClass = ezxml_attr(modelXml, "class");
 	const char * viewClass = ezxml_attr(viewXml, "class");
 	
 	view = View_construct(ezxml_attr(viewXml, "id"), sizeofDynamic(viewClass));
 	view->model 			= model;
 	
-	FOREACH_VIEW_FUNCTION(GENERATE_ASSIGN_FUNCTION);
+	FOREACH_VIEW_FUNCTION(GENERATE_ASSIGN_METHOD, view)
 	
 	if (app)
 		App_setView(app, view); //must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
 	
+	View * subview;
 	for (subviewXml = ezxml_child(viewXml, "view"); subviewXml; subviewXml = subviewXml->next)
 	{
 		subview = Builder_buildView(NULL, subview, subviewXml, model, modelXml);
@@ -933,14 +944,15 @@ ezxml_t ezxml_child_any(ezxml_t xml)
 App * Builder_buildApp(ezxml_t appXml)
 {
 	ezxml_t modelXml, viewXml, subviewXml, rootctrlXml, ctrlXml, elementXml, elementXmlCopy;
+	char nameAssembled[STRLEN_MAX];
+	const char * name;
 	const char * modelClass;
 	const char * ctrlClass;
-	char string[STRLEN_MAX];
+	//char string[STRLEN_MAX];
 	
 	void * model;
 	View * view;
 	Ctrl * ctrl;
-	const char * name;
 	
 	//app (create)
 	App * app = App_construct(ezxml_attr(appXml, "id"));
@@ -973,6 +985,9 @@ App * Builder_buildApp(ezxml_t appXml)
 	ctrl = Ctrl_construct(ezxml_attr(ctrlXml, "id"), sizeofDynamic(ctrlClass));
 	ctrl->model 	= model;
 	
+	FOREACH_CTRL_FUNCTION(GENERATE_ASSIGN_METHOD, ctrl)
+	
+	/*
 	name = ezxml_attr(ctrlXml, "mustStart");
 	if (name) ctrl->mustStart = addressofDynamic(name);
 	name = ezxml_attr(ctrlXml, "mustStop");
@@ -993,6 +1008,7 @@ App * Builder_buildApp(ezxml_t appXml)
 	if (name) ctrl->suspend = addressofDynamic(name);
 	name = ezxml_attr(ctrlXml, "resume");
 	if (name) ctrl->resume= addressofDynamic(name);
+	*/
 	
 	//TODO find custom elements and build them using their name as a key into a map provided for each element type
 	for (elementXml = ezxml_child_any(ctrlXml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
