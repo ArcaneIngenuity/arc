@@ -868,42 +868,54 @@ void View_listen(View * const this)
 
 typedef void * (*BuildFunction) (ezxml_t xml);
 
-View * Builder_addView(App * app, View * view, ezxml_t viewXml, void * model, ezxml_t modelXml)
+
+#define FOREACH_VIEW_FUNCTION(HANDLER) \
+	HANDLER(onParentResize) \
+	HANDLER(start) \
+	HANDLER(stop) \
+	HANDLER(update) \
+	HANDLER(updatePost) \
+	HANDLER(initialise) \
+	HANDLER(dispose) \
+	HANDLER(suspend) \
+	HANDLER(resume)
+
+#define GENERATE_ENUM(value) value,
+#define GENERATE_STRING(value) #value,
+#define GENERATE_KH(value) k = kh_put(StrInt,stringToKey,#value,&ret); kh_value(stringToKey,k) = c; c++;
+#define GENERATE_ASSIGN_FUNCTION(value) name = ezxml_attr(viewXml, #value); \
+	if (name) 	view->value = addressofDynamic(name); \
+	else \
+	{ \
+		strcpy(nameAssembled, viewClass); \
+		strcat(nameAssembled, "_"); \
+		strcat(nameAssembled, #value); \
+		view->value = addressofDynamic(nameAssembled); \
+		if (!view->value) \
+			view->value = &doNothing; \
+	}
+
+
+View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model, ezxml_t modelXml)
 {
 	View * subview;
 	ezxml_t subviewXml;
 	const char * name;
+	char nameAssembled[STRLEN_MAX];
 	const char * modelClass = ezxml_attr(modelXml, "class");
 	const char * viewClass = ezxml_attr(viewXml, "class");
 	
 	view = View_construct(ezxml_attr(viewXml, "id"), sizeofDynamic(viewClass));
 	view->model 			= model;
 	
-	name = ezxml_attr(viewXml, "onParentResize");
-	if (name) view->onParentResize = addressofDynamic(name);
-	name = ezxml_attr(viewXml, "start");
-	if (name) view->start = addressofDynamic(name);
-	name = ezxml_attr(viewXml, "stop");
-	if (name) view->stop = addressofDynamic(name);
-	name = ezxml_attr(viewXml, "update");
-	if (name) view->update = addressofDynamic(name);
-	name = ezxml_attr(viewXml, "updatePost");
-	if (name) view->updatePost = addressofDynamic(name);
-	name = ezxml_attr(viewXml, "initialise");
-	if (name) view->initialise = addressofDynamic(name);
-	name = ezxml_attr(viewXml, "dispose");
-	if (name) view->dispose = addressofDynamic(name);
-	name = ezxml_attr(viewXml, "suspend");
-	if (name) view->suspend = addressofDynamic(name);
-	name = ezxml_attr(viewXml, "resume");
-	if (name) view->resume = addressofDynamic(name);
-
+	FOREACH_VIEW_FUNCTION(GENERATE_ASSIGN_FUNCTION);
+	
 	if (app)
 		App_setView(app, view); //must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
 	
 	for (subviewXml = ezxml_child(viewXml, "view"); subviewXml; subviewXml = subviewXml->next)
 	{
-		subview = Builder_addView(NULL, subview, subviewXml, model, modelXml);
+		subview = Builder_buildView(NULL, subview, subviewXml, model, modelXml);
 
 		View_addChild(view, subview);
 	}
@@ -950,7 +962,7 @@ App * Builder_buildApp(ezxml_t appXml)
 	
 	//views
 	viewXml = ezxml_child(appXml, "view");
-	view = Builder_addView(app, view, viewXml, model, modelXml);
+	view = Builder_buildView(app, view, viewXml, model, modelXml);
 	#ifdef DESKTOP
 	//View_addChild((View *)mainView, (View *)terminalView);
 	#endif//DESKTOP
