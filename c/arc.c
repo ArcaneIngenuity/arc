@@ -985,18 +985,34 @@ App * Builder_buildApp(ezxml_t appXml)
 	//TODO find custom elements and build them using their name as a key into a map provided for each element type
 	for (elementXml = ezxml_child_any(ctrlXml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
 	{
-		elementXmlCopy = elementXml;
-		while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
+		bool allowCustomElementsAsExtensions = false; //DEV -get from <hub> as an arg (or pass hub as arg)
+		
+		if (allowCustomElementsAsExtensions)
 		{
-			//LOGI("element name is %s", ezxml_name(elementXmlCopy));
-			ExtensionFromConfigXML constructor = addressofDynamic(ezxml_attr(elementXmlCopy, "constructor"));
-			void * extension = constructor(elementXmlCopy);
-			
-			strcpy(((Extension *)extension)->id, ezxml_attr(elementXmlCopy, "id"));
-			
-			kh_set(StrPtr, ctrl->extensionsById, ((Extension *)extension)->id, extension);
-			//kv_push(void *, ctrl->extensions, extension);
-			elementXmlCopy = elementXmlCopy->next;
+			//TODO similar to below block, but using a custom element name as extension class name
+		}
+		else //do not allow custom elements - fallback to seeking standard <extension> elements
+		{
+			if (strcmp(ezxml_name(elementXml), "extension") == 0) 
+			{
+				elementXmlCopy = elementXml;
+				while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
+				{
+					char * extensionClass = ezxml_attr(elementXmlCopy, "class");
+					char constructorName[STRLEN_MAX];
+					strcpy(constructorName, extensionClass);
+					strcat(constructorName, "_fromConfigXML");
+					LOGI("constructor name is %s", constructorName);
+					ExtensionFromConfigXML constructor = addressofDynamic(constructorName);
+					void * extension = constructor(elementXmlCopy);
+					
+					strcpy(((Extension *)extension)->id, ezxml_attr(elementXmlCopy, "id"));
+					
+					kh_set(StrPtr, ctrl->extensionsById, ((Extension *)extension)->id, extension);
+					//kv_push(void *, ctrl->extensions, extension);
+					elementXmlCopy = elementXmlCopy->next;
+				}
+			}
 		}
 	}
 	
