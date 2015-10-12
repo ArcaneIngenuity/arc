@@ -3,7 +3,7 @@
 	url = https://github.com/ArcaneIngenuity/log.git
 [submodule "c/ezxml"]
 	path = c/ezxml
-	url = https://github.com/lxfontes/ezxml.git
+url=https://github.com/ArcaneIngenuity/ezxml.git
 [submodule "c/klib"]
 	path = c/klib
 url=https://github.com/ArcaneIngenuity/klib.git
