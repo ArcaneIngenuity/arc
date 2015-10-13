@@ -150,8 +150,8 @@ typedef struct Ctrl
 	//kvec_t(void *) configs; ///< Custom configs included in this Ctrl's markup, if any.
 	khash_t(StrPtr) * extensionsById;
 	
-	void (*mustStart)(struct Ctrl * const this); ///< \brief User-supplied callback for checking when this Ctrl mustStart().
-	void (*mustStop)(struct Ctrl * const this); ///< \brief User-supplied callback for checking when this Ctrl mustStop().
+	//void (*mustStart)(struct Ctrl * const this); ///< \brief User-supplied callback for checking when this Ctrl mustStart().
+	//void (*mustStop)(struct Ctrl * const this); ///< \brief User-supplied callback for checking when this Ctrl mustStop().
 	void (*start)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl start()s.
 	void (*stop)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl stop()s.
 	void (*suspend)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl must suspend() due to a loss of rendering context.

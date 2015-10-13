@@ -425,8 +425,8 @@ void Ctrl_setDefaultCallbacks(Ctrl * const this)
 	LOGI("[ARC] Ctrl_setDefaultCallbacks (id=%s)\n", this->id);
 	#endif
 	
-	this->mustStart = (void * const)&doNothing;
-	this->mustStop 	= (void * const)&doNothing;
+	//this->mustStart = (void * const)&doNothing;
+	//this->mustStop 	= (void * const)&doNothing;
 	this->start 	= (void * const)&doNothing;
 	this->stop 		= (void * const)&doNothing;
 	this->suspend 	= (void * const)&doNothing;
@@ -870,8 +870,6 @@ void View_listen(View * const this)
 typedef void * (*BuildFunction) (ezxml_t xml);
 
 #define FOREACH_CTRL_FUNCTION(HANDLER, T) \
-	HANDLER(mustStart, T) \
-	HANDLER(mustStop, T) \
 	HANDLER(start, T) \
 	HANDLER(stop, T) \
 	HANDLER(update, T) \
@@ -882,6 +880,8 @@ typedef void * (*BuildFunction) (ezxml_t xml);
 	HANDLER(resume, T)
 	//HANDLER(construct, T) \
 	//HANDLER(destruct, T)
+	//HANDLER(mustStart, T) \
+	//HANDLER(mustStop, T) \
 
 #define FOREACH_VIEW_FUNCTION(HANDLER, T) \
 	HANDLER(onParentResize, T) \

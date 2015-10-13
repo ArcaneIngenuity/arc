@@ -143,8 +143,8 @@ void extractFunctionFromConfigXML(ezxml_t someXml, const char * functions[], int
 void extractFunctionsFromConfigXML(ezxml_t someXml, const char * functions[], int * functionsCount)
 {
 	//use the full collection of functions to check across all classes (many are shared)
-	extractFunctionFromConfigXML(someXml, functions, functionsCount, "mustStart");
-	extractFunctionFromConfigXML(someXml, functions, functionsCount, "mustStop");
+	//extractFunctionFromConfigXML(someXml, functions, functionsCount, "mustStart");
+	//extractFunctionFromConfigXML(someXml, functions, functionsCount, "mustStop");
 	extractFunctionFromConfigXML(someXml, functions, functionsCount, "start");
 	extractFunctionFromConfigXML(someXml, functions, functionsCount, "stop");
 	extractFunctionFromConfigXML(someXml, functions, functionsCount, "initialise");
@@ -154,6 +154,7 @@ void extractFunctionsFromConfigXML(ezxml_t someXml, const char * functions[], in
 	extractFunctionFromConfigXML(someXml, functions, functionsCount, "suspend");
 	extractFunctionFromConfigXML(someXml, functions, functionsCount, "resume");
 	extractFunctionFromConfigXML(someXml, functions, functionsCount, "onParentResize");
+	extractFunctionFromConfigXML(someXml, functions, functionsCount, "fromConfigXML");
 }
 
 void stripBlockComments(char * buffer)
@@ -429,9 +430,9 @@ void extractFunctionsFromHeaders(const char * types[], int * typesCount, const c
 	char filename[256];
 	strcpy(filename, srcPath);
 	strcat(filename, "/");
-	strcat(filename, types[(*typesCount-1)]);
+	strcat(filename, types[(*typesCount-1)]); // for the most recently added type
 	strcat(filename, ".h");
-	char * fileString = Text_load(filename);
+	char * fileString = Text_load(filename); //NB not freed till program ends - thus we keep valid strings till implementTypesAndFunctions()
 	LOGI("---------------------------\n");
 	//LOGI("fileString=%s\n", fileString);
 	//char buffer[strlen(fileString)];
@@ -512,7 +513,7 @@ void extractTypesAndFunctionsFromConfigXML(ezxml_t hubXml, const char * types[],
 					while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
 					{
 						types[(*typesCount)++] = ezxml_attr(elementXmlCopy, "class");
-						
+						extractFunctionsFromHeaders(types, typesCount, functions, functionsCount);
 						elementXmlCopy = elementXmlCopy->next;
 					}
 					
