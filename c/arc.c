@@ -935,13 +935,6 @@ View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model, 
 	return view;
 }
 
-ezxml_t ezxml_child_any(ezxml_t xml)
-{
-    xml = (xml) ? xml->child : NULL;
-    //while (xml) xml = xml->sibling;
-    return xml;
-}
-
 App * Builder_buildApp(ezxml_t appXml)
 {
 	ezxml_t modelXml, viewXml, subviewXml, rootctrlXml, ctrlXml, elementXml, elementXmlCopy;
