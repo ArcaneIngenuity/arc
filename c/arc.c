@@ -935,9 +935,54 @@ View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model, 
 	return view;
 }
 
+void Builder_buildExtension(ezxml_t extensionXml, khash_t(StrPtr) * ctrlExtensionsById)
+{
+	char * extensionClass = ezxml_attr(extensionXml, "class");
+	char constructorName[STRLEN_MAX];
+	strcpy(constructorName, extensionClass);
+	strcat(constructorName, "_fromConfigXML");
+	LOGI("constructor name is %s", constructorName);
+	ExtensionFromConfigXML constructor = addressofDynamic(constructorName);
+	void * extension = constructor(extensionXml);
+	
+	strcpy(((Extension *)extension)->id, ezxml_attr(extensionXml, "id"));
+	
+	kh_set(StrPtr, ctrlExtensionsById, ((Extension *)extension)->id, extension);
+	//kv_push(void *, ctrl->extensions, extension);
+}
+
+void Builder_buildExtensions(ezxml_t ctrlXml, khash_t(StrPtr) * ctrlExtensionsById)
+{
+	ezxml_t elementXml, elementXmlCopy;
+	//TODO find custom elements and build them using their name as a key into a map provided for each element type
+	for (elementXml = ezxml_child_any(ctrlXml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
+	{
+		bool allowCustomElementsAsExtensions = false; //DEV -get from <hub> as an arg (or pass hub as arg)
+		
+		if (allowCustomElementsAsExtensions)
+		{
+			//TODO similar to below block, but using a custom element name as extension class name
+		}
+		else //do not allow custom elements - fallback to seeking standard <extension> elements
+		{
+			if (strcmp(ezxml_name(elementXml), "extension") == 0) 
+			{
+				elementXmlCopy = elementXml;
+				while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
+				{
+					Builder_buildExtension(elementXmlCopy, ctrlExtensionsById);
+
+					elementXmlCopy = elementXmlCopy->next;
+				}
+			}
+		}
+	}
+	
+}
+
 App * Builder_buildApp(ezxml_t appXml)
 {
-	ezxml_t modelXml, viewXml, subviewXml, rootctrlXml, ctrlXml, elementXml, elementXmlCopy;
+	ezxml_t modelXml, viewXml, subviewXml, rootctrlXml, ctrlXml;
 	char nameAssembled[STRLEN_MAX];
 	const char * name;
 	const char * modelClass;
@@ -981,39 +1026,7 @@ App * Builder_buildApp(ezxml_t appXml)
 	
 	FOREACH_CTRL_FUNCTION(GENERATE_ASSIGN_METHOD, ctrl)
 
-	//TODO find custom elements and build them using their name as a key into a map provided for each element type
-	for (elementXml = ezxml_child_any(ctrlXml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
-	{
-		bool allowCustomElementsAsExtensions = false; //DEV -get from <hub> as an arg (or pass hub as arg)
-		
-		if (allowCustomElementsAsExtensions)
-		{
-			//TODO similar to below block, but using a custom element name as extension class name
-		}
-		else //do not allow custom elements - fallback to seeking standard <extension> elements
-		{
-			if (strcmp(ezxml_name(elementXml), "extension") == 0) 
-			{
-				elementXmlCopy = elementXml;
-				while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
-				{
-					char * extensionClass = ezxml_attr(elementXmlCopy, "class");
-					char constructorName[STRLEN_MAX];
-					strcpy(constructorName, extensionClass);
-					strcat(constructorName, "_fromConfigXML");
-					LOGI("constructor name is %s", constructorName);
-					ExtensionFromConfigXML constructor = addressofDynamic(constructorName);
-					void * extension = constructor(elementXmlCopy);
-					
-					strcpy(((Extension *)extension)->id, ezxml_attr(elementXmlCopy, "id"));
-					
-					kh_set(StrPtr, ctrl->extensionsById, ((Extension *)extension)->id, extension);
-					//kv_push(void *, ctrl->extensions, extension);
-					elementXmlCopy = elementXmlCopy->next;
-				}
-			}
-		}
-	}
+	Builder_buildExtensions(ctrlXml, ctrl->extensionsById);
 	
 	App_setCtrl(app, ctrl);
 	
