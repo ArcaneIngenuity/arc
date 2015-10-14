@@ -110,7 +110,7 @@ Hub * Hub_construct()
 	//#else //no auto destructor!
 	Hub * hub = calloc(1, sizeof(Hub));
 	//#endif//__GNUC__
-	
+	hub->extensionsById = kh_init(StrPtr);
 	Hub_setDefaultCallbacks(hub);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -243,6 +243,7 @@ App * App_construct(const char * id)//App ** app)
 	App * app = calloc(1, sizeof(App));
 	//#endif//__GNUC__
 	strcpy(app->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
+	app->extensionsById = kh_init(StrPtr);
 	app->pubsByName = kh_init(StrPtr);
 	app->initialise = (void * const)&doNothing;
 	app->dispose 	= (void * const)&doNothing;
@@ -588,6 +589,7 @@ View * View_construct(const char * id, size_t sizeofSubclass)
 	strcpy(view->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
 	View_setDefaultCallbacks(view);
 	kv_init(view->childrenByZ);
+	view->extensionsById = kh_init(StrPtr);
 	//view->subStatusesByName = kh_init(StrPtr);
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...View_construct (id=%s)\n", id);
@@ -908,26 +910,26 @@ typedef void * (*BuildFunction) (ezxml_t xml);
 
 #define GENERATE_CTRL_ASSIGN_METHOD(value, type) name = ezxml_attr(ctrlXml, #value); \
 
-View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model, ezxml_t modelXml)
+View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model)
 {
-	ezxml_t subviewXml;
 	char nameAssembled[STRLEN_MAX];
 	const char * name;
-	const char * modelClass = ezxml_attr(modelXml, "class");
 	const char * viewClass = ezxml_attr(viewXml, "class");
 	
 	view = View_construct(ezxml_attr(viewXml, "id"), sizeofDynamic(viewClass));
-	view->model 			= model;
+	view->model = model;
 	
 	FOREACH_VIEW_FUNCTION(GENERATE_ASSIGN_METHOD, view)
+	
+	Builder_buildExtensions(viewXml, view->extensionsById);
 	
 	if (app)
 		App_setView(app, view); //must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
 	
 	View * subview;
-	for (subviewXml = ezxml_child(viewXml, "view"); subviewXml; subviewXml = subviewXml->next)
+	for (ezxml_t subviewXml = ezxml_child(viewXml, "view"); subviewXml; subviewXml = subviewXml->next)
 	{
-		subview = Builder_buildView(NULL, subview, subviewXml, model, modelXml);
+		subview = Builder_buildView(NULL, subview, subviewXml, model);
 
 		View_addChild(view, subview);
 	}
@@ -935,7 +937,25 @@ View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model, 
 	return view;
 }
 
-void Builder_buildExtension(ezxml_t extensionXml, khash_t(StrPtr) * ctrlExtensionsById)
+Ctrl * Builder_buildCtrl(App * app, ezxml_t ctrlXml, void * model)
+{
+	char nameAssembled[STRLEN_MAX];
+	const char * name;
+	const char * ctrlClass = ezxml_attr(ctrlXml, "class");
+	
+	Ctrl * ctrl = Ctrl_construct(ezxml_attr(ctrlXml, "id"), sizeofDynamic(ctrlClass));
+	ctrl->model = model;
+	
+	FOREACH_CTRL_FUNCTION(GENERATE_ASSIGN_METHOD, ctrl)
+	
+	Builder_buildExtensions(ctrlXml, ctrl->extensionsById);
+	
+	App_setCtrl(app, ctrl);
+	
+	return ctrl;
+}
+
+void Builder_buildExtension(ezxml_t extensionXml, khash_t(StrPtr) * extensionsById)
 {
 	char * extensionClass = ezxml_attr(extensionXml, "class");
 	char constructorName[STRLEN_MAX];
@@ -947,11 +967,12 @@ void Builder_buildExtension(ezxml_t extensionXml, khash_t(StrPtr) * ctrlExtensio
 	
 	strcpy(((Extension *)extension)->id, ezxml_attr(extensionXml, "id"));
 	
-	kh_set(StrPtr, ctrlExtensionsById, ((Extension *)extension)->id, extension);
+	kh_set(StrPtr, extensionsById, ((Extension *)extension)->id, extension);
 	//kv_push(void *, ctrl->extensions, extension);
+	LOGI("extension built.\n");
 }
 
-void Builder_buildExtensions(ezxml_t ctrlXml, khash_t(StrPtr) * ctrlExtensionsById)
+void Builder_buildExtensions(ezxml_t ctrlXml, khash_t(StrPtr) * extensionsById)
 {
 	ezxml_t elementXml, elementXmlCopy;
 	//TODO find custom elements and build them using their name as a key into a map provided for each element type
@@ -970,7 +991,7 @@ void Builder_buildExtensions(ezxml_t ctrlXml, khash_t(StrPtr) * ctrlExtensionsBy
 				elementXmlCopy = elementXml;
 				while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
 				{
-					Builder_buildExtension(elementXmlCopy, ctrlExtensionsById);
+					Builder_buildExtension(elementXmlCopy, extensionsById);
 
 					elementXmlCopy = elementXmlCopy->next;
 				}
@@ -983,11 +1004,9 @@ void Builder_buildExtensions(ezxml_t ctrlXml, khash_t(StrPtr) * ctrlExtensionsBy
 App * Builder_buildApp(ezxml_t appXml)
 {
 	ezxml_t modelXml, viewXml, subviewXml, rootctrlXml, ctrlXml;
-	char nameAssembled[STRLEN_MAX];
 	const char * name;
 	const char * modelClass;
 	const char * ctrlClass;
-	//char string[STRLEN_MAX];
 	
 	void * model;
 	View * view;
@@ -1013,22 +1032,11 @@ App * Builder_buildApp(ezxml_t appXml)
 	
 	//views
 	viewXml = ezxml_child(appXml, "view");
-	view = Builder_buildView(app, view, viewXml, model, modelXml);
-	#ifdef DESKTOP
-	//View_addChild((View *)mainView, (View *)terminalView);
-	#endif//DESKTOP
+	view = Builder_buildView(app, view, viewXml, model);
 	
 	//ctrl
 	ctrlXml = ezxml_child(appXml, "ctrl");
-	ctrlClass = ezxml_attr(ctrlXml, "class");
-	ctrl = Ctrl_construct(ezxml_attr(ctrlXml, "id"), sizeofDynamic(ctrlClass));
-	ctrl->model 	= model;
-	
-	FOREACH_CTRL_FUNCTION(GENERATE_ASSIGN_METHOD, ctrl)
-
-	Builder_buildExtensions(ctrlXml, ctrl->extensionsById);
-	
-	App_setCtrl(app, ctrl);
+	ctrl = Builder_buildCtrl(app, ctrlXml, model);
 	
 	return app;
 }

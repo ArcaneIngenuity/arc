@@ -463,6 +463,32 @@ void extractFunctionsFromHeaders(const char * types[], int * typesCount, const c
 	LOGI("---------------------------\n");
 }
 
+void extractTypesAndFunctionsFromExtensionsXML(ezxml_t parentXml, const char * types[], int * typesCount, const char * functions[], int * functionsCount)
+{
+	for (ezxml_t elementXml = ezxml_child_any(parentXml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
+	{
+		bool allowCustomElementsAsExtensions = false; //DEV -get from <hub> as an arg (or pass hub as arg)
+		if (allowCustomElementsAsExtensions)
+		{
+			//TODO similar to below block, but using a custom element name as extension class name
+		}
+		else //do not allow custom elements - fallback to seeking standard <extension> elements
+		{
+			if (strcmp(ezxml_name(elementXml), "extension") == 0) 
+			{
+				ezxml_t elementXmlCopy = elementXml;
+				while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
+				{
+					types[(*typesCount)++] = ezxml_attr(elementXmlCopy, "class");
+					extractFunctionsFromHeaders(types, typesCount, functions, functionsCount);
+					elementXmlCopy = elementXmlCopy->next;
+				}
+				
+			}
+		}
+	}
+}
+
 void recurseViews(ezxml_t viewXml, const char * types[], int * typesCount, const char * functions[], int * functionsCount)
 {
 	for (viewXml = ezxml_child(viewXml, "view"); viewXml; viewXml = viewXml->next)
@@ -470,6 +496,7 @@ void recurseViews(ezxml_t viewXml, const char * types[], int * typesCount, const
 		types[(*typesCount)++] = ezxml_attr(viewXml, "class");
 		//extractFunctionsFromConfigXML(viewXml, functions, functionsCount);
 		extractFunctionsFromHeaders(types, typesCount, functions, functionsCount);
+		extractTypesAndFunctionsFromExtensionsXML(viewXml, types, typesCount, functions, functionsCount);
 		recurseViews(viewXml, types, typesCount, functions, functionsCount);
 	}
 }
@@ -495,37 +522,14 @@ void extractTypesAndFunctionsFromConfigXML(ezxml_t hubXml, const char * types[],
 		types[(*typesCount)++] = ezxml_attr(ctrlXml, "class");
 		//extractFunctionsFromConfigXML(ctrlXml, functions, functionsCount);
 		extractFunctionsFromHeaders(types, typesCount, functions, functionsCount);
-		
-		//ctrl's extensions
-		ezxml_t elementXml, elementXmlCopy;
-		for (elementXml = ezxml_child_any(ctrlXml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
-		{
-			bool allowCustomElementsAsExtensions = false; //DEV -get from <hub> as an arg (or pass hub as arg)
-			if (allowCustomElementsAsExtensions)
-			{
-				//TODO similar to below block, but using a custom element name as extension class name
-			}
-			else //do not allow custom elements - fallback to seeking standard <extension> elements
-			{
-				if (strcmp(ezxml_name(elementXml), "extension") == 0) 
-				{
-					elementXmlCopy = elementXml;
-					while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
-					{
-						types[(*typesCount)++] = ezxml_attr(elementXmlCopy, "class");
-						extractFunctionsFromHeaders(types, typesCount, functions, functionsCount);
-						elementXmlCopy = elementXmlCopy->next;
-					}
-					
-				}
-			}
-		}
+		extractTypesAndFunctionsFromExtensionsXML(ctrlXml, types, typesCount, functions, functionsCount);
 	
 		//views
 		ezxml_t viewXml = ezxml_child(appXml, "view");
 		types[(*typesCount)++] = ezxml_attr(viewXml, "class");
 		//extractFunctionsFromConfigXML(viewXml, functions, functionsCount);
 		extractFunctionsFromHeaders(types, typesCount, functions, functionsCount);
+		extractTypesAndFunctionsFromExtensionsXML(viewXml, types, typesCount, functions, functionsCount);
 		recurseViews(viewXml, types, typesCount, functions, functionsCount);
 	}
 }

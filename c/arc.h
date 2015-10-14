@@ -119,6 +119,8 @@ typedef struct View
 	int width; ///< Width of this View. (NEEDS REVIEW - should be float to accommodate any user units; perhaps should be in user subclass of View)
 	int height; ///< Height of this View. (NEEDS REVIEW - should be float to accommodate any user units; perhaps should be in user subclass of View)
 
+	khash_t(StrPtr) * extensionsById; ///< Extensions included on this View instance, if using config.
+	
 	void (*start)(struct View * const this); ///< \brief User-supplied callback for when this View start()s.
 	void (*stop)(struct View * const this); ///< \brief User-supplied callback for when this View stop()s.
 	void (*suspend)(struct View * const this); ///< \brief User-supplied callback for when this View must suspend() due to a loss of rendering context.
@@ -148,7 +150,7 @@ typedef struct Ctrl
 	bool initialised; ///< True after first initialisation. If re-initialisation is required, manually reset this to false.
 	void * model; ///< The model associated with this View. May or may not be the same as this View's App's (complete) model, depending on \link Configuration \endlink.
 	//kvec_t(void *) configs; ///< Custom configs included in this Ctrl's markup, if any.
-	khash_t(StrPtr) * extensionsById;
+	khash_t(StrPtr) * extensionsById; ///< Extensions included on this Ctrl instance, if using config.
 	
 	//void (*mustStart)(struct Ctrl * const this); ///< \brief User-supplied callback for checking when this Ctrl mustStart().
 	//void (*mustStop)(struct Ctrl * const this); ///< \brief User-supplied callback for checking when this Ctrl mustStop().
@@ -178,6 +180,8 @@ typedef struct App
 	void * model; ///< The model associated with this App.
 	struct View * view; ///< The root View associated with this App.
 	struct Ctrl * ctrl; ///< The root Ctrl associated with this App.
+	
+	khash_t(StrPtr) * extensionsById; ///< Extensions included on this App instance, if using config.
 	
 	void (*initialise)(struct App * const this); ///< \brief User-supplied callback for when this App initialise()s.
 	void (*dispose)(struct App * const this); ///< \brief User-supplied callback for when this App dispose()s of its resources.
@@ -210,6 +214,8 @@ typedef struct Hub
 	//TODO global Services?
 	//struct Service _services[SERVICES_MAX];
 	//Key _serviceKeys[SERVICES_MAX];
+	
+	khash_t(StrPtr) * extensionsById; ///< Extensions included on this Hub instance, if using config.
 
 	//TODO Builder
 	void (*initialise)(struct Hub * const this); ///< \brief User-supplied callback for when this Hub initialise()s.
