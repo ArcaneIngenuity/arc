@@ -111,7 +111,7 @@ void implementTypesAndFunctions(FILE * hFile, const char * types[], int * typesC
 	fprintf(hFile, "\t}\n");
 	
 	fprintf(hFile, "\tLOGI(\"[ARC] Function name not found: %%s.\\n\", name);\n");
-	fprintf(hFile, "\texit(1);\n");
+	fprintf(hFile, "\treturn NULL;\n");
 	
 	fprintf(hFile, "}\n");
 	fprintf(hFile, "\n");
@@ -540,14 +540,14 @@ void main(int argc, char *argv[])
 	{
 		printf("Usage: arctyper <input: space-separated type names> <output>\n");
 		printf("Output is <output>.c.\n");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	
 	ezxml_t hubXml = ezxml_parse_file(argv[1]);
 	if (hubXml == NULL)
 	{
 		printf("Error opening config file %s for read.\n", argv[1]);
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	
 	srcPath = argv[2];
@@ -561,7 +561,7 @@ void main(int argc, char *argv[])
 	if (cFile == NULL)
 	{
 		printf("Error opening source file %s for write.\n", filename);
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	
 	//prepare types and functions arrays to be populated

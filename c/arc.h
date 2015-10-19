@@ -231,7 +231,6 @@ typedef struct Hub
 
 Ctrl * 		Ctrl_construct(const char * id, size_t sizeofSubclass); ///< \memberof Ctrl Constructs the Ctrl and sets all callbacks to do nothing.
 void 		Ctrl_destruct(Ctrl * const this); ///< \memberof Ctrl Disposes of the Ctrl using \link dispose \endlink.
-void 		Ctrl_setDefaultCallbacks(Ctrl * const this); ///< \memberof Ctrl Sets all Ctrl's callbacks to do nothing. (TODO REMOVE, should not be public)
 //bool 		Ctrl_mustStart(Ctrl * const this); ///< \memberof Ctrl
 //bool 		Ctrl_mustStop(Ctrl * const this); ///< \memberof Ctrl
 void 		Ctrl_start(Ctrl * const this); ///< \memberof Ctrl Starts the Ctrl using \link start \endlink.
@@ -243,7 +242,6 @@ void 		Ctrl_createPub(Ctrl * this, const char * name); ///< \memberof Ctrl Conve
 
 View * 		View_construct(const char * id, size_t sizeofSubclass); ///< \memberof View Constructs the View and sets all callbacks to do nothing.
 void 		View_destruct(View * const this); ///< \memberof View Disposes of the View and its children, depth-first, using \link dispose \endlink.
-void 		View_setDefaultCallbacks(View * const this); ///< \memberof View Sets all View's callbacks to do nothing.
 void 		View_start(View * const this); ///< \memberof View Starts the View using \link start \endlink.
 void 		View_stop(View * const this); ///< \memberof View Stops the View using \link stop \endlink.
 void 		View_suspend(View * const this); ///< \memberof View Has this View and its children %s \link suspend \endlink operations due to a loss of rendering context.

@@ -111,7 +111,7 @@ Hub * Hub_construct()
 	Hub * hub = calloc(1, sizeof(Hub));
 	//#endif//__GNUC__
 	hub->extensionsById = kh_init(StrPtr);
-	Hub_setDefaultCallbacks(hub);
+	//Hub_setDefaultCallbacks(hub);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Hub_construct\n");
@@ -230,6 +230,19 @@ App * const Hub_getApp(Hub * const this, const char * const id)
 }
 
 //--------- App ---------//
+void App_setDefaultCallbacks(App * app)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] App_setDefaultCallbacks\n");
+	#endif
+	
+	app->initialise = (void * const)&doNothing;
+	app->dispose 	= (void * const)&doNothing;
+	app->suspend 	= (void * const)&doNothing;
+	app->resume 	= (void * const)&doNothing;
+}
+
+
 App * App_construct(const char * id)//App ** app)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -245,8 +258,7 @@ App * App_construct(const char * id)//App ** app)
 	strcpy(app->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
 	app->extensionsById = kh_init(StrPtr);
 	app->pubsByName = kh_init(StrPtr);
-	app->initialise = (void * const)&doNothing;
-	app->dispose 	= (void * const)&doNothing;
+	//App_setDefaultCallbacks(app);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...App_construct (id=%s)\n", id);
@@ -397,29 +409,6 @@ void App_setView(App * app, View * view)
 }
 
 //--------- Ctrl ---------//
-Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] Ctrl_construct...(id=%s)\n", id);
-	#endif
-	LOGI("sizeof ctrl=%u\n", sizeofSubclass);
-	//since we can't pass in a type,
-	//allocate full size of the "subclass" - this is fine as "base"
-	//struct is situated from zero in this allocated space
-	Ctrl * ctrl = calloc(1, sizeofSubclass);
-	strcpy(ctrl->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
-	Ctrl_setDefaultCallbacks(ctrl);
-	//kv_init(ctrl->configs);
-	ctrl->extensionsById = kh_init(StrPtr);
-	//ctrl->construct(ctrl);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_construct(id=%s)\n", id);
-	#endif
-	
-	return ctrl;
-}
-
 void Ctrl_setDefaultCallbacks(Ctrl * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -436,6 +425,29 @@ void Ctrl_setDefaultCallbacks(Ctrl * const this)
 	this->dispose 	= (void * const)&doNothing;
 	this->update 	= (void * const)&doNothing;
 	this->updatePost= (void * const)&doNothing;
+}
+
+Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] Ctrl_construct...(id=%s)\n", id);
+	#endif
+	LOGI("sizeof ctrl=%u\n", sizeofSubclass);
+	//since we can't pass in a type,
+	//allocate full size of the "subclass" - this is fine as "base"
+	//struct is situated from zero in this allocated space
+	Ctrl * ctrl = calloc(1, sizeofSubclass);
+	strcpy(ctrl->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
+	//Ctrl_setDefaultCallbacks(ctrl);
+	//kv_init(ctrl->configs);
+	ctrl->extensionsById = kh_init(StrPtr);
+	//ctrl->construct(ctrl);
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Ctrl_construct(id=%s)\n", id);
+	#endif
+	
+	return ctrl;
 }
 
 void Ctrl_start(Ctrl * const this)
@@ -587,7 +599,7 @@ View * View_construct(const char * id, size_t sizeofSubclass)
 	//struct is situated from zero in this allocated space
 	View * view = calloc(1, sizeofSubclass);
 	strcpy(view->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
-	View_setDefaultCallbacks(view);
+	//View_setDefaultCallbacks(view);
 	kv_init(view->childrenByZ);
 	view->extensionsById = kh_init(StrPtr);
 	//view->subStatusesByName = kh_init(StrPtr);
@@ -895,20 +907,34 @@ typedef void * (*BuildFunction) (ezxml_t xml);
 	HANDLER(dispose, T) \
 	HANDLER(suspend, T) \
 	HANDLER(resume, T)
+	
+#define FOREACH_HUB_FUNCTION(HANDLER, T) \
+	HANDLER(initialise, T) \
+	HANDLER(dispose, T) \
+	HANDLER(suspend, T) \
+	HANDLER(resume, T)
+	
+#define FOREACH_APP_FUNCTION(HANDLER, T) \
+	HANDLER(initialise, T) \
+	HANDLER(dispose, T) \
+	HANDLER(suspend, T) \
+	HANDLER(resume, T)
 
-#define GENERATE_ASSIGN_METHOD(value, T) name = ezxml_attr(T##Xml, #value); \
-	if (name) 	T->value = addressofDynamic(name); \
+#define GENERATE_ASSIGN_METHOD(member, instance) name = ezxml_attr(instance##Xml, #member); \
+	if (name) 	instance->member = addressofDynamic(name); \
 	else \
 	{ \
-		strcpy(nameAssembled, T##Class); \
+		char *  s = #instance "Class"; \
+		strcpy(nameAssembled, s); \
 		strcat(nameAssembled, "_"); \
-		strcat(nameAssembled, #value); \
-		T->value = addressofDynamic(nameAssembled); \
-		if (!T->value) \
-			T->value = &doNothing; \
+		strcat(nameAssembled, #member); \
+		instance->member = addressofDynamic(nameAssembled); \
+	} \
+	if (!instance->member) \
+	{ \
+		instance->member = &doNothing; \
+		LOGI("[ARC] Using default function doNothing().\n"); \
 	}
-
-#define GENERATE_CTRL_ASSIGN_METHOD(value, type) name = ezxml_attr(ctrlXml, #value); \
 
 View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model)
 {
@@ -963,7 +989,11 @@ void Builder_buildExtension(ezxml_t extensionXml, khash_t(StrPtr) * extensionsBy
 	strcat(constructorName, "_fromConfigXML");
 	LOGI("constructor name is %s", constructorName);
 	ExtensionFromConfigXML constructor = addressofDynamic(constructorName);
-	void * extension = constructor(extensionXml);
+	void * extension;
+	if (constructor) //if extension constructor is available
+		extension = constructor(extensionXml);
+	else //cannot construct extension without function
+		{LOGI("THANG1") ; exit(EXIT_FAILURE);}; //error already logged by addressofDynamic()
 	
 	strcpy(((Extension *)extension)->id, ezxml_attr(extensionXml, "id"));
 	
@@ -1004,9 +1034,11 @@ void Builder_buildExtensions(ezxml_t ctrlXml, khash_t(StrPtr) * extensionsById)
 App * Builder_buildApp(ezxml_t appXml)
 {
 	ezxml_t modelXml, viewXml, subviewXml, rootctrlXml, ctrlXml;
+	char nameAssembled[STRLEN_MAX];
 	const char * name;
 	const char * modelClass;
 	const char * ctrlClass;
+	const char * appClass;
 	
 	void * model;
 	View * view;
@@ -1015,15 +1047,8 @@ App * Builder_buildApp(ezxml_t appXml)
 	//app (create)
 	App * app = App_construct(ezxml_attr(appXml, "id"));
 	
-	name = ezxml_attr(appXml, "initialise");
-	if (name) app->initialise = addressofDynamic(name);
-	name = ezxml_attr(appXml, "dispose");
-	if (name) app->dispose = addressofDynamic(name);
-	name = ezxml_attr(appXml, "suspend");
-	if (name) app->suspend = addressofDynamic(name);
-	name = ezxml_attr(appXml, "resume");
-	if (name) app->resume = addressofDynamic(name);
-	
+	FOREACH_APP_FUNCTION(GENERATE_ASSIGN_METHOD, app)
+
 	//model
 	modelXml = ezxml_child(appXml, "model");
 	modelClass = ezxml_attr(modelXml, "class");
@@ -1043,17 +1068,12 @@ App * Builder_buildApp(ezxml_t appXml)
 
 void Builder_buildHub(Hub * hub, ezxml_t hubXml)
 {
+	char nameAssembled[STRLEN_MAX];
 	const char * name;
+	const char * hubClass;
 	
-	name = ezxml_attr(hubXml, "initialise");
-	if (name) hub->initialise = addressofDynamic(name);
-	name = ezxml_attr(hubXml, "dispose");
-	if (name) hub->dispose = addressofDynamic(name);
-	name = ezxml_attr(hubXml, "suspend");
-	if (name) hub->suspend = addressofDynamic(name);
-	name = ezxml_attr(hubXml, "resume");
-	if (name) hub->resume = addressofDynamic(name);
-	
+	FOREACH_HUB_FUNCTION(GENERATE_ASSIGN_METHOD, hub)
+
 	ezxml_t appsXml = ezxml_child(hubXml, "apps");
 	
 	for (ezxml_t appXml = ezxml_child(appsXml, "app"); appXml; appXml = appXml->next)
