@@ -987,13 +987,15 @@ void Builder_buildExtension(ezxml_t extensionXml, khash_t(StrPtr) * extensionsBy
 	char constructorName[STRLEN_MAX];
 	strcpy(constructorName, extensionClass);
 	strcat(constructorName, "_fromConfigXML");
-	LOGI("constructor name is %s", constructorName);
 	ExtensionFromConfigXML constructor = addressofDynamic(constructorName);
 	void * extension;
 	if (constructor) //if extension constructor is available
 		extension = constructor(extensionXml);
 	else //cannot construct extension without function
-		{LOGI("THANG1") ; exit(EXIT_FAILURE);}; //error already logged by addressofDynamic()
+	{
+		LOGI("Constructor %s not found.\n", constructorName);
+		exit(EXIT_FAILURE); //error already logged by addressofDynamic()
+	}
 	
 	strcpy(((Extension *)extension)->id, ezxml_attr(extensionXml, "id"));
 	
