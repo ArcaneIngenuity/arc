@@ -111,6 +111,7 @@ Hub * Hub_construct()
 	Hub * hub = calloc(1, sizeof(Hub));
 	//#endif//__GNUC__
 	hub->extensionsById = kh_init(StrPtr);
+	kv_init(hub->extensionIds);
 	//Hub_setDefaultCallbacks(hub);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -257,6 +258,7 @@ App * App_construct(const char * id)//App ** app)
 	//#endif//__GNUC__
 	strcpy(app->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
 	app->extensionsById = kh_init(StrPtr);
+	kv_init(app->extensionIds);
 	app->pubsByName = kh_init(StrPtr);
 	//App_setDefaultCallbacks(app);
 	
@@ -441,6 +443,7 @@ Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
 	//Ctrl_setDefaultCallbacks(ctrl);
 	//kv_init(ctrl->configs);
 	ctrl->extensionsById = kh_init(StrPtr);
+	kv_init(ctrl->extensionIds);
 	//ctrl->construct(ctrl);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -602,6 +605,7 @@ View * View_construct(const char * id, size_t sizeofSubclass)
 	//View_setDefaultCallbacks(view);
 	kv_init(view->childrenByZ);
 	view->extensionsById = kh_init(StrPtr);
+	kv_init(view->extensionIds);
 	//view->subStatusesByName = kh_init(StrPtr);
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...View_construct (id=%s)\n", id);
@@ -921,11 +925,10 @@ typedef void * (*BuildFunction) (ezxml_t xml);
 	HANDLER(resume, T)
 
 #define GENERATE_ASSIGN_METHOD(member, instance) name = ezxml_attr(instance##Xml, #member); \
-	if (name) 	instance->member = addressofDynamic(name); \
+	if (name) instance->member = addressofDynamic(name); \
 	else \
 	{ \
-		char *  s = #instance "Class"; \
-		strcpy(nameAssembled, s); \
+		strcpy(nameAssembled, instance##Class); \
 		strcat(nameAssembled, "_"); \
 		strcat(nameAssembled, #member); \
 		instance->member = addressofDynamic(nameAssembled); \
@@ -947,7 +950,7 @@ View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model)
 	
 	FOREACH_VIEW_FUNCTION(GENERATE_ASSIGN_METHOD, view)
 	
-	Builder_buildExtensions(viewXml, view->extensionsById);
+	Builder_buildExtensions(viewXml, view->extensionsById, &view->extensionIds);
 	
 	if (app)
 		App_setView(app, view); //must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
@@ -974,38 +977,49 @@ Ctrl * Builder_buildCtrl(App * app, ezxml_t ctrlXml, void * model)
 	
 	FOREACH_CTRL_FUNCTION(GENERATE_ASSIGN_METHOD, ctrl)
 	
-	Builder_buildExtensions(ctrlXml, ctrl->extensionsById);
+	Builder_buildExtensions(ctrlXml, ctrl->extensionsById, &ctrl->extensionIds);
 	
 	App_setCtrl(app, ctrl);
 	
 	return ctrl;
 }
 
-void Builder_buildExtension(ezxml_t extensionXml, khash_t(StrPtr) * extensionsById)
+void Builder_buildExtension(ezxml_t extensionXml, khash_t(StrPtr) * extensionsById, kvec_t(ArcString) * extensionIds)
 {
-	char * extensionClass = ezxml_attr(extensionXml, "class");
-	char constructorName[STRLEN_MAX];
-	strcpy(constructorName, extensionClass);
-	strcat(constructorName, "_fromConfigXML");
-	ExtensionFromConfigXML constructor = addressofDynamic(constructorName);
-	void * extension;
-	if (constructor) //if extension constructor is available
-		extension = constructor(extensionXml);
-	else //cannot construct extension without function
+	LOGI("Builder_buildExtension\n");
+	char * extensionClassName = ezxml_attr(extensionXml, "class");
+	void * extension = calloc(1, sizeofDynamic(extensionClassName));
+	
+	if (ezxml_child_any(extensionXml)) //requires a parser to consume contents hereof
 	{
-		LOGI("Constructor %s not found.\n", constructorName);
-		exit(EXIT_FAILURE); //error already logged by addressofDynamic()
+		char parserFunctionName[STRLEN_MAX];
+		strcpy(parserFunctionName, extensionClassName);
+		strcat(parserFunctionName, "_fromConfigXML");
+		ParserFunctionXML parser = addressofDynamic(parserFunctionName);
+		
+		if (parser) //if extension constructor is available
+			//extension = parser(extensionXml);
+			parser(extension, extensionXml);
+		else //cannot construct extension without function
+		{
+			LOGI("Parser function %s required but not found on %s.\n", parserFunctionName, extensionClassName);
+			exit(EXIT_FAILURE); //error already logged by addressofDynamic()
+		}
 	}
 	
-	strcpy(((Extension *)extension)->id, ezxml_attr(extensionXml, "id"));
+	//strcpy(((Extension *)extension)->id, ezxml_attr(extensionXml, "id"));
+	int extensionsCount = kh_size(extensionsById);
+	char * extensionId = &kv_A(*extensionIds, extensionsCount);
+	strncpy(extensionId, ezxml_attr(extensionXml, "id"), STRLEN_MAX);
 	
-	kh_set(StrPtr, extensionsById, ((Extension *)extension)->id, extension);
+	kh_set(StrPtr, extensionsById, extensionId, extension);
 	//kv_push(void *, ctrl->extensions, extension);
 	LOGI("extension built.\n");
 }
 
-void Builder_buildExtensions(ezxml_t ctrlXml, khash_t(StrPtr) * extensionsById)
+void Builder_buildExtensions(ezxml_t ctrlXml, khash_t(StrPtr) * extensionsById, kvec_t(ArcString) * extensionIds)
 {
+	LOGI("Builder_buildExtensions\n");
 	ezxml_t elementXml, elementXmlCopy;
 	//TODO find custom elements and build them using their name as a key into a map provided for each element type
 	for (elementXml = ezxml_child_any(ctrlXml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
@@ -1023,7 +1037,7 @@ void Builder_buildExtensions(ezxml_t ctrlXml, khash_t(StrPtr) * extensionsById)
 				elementXmlCopy = elementXml;
 				while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
 				{
-					Builder_buildExtension(elementXmlCopy, extensionsById);
+					Builder_buildExtension(elementXmlCopy, extensionsById, extensionIds);
 
 					elementXmlCopy = elementXmlCopy->next;
 				}
@@ -1035,6 +1049,7 @@ void Builder_buildExtensions(ezxml_t ctrlXml, khash_t(StrPtr) * extensionsById)
 
 App * Builder_buildApp(ezxml_t appXml)
 {
+	LOGI("Builder_buildApp\n");
 	ezxml_t modelXml, viewXml, subviewXml, rootctrlXml, ctrlXml;
 	char nameAssembled[STRLEN_MAX];
 	const char * name;
@@ -1047,9 +1062,13 @@ App * Builder_buildApp(ezxml_t appXml)
 	Ctrl * ctrl;
 	
 	//app (create)
+	
+	appClass = ezxml_attr(appXml, "class");
 	App * app = App_construct(ezxml_attr(appXml, "id"));
 	
 	FOREACH_APP_FUNCTION(GENERATE_ASSIGN_METHOD, app)
+	
+	Builder_buildExtensions(appXml, app->extensionsById, &app->extensionIds);
 
 	//model
 	modelXml = ezxml_child(appXml, "model");
@@ -1070,12 +1089,13 @@ App * Builder_buildApp(ezxml_t appXml)
 
 void Builder_buildHub(Hub * hub, ezxml_t hubXml)
 {
+	LOGI("Builder_buildHub\n");
 	char nameAssembled[STRLEN_MAX];
 	const char * name;
-	const char * hubClass;
+	const char * hubClass = "Hub";
 	
 	FOREACH_HUB_FUNCTION(GENERATE_ASSIGN_METHOD, hub)
-
+	Builder_buildExtensions(hubXml, hub->extensionsById, &hub->extensionIds);
 	ezxml_t appsXml = ezxml_child(hubXml, "apps");
 	
 	for (ezxml_t appXml = ezxml_child(appsXml, "app"); appXml; appXml = appXml->next)
@@ -1087,6 +1107,7 @@ void Builder_buildHub(Hub * hub, ezxml_t hubXml)
 
 void Builder_buildFromConfig(Hub * const hub, const char * configFilename)
 {
+	LOGI("Builder_buildFromConfig\n");
 	ezxml_t hubXml = ezxml_parse_file(configFilename);
 	Builder_buildHub(hub, hubXml);
 	ezxml_free(hubXml);

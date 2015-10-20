@@ -85,6 +85,12 @@ typedef struct Pub
 	kvec_t(Sub) subsList; ///< The list of Sub(scriber)s to which this Pub(lisher) publishers events.
 } Pub;
 
+/// Value type for kvec_t(ArcString) (char array not possible).
+typedef struct ArcString
+{
+	char name[STRLEN_MAX];
+} ArcString;
+
 
 /// Base class for a user-defined extension created from config.
 typedef struct Extension
@@ -120,6 +126,7 @@ typedef struct View
 	int height; ///< Height of this View. (NEEDS REVIEW - should be float to accommodate any user units; perhaps should be in user subclass of View)
 
 	khash_t(StrPtr) * extensionsById; ///< Extensions included on this View instance, if using config.
+	kvec_t(ArcString) extensionIds; ///< Array of fixed-length cstrings used as keys to extensionsById (required once XML and its source strings are freed).
 	
 	void (*start)(struct View * const this); ///< \brief User-supplied callback for when this View start()s.
 	void (*stop)(struct View * const this); ///< \brief User-supplied callback for when this View stop()s.
@@ -150,7 +157,8 @@ typedef struct Ctrl
 	bool initialised; ///< True after first initialisation. If re-initialisation is required, manually reset this to false.
 	void * model; ///< The model associated with this View. May or may not be the same as this View's App's (complete) model, depending on \link Configuration \endlink.
 	//kvec_t(void *) configs; ///< Custom configs included in this Ctrl's markup, if any.
-	khash_t(StrPtr) * extensionsById; ///< Extensions included on this Ctrl instance, if using config.
+	khash_t(StrPtr) * extensionsById; ///< Extensions included on this Ctrl, if using config.
+	kvec_t(ArcString) extensionIds; ///< Array of fixed-length cstrings used as keys to extensionsById (required once XML and its source strings are freed).
 	
 	//void (*mustStart)(struct Ctrl * const this); ///< \brief User-supplied callback for checking when this Ctrl mustStart().
 	//void (*mustStop)(struct Ctrl * const this); ///< \brief User-supplied callback for checking when this Ctrl mustStop().
@@ -182,6 +190,7 @@ typedef struct App
 	struct Ctrl * ctrl; ///< The root Ctrl associated with this App.
 	
 	khash_t(StrPtr) * extensionsById; ///< Extensions included on this App instance, if using config.
+	kvec_t(ArcString) extensionIds; ///< Array of fixed-length cstrings used as keys to extensionsById (required once XML and its source strings are freed).
 	
 	void (*initialise)(struct App * const this); ///< \brief User-supplied callback for when this App initialise()s.
 	void (*dispose)(struct App * const this); ///< \brief User-supplied callback for when this App dispose()s of its resources.
@@ -215,8 +224,9 @@ typedef struct Hub
 	//struct Service _services[SERVICES_MAX];
 	//Key _serviceKeys[SERVICES_MAX];
 	
-	khash_t(StrPtr) * extensionsById; ///< Extensions included on this Hub instance, if using config.
-
+	khash_t(StrPtr) * extensionsById; ///< Extensions included on this Hub, if using config.
+	kvec_t(ArcString) extensionIds; ///< Array of fixed-length cstrings used as keys to extensionsById (required once XML and its source strings are freed).
+	
 	//TODO Builder
 	void (*initialise)(struct Hub * const this); ///< \brief User-supplied callback for when this Hub initialise()s.
 	void (*dispose)(struct Hub * const this); ///< \brief User-supplied callback for when this Hub dispose()s of its resources.
@@ -282,7 +292,7 @@ App * const Hub_getApp(Hub * const this, const char * const id); ///< \memberof 
 //TODO... void Hub_removeDevice(Hub * const this, const char * id);
 
 void 		Builder_buildFromConfig(Hub * const hub, const char * configFilename); ///< Build the Hub contents from a config file; path should be relative to executable.
-typedef void * (*ExtensionFromConfigXML)(ezxml_t xml);
+typedef void * (*ParserFunctionXML)(void * this, ezxml_t xml);
 void doNothing(void * const this); ///< A null-pattern callback which is the default when no user-defined callback has yet been supplied (prevents null pointer crashes).
 
 #endif //ARC_H
