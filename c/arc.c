@@ -27,6 +27,7 @@
 
 #define ARC_DEBUG_ONEOFFS 1
 //#define ARC_DEBUG_UPDATES 1
+//#define ARC_DEBUG_PUBSUB 1
 #ifndef ARC_KHASH_TYPES_OFF
 KHASH_DEFINE(StrPtr, 	kh_cstr_t, uintptr_t, kh_str_hash_func, kh_str_hash_equal, 1)
 #endif//ARC_KHASH_TYPES_OFF
@@ -40,6 +41,9 @@ static khiter_t k;
 /// Construct a Pub(lisher). This is usually called by Ctrl.initialise(), or possibly by Ctrl.update().
 Pub * Pub_construct(const char * name)//, void * data)
 {
+	#ifdef ARC_DEBUG_PUBSUB
+	LOGI("[ARC]    Pub_construct (name=%name)\n", name);
+	#endif
 	Pub * pubPtr = calloc(1, sizeof(Pub));
 	strcpy(pubPtr->name, name);
 	//pubPtr->data = data;
@@ -50,6 +54,9 @@ Pub * Pub_construct(const char * name)//, void * data)
 /// Publish to the Sub(scriber) list.
 void Pub_lish(Pub * pubPtr, void * info)
 {
+	#ifdef ARC_DEBUG_PUBSUB
+	LOGI("[ARC]    Pub_lish\n");
+	#endif
 	for (int i = 0; i < kv_size(pubPtr->subsList); ++i)
 	{
 		Sub * subPtr = &kv_A(pubPtr->subsList, i);
@@ -62,6 +69,9 @@ void Pub_lish(Pub * pubPtr, void * info)
 /// A Sub(scriber) knows what the data
 void Sub_scribe(Sub * subPtr, Pub * pubPtr)
 {
+	#ifdef ARC_DEBUG_PUBSUB
+	LOGI("[ARC]    Sub_scribe\n");
+	#endif
 	kv_push(Sub, pubPtr->subsList, *subPtr);	
 }
 
@@ -70,7 +80,7 @@ void Sub_scribe(Sub * subPtr, Pub * pubPtr)
 void Hub_setDefaultCallbacks(Hub * hub)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] Hub_setDefaultCallbacks\n");
+	LOGI("[ARC]    Hub_setDefaultCallbacks\n");
 	#endif
 	
 	hub->initialise = (void * const)&doNothing;
@@ -82,7 +92,7 @@ void Hub_setDefaultCallbacks(Hub * hub)
 void Hub_update(Hub * const this)
 {
 	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC] Hub_update...\n");
+	LOGI("[ARC]    Hub_update...\n");
 	#endif
 	
 	//update apps
@@ -101,7 +111,7 @@ void Hub_update(Hub * const this)
 Hub * Hub_construct()
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] Hub_construct...\n");
+	LOGI("[ARC]    Hub_construct...\n");
 	#endif
 	
 	//TODO ifdef GCC, link destruct() via attr cleanup 
@@ -124,7 +134,7 @@ Hub * Hub_construct()
 void Hub_destruct(Hub * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] Hub_destruct...\n"); 
+	LOGI("[ARC]    Hub_destruct...\n"); 
 	#endif// ARC_DEBUG_ONEOFFS
 	
 	for (int i = 0; i < this->appsCount; ++i)
@@ -147,7 +157,7 @@ void Hub_destruct(Hub * const this)
 void Hub_suspend(Hub * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] Hub_suspend...");
+	LOGI("[ARC]    Hub_suspend...");
 	#endif// ARC_DEBUG_ONEOFFS
 	for (int i = 0; i < this->appsCount; ++i)
 	{
@@ -166,7 +176,7 @@ void Hub_suspend(Hub * const this)
 void Hub_resume(Hub * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] Hub_resume...");
+	LOGI("[ARC]    Hub_resume...");
 	#endif// ARC_DEBUG_ONEOFFS
 	for (int i = 0; i < this->appsCount; ++i)
 	{
@@ -185,7 +195,7 @@ void Hub_resume(Hub * const this)
 App * const Hub_addApp(Hub * const this, App * const app)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] Hub_addApp... (app id=%s)\n", app->id);
+	LOGI("[ARC]    Hub_addApp... (id=%s)\n", app->id);
 	#endif
 	if (this->appsCount < APPS_MAX)
 	{
@@ -196,7 +206,7 @@ App * const Hub_addApp(Hub * const this, App * const app)
 		//#endif// ARC_DEBUG_ONEOFFS
 		
 		#ifdef ARC_DEBUG_ONEOFFS
-		LOGI("[ARC] ...Hub_addApp (app id=%s)\n", app->id);
+		LOGI("[ARC] ...Hub_addApp    (id=%s)\n", app->id);
 		#endif
 		
 		return app;
@@ -207,7 +217,7 @@ App * const Hub_addApp(Hub * const this, App * const app)
 App * const Hub_getApp(Hub * const this, const char * const id)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] Hub_getApp... (app id=%s)\n", id);
+	LOGI("[ARC]    Hub_getApp... (app id=%s)\n", id);
 	#endif
 	
 	for (int i = 0; i < this->appsCount; ++i)
@@ -234,7 +244,7 @@ App * const Hub_getApp(Hub * const this, const char * const id)
 void App_setDefaultCallbacks(App * app)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] App_setDefaultCallbacks\n");
+	LOGI("[ARC]    App_setDefaultCallbacks\n");
 	#endif
 	
 	app->initialise = (void * const)&doNothing;
@@ -247,7 +257,7 @@ void App_setDefaultCallbacks(App * app)
 App * App_construct(const char * id)//App ** app)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] App_construct...(id=%s)\n", id);
+	LOGI("[ARC]    App_construct...(id=%s)\n", id);
 	#endif
 	
 	//TODO ifdef GCC, link destruct() via attr cleanup 
@@ -263,7 +273,7 @@ App * App_construct(const char * id)//App ** app)
 	//App_setDefaultCallbacks(app);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...App_construct (id=%s)\n", id);
+	LOGI("[ARC] ...App_construct    (id=%s)\n", id);
 	#endif
 	
 	return app;
@@ -272,7 +282,7 @@ App * App_construct(const char * id)//App ** app)
 void App_update(App * const this)
 {
 	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC] App_update... (id=%s)\n", this->id);
+	LOGI("[ARC]    App_update... (id=%s)\n", this->id);
 	#endif
 	
 	Ctrl * ctrl = this->ctrl;
@@ -286,7 +296,7 @@ void App_update(App * const this)
 	Ctrl_updatePost(ctrl); //abstract
 	
 	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC] ...App_update (id=%s)\n", this->id);
+	LOGI("[ARC] ...App_update    (id=%s)\n", this->id);
 	#endif
 }
 
@@ -302,7 +312,7 @@ void App_initialise(App * const this)
 void App_start(App * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] App_start... (id=%s)\n", this->id);
+	LOGI("[ARC]    App_start... (id=%s)\n", this->id);
 	#endif
 	if (!this->updating)
 	{
@@ -319,14 +329,14 @@ void App_start(App * const this)
 		}
 	}
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...App_start (id=%s)\n", this->id);
+	LOGI("[ARC] ...App_start    (id=%s)\n", this->id);
 	#endif
 }
 
 void App_stop(App * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] App_stop... (id=%s)\n", this->id);
+	LOGI("[ARC]    App_stop... (id=%s)\n", this->id);
 	#endif
 	
 	Ctrl * ctrl = this->ctrl;
@@ -346,7 +356,7 @@ void App_destruct(App * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
 	char id[64]; strcpy(id, this->id);
-	LOGI("[ARC] App_destruct... (id=%s)\n", id);
+	LOGI("[ARC]    App_destruct... (id=%s)\n", id);
 	#endif//ARC_DEBUG_ONEOFFS
 	
 	Ctrl * ctrl = this->ctrl;
@@ -362,14 +372,14 @@ void App_destruct(App * const this)
 	free(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...App_destruct (id=%s)\n", id);
+	LOGI("[ARC] ...App_destruct    (id=%s)\n", id);
 	#endif//ARC_DEBUG_ONEOFFS
 }
 
 void App_suspend(App * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] App_suspend... (id=%s)\n", this->id);
+	LOGI("[ARC]    App_suspend... (id=%s)\n", this->id);
 	#endif//ARC_DEBUG_ONEOFFS
 	
 	View_suspend(this->view);
@@ -377,14 +387,14 @@ void App_suspend(App * const this)
 	this->ctrl->suspend((void *)this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...App_suspend (id=%s)\n", this->id);
+	LOGI("[ARC] ...App_suspend    (id=%s)\n", this->id);
 	#endif//ARC_DEBUG_ONEOFFS
 }
 
 void App_resume(App * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] App_resume... (id=%s)\n", this->id);
+	LOGI("[ARC]    App_resume... (id=%s)\n", this->id);
 	#endif//ARC_DEBUG_ONEOFFS
 	
 	View_resume(this->view);
@@ -392,7 +402,7 @@ void App_resume(App * const this)
 	this->ctrl->resume((void *)this);
 
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...App_resume (id=%s)\n", this->id);
+	LOGI("[ARC] ...App_resume    (id=%s)\n", this->id);
 	#endif//ARC_DEBUG_ONEOFFS
 }
 
@@ -414,7 +424,7 @@ void App_setView(App * app, View * view)
 void Ctrl_setDefaultCallbacks(Ctrl * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] Ctrl_setDefaultCallbacks (id=%s)\n", this->id);
+	LOGI("[ARC]    Ctrl_setDefaultCallbacks (id=%s)\n", this->id);
 	#endif
 	
 	//this->mustStart = (void * const)&doNothing;
@@ -432,9 +442,8 @@ void Ctrl_setDefaultCallbacks(Ctrl * const this)
 Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] Ctrl_construct...(id=%s)\n", id);
+	LOGI("[ARC]    Ctrl_construct... (id=%s)\n", id);
 	#endif
-	LOGI("sizeof ctrl=%u\n", sizeofSubclass);
 	//since we can't pass in a type,
 	//allocate full size of the "subclass" - this is fine as "base"
 	//struct is situated from zero in this allocated space
@@ -447,7 +456,7 @@ Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
 	//ctrl->construct(ctrl);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_construct(id=%s)\n", id);
+	LOGI("[ARC] ...Ctrl_construct    (id=%s)\n", id);
 	#endif
 	
 	return ctrl;
@@ -456,61 +465,61 @@ Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
 void Ctrl_start(Ctrl * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] Ctrl_start... (id=%s)\n", this->id);
+	LOGI("[ARC]    Ctrl_start... (id=%s)\n", this->id);
 	#endif
 	
 	this->start((void *)this);
 	this->updating = true;
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_start (id=%s)\n", this->id);
+	LOGI("[ARC] ...Ctrl_start    (id=%s)\n", this->id);
 	#endif
 }
 
 void Ctrl_stop(Ctrl * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] Ctrl_stop... (id=%s)\n", this->id);
+	LOGI("[ARC]    Ctrl_stop... (id=%s)\n", this->id);
 	#endif
 	
 	this->stop((void *)this);
 	this->updating = false;
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_stop (id=%s)\n", this->id);
+	LOGI("[ARC] ...Ctrl_stop    (id=%s)\n", this->id);
 	#endif
 }
 
 void Ctrl_suspend(Ctrl * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] Ctrl_suspend... (id=%s)\n", this->id);
+	LOGI("[ARC]    Ctrl_suspend... (id=%s)\n", this->id);
 	#endif
 	
 	this->suspend(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_suspend (id=%s)\n", this->id);
+	LOGI("[ARC] ...Ctrl_suspend    (id=%s)\n", this->id);
 	#endif
 }
 
 void Ctrl_resume(Ctrl * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] Ctrl_resume... (id=%s)\n", this->id);
+	LOGI("[ARC]    Ctrl_resume... (id=%s)\n", this->id);
 	#endif
 	
 	this->resume(this);	
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_resume (id=%s)\n", this->id);
+	LOGI("[ARC] ...Ctrl_resume    (id=%s)\n", this->id);
 	#endif
 }
 
 void Ctrl_initialise(Ctrl * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] Ctrl_initialise... (id=%s)\n", this->id);
+	LOGI("[ARC]    Ctrl_initialise... (id=%s)\n", this->id);
 	#endif
 	
 	this->initialise(this);
@@ -518,33 +527,33 @@ void Ctrl_initialise(Ctrl * const this)
 	this->initialised = true;
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_initialise (id=%s)\n", this->id);
+	LOGI("[ARC] ...Ctrl_initialise    (id=%s)\n", this->id);
 	#endif
 }
 
 void Ctrl_update(Ctrl * const this)
 {
 	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC] Ctrl_update... (id=%s)\n", this->id);
+	LOGI("[ARC]    Ctrl_update... (id=%s)\n", this->id);
 	#endif
 	
 	this->update(this);//deltaSec
 	
 	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC] ...Ctrl_update (id=%s)\n", this->id);
+	LOGI("[ARC] ...Ctrl_update    (id=%s)\n", this->id);
 	#endif
 }
 
 void Ctrl_updatePost(Ctrl * const this)
 {
 	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC] Ctrl_updatePost... (id=%s)\n", this->id);
+	LOGI("[ARC]    Ctrl_updatePost... (id=%s)\n", this->id);
 	#endif
 	
 	this->updatePost(this);//deltaSec
 	
 	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC] ...Ctrl_updatePost (id=%s)\n", this->id);
+	LOGI("[ARC] ...Ctrl_updatePost    (id=%s)\n", this->id);
 	#endif
 }
 
@@ -552,7 +561,7 @@ void Ctrl_destruct(Ctrl * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
 	char id[64]; strcpy(id, this->id);
-	LOGI("[ARC] Ctrl_destruct... (id=%s)\n", id);
+	LOGI("[ARC]    Ctrl_destruct... (id=%s)\n", id);
 	#endif
 	
 	this->dispose(this);
@@ -560,7 +569,7 @@ void Ctrl_destruct(Ctrl * const this)
 	free(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_destruct (id=%s)\n", id);
+	LOGI("[ARC] ...Ctrl_destruct    (id=%s)\n", id);
 	#endif
 }
 
@@ -575,7 +584,7 @@ void Ctrl_createPub(Ctrl * this, const char * name)
 void View_setDefaultCallbacks(View * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] View_setDefaultCallbacks (id=%s)\n", this->id);
+	LOGI("[ARC]    View_setDefaultCallbacks (id=%s)\n", this->id);
 	#endif
 	
 	//null id
@@ -594,7 +603,7 @@ void View_setDefaultCallbacks(View * const this)
 View * View_construct(const char * id, size_t sizeofSubclass)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] View_construct... (id=%s)\n", id);
+	LOGI("[ARC]    View_construct... (id=%s)\n", id);
 	#endif
 	
 	//since we can't pass in a type,
@@ -608,7 +617,7 @@ View * View_construct(const char * id, size_t sizeofSubclass)
 	kv_init(view->extensionIds);
 	//view->subStatusesByName = kh_init(StrPtr);
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_construct (id=%s)\n", id);
+	LOGI("[ARC] ...View_construct    (id=%s)\n", id);
 	#endif
 	
 	return view;
@@ -617,35 +626,35 @@ View * View_construct(const char * id, size_t sizeofSubclass)
 void View_start(View * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] View_start... (id=%s)\n", this->id);
+	LOGI("[ARC]    View_start... (id=%s)\n", this->id);
 	#endif
 	
 	this->start((void *)this);
 	this->updating = true;
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_start (id=%s)\n", this->id);
+	LOGI("[ARC] ...View_start    (id=%s)\n", this->id);
 	#endif
 }
 
 void View_stop(View * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] View_stop... (id=%s)\n", this->id);
+	LOGI("[ARC]    View_stop... (id=%s)\n", this->id);
 	#endif
 	
 	this->stop((void *)this);
 	this->updating = false;
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_stop (id=%s)\n", this->id);
+	LOGI("[ARC] ...View_stop    (id=%s)\n", this->id);
 	#endif
 }
 
 void View_suspend(View * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] View_suspend... (id=%s)\n", this->id);
+	LOGI("[ARC]    View_suspend... (id=%s)\n", this->id);
 	#endif
 	
 	for (int i = 0; i < kv_size(this->childrenByZ); ++i)
@@ -657,14 +666,14 @@ void View_suspend(View * const this)
 	this->suspend(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_suspend (id=%s)\n", this->id);
+	LOGI("[ARC] ...View_suspend    (id=%s)\n", this->id);
 	#endif
 }
 
 void View_resume(View * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] View_resume... (id=%s)\n", this->id);
+	LOGI("[ARC]    View_resume... (id=%s)\n", this->id);
 	#endif
 	
 	for (int i = 0; i < kv_size(this->childrenByZ); ++i)
@@ -676,7 +685,7 @@ void View_resume(View * const this)
 	this->resume(this);	
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_resume (id=%s)\n", this->id);
+	LOGI("[ARC] ...View_resume    (id=%s)\n", this->id);
 	#endif
 }
 
@@ -684,7 +693,7 @@ void View_resume(View * const this)
 void View_initialise(View * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] View_initialise... (id=%s)\n", this->id);
+	LOGI("[ARC]    View_initialise... (id=%s)\n", this->id);
 	#endif
 	
 	this->initialise(this);
@@ -698,14 +707,14 @@ void View_initialise(View * const this)
 	}
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_initialise (id=%s)\n", this->id);
+	LOGI("[ARC] ...View_initialise    (id=%s)\n", this->id);
 	#endif
 }
 
 void View_update(View * const this)
 {
 	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC] View_update... (id=%s)\n", this->id);
+	LOGI("[ARC]    View_update... (id=%s)\n", this->id);
 	#endif
 	
 	this->update(this);//deltaSec
@@ -720,7 +729,7 @@ void View_update(View * const this)
 	this->updatePost(this);//deltaSec
 	
 	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC] ...View_update (id=%s)\n", this->id);
+	LOGI("[ARC] ...View_update    (id=%s)\n", this->id);
 	#endif
 }
 
@@ -728,7 +737,7 @@ void View_destruct(View * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
 	char id[64]; strcpy(id, this->id);
-	LOGI("[ARC] View_destruct... (id=%s)\n", id);
+	LOGI("[ARC]    View_destruct... (id=%s)\n", id);
 	#endif
 	
 	for (int i = 0; i < kv_size(this->childrenByZ); ++i)
@@ -743,14 +752,14 @@ void View_destruct(View * const this)
 	free(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_destruct (id=%s)\n", id);
+	LOGI("[ARC] ...View_destruct    (id=%s)\n", id);
 	#endif
 }
 
 View * View_getChild(View * const this, char * id)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] View_getChild... (id=%s) (child id=%s)\n", this->id, id);
+	LOGI("[ARC]    View_getChild... (id=%s) (child id=%s)\n", this->id, id);
 	#endif
 	
 	for (int i = 0; i < kv_size(this->childrenByZ); ++i)
@@ -759,7 +768,7 @@ View * View_getChild(View * const this, char * id)
 		if (strcmp(id, child->id) == 0)
 		{
 			#ifdef ARC_DEBUG_ONEOFFS
-			LOGI("[ARC] ...View_getChild (id=%s) (child id=%s)\n", this->id, id);
+			LOGI("[ARC] ...View_getChild    (id=%s) (child id=%s)\n", this->id, id);
 			#endif
 			
 			return child;
@@ -767,7 +776,7 @@ View * View_getChild(View * const this, char * id)
 	}
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_getChild (id=%s) (child id=%s)\n", this->id, id);
+	LOGI("[ARC] ...View_getChild    (id=%s) (child id=%s)\n", this->id, id);
 	#endif
 	
 	return NULL;
@@ -794,13 +803,13 @@ void View_claimAncestry(View * const this, View * const child)
 View * View_addChild(View * const this, View * const child)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] View_addChild... (id=%s) (child id=%s)\n", this->id, child->id);
+	LOGI("[ARC]    View_addChild... (id=%s) (child id=%s)\n", this->id, child->id);
 	#endif
 	
 	View_claimAncestry(this, child);
 
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_addChild (id=%s) (child id=%s)\n", this->id, child->id);
+	LOGI("[ARC] ...View_addChild    (id=%s) (child id=%s)\n", this->id, child->id);
 	#endif
 	
 	kv_push(View *, this->childrenByZ, child); //NB! dispose in draw order
@@ -843,7 +852,7 @@ bool View_isRoot(View * const this)
 void View_onParentResize(View * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] View_onParentResize... (id=%s)\n", this->id);
+	LOGI("[ARC]    View_onParentResize... (id=%s)\n", this->id);
 	#endif
 	
 	this->onParentResize(this);
@@ -858,7 +867,7 @@ void View_onParentResize(View * const this)
 	}
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_onParentResize (id=%s)\n", this->id);
+	LOGI("[ARC] ...View_onParentResize    (id=%s)\n", this->id);
 	#endif
 }
 
@@ -936,11 +945,15 @@ typedef void * (*BuildFunction) (ezxml_t xml);
 	if (!instance->member) \
 	{ \
 		instance->member = &doNothing; \
-		LOGI("[ARC] Using default function doNothing().\n"); \
+		LOGI("[ARC]    Using default function: doNothing.\n"); \
 	}
 
 View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Builder_buildView...\n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
 	char nameAssembled[STRLEN_MAX];
 	const char * name;
 	const char * viewClass = ezxml_attr(viewXml, "class");
@@ -963,11 +976,19 @@ View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model)
 		View_addChild(view, subview);
 	}
 	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Builder_buildView   \n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
 	return view;
 }
 
 Ctrl * Builder_buildCtrl(App * app, ezxml_t ctrlXml, void * model)
 {
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Builder_buildCtrl...\n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
 	char nameAssembled[STRLEN_MAX];
 	const char * name;
 	const char * ctrlClass = ezxml_attr(ctrlXml, "class");
@@ -981,45 +1002,66 @@ Ctrl * Builder_buildCtrl(App * app, ezxml_t ctrlXml, void * model)
 	
 	App_setCtrl(app, ctrl);
 	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Builder_buildCtrl   \n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
 	return ctrl;
 }
 
 void Builder_buildExtension(ezxml_t extensionXml, khash_t(StrPtr) * extensionsById, kvec_t(ArcString) * extensionIds)
 {
-	LOGI("Builder_buildExtension\n");
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Builder_buildExtension...\n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
 	char * extensionClassName = ezxml_attr(extensionXml, "class");
 	void * extension = calloc(1, sizeofDynamic(extensionClassName));
+
+	//check for parser and run it if available
+	//would allow custom <extension initialise="someFunction"> to override this if user desires, but then again,
+	//we'd still have to match the function signature so why not just match name, too, as done here.
+	//essentially, an "instance" is only an "extension" if it matches the required function interface.
+	char parserFunctionName[STRLEN_MAX];
+	strcpy(parserFunctionName, extensionClassName);
+	strcat(parserFunctionName, "_fromConfigXML");
+	ParserFunctionXML parser = addressofDynamic(parserFunctionName);
 	
-	if (ezxml_child_any(extensionXml)) //requires a parser to consume contents hereof
+	if (parser) //if extension constructor is available
 	{
-		char parserFunctionName[STRLEN_MAX];
-		strcpy(parserFunctionName, extensionClassName);
-		strcat(parserFunctionName, "_fromConfigXML");
-		ParserFunctionXML parser = addressofDynamic(parserFunctionName);
-		
-		if (parser) //if extension constructor is available
-			//extension = parser(extensionXml);
-			parser(extension, extensionXml);
-		else //cannot construct extension without function
-		{
-			LOGI("Parser function %s required but not found on %s.\n", parserFunctionName, extensionClassName);
-			exit(EXIT_FAILURE); //error already logged by addressofDynamic()
-		}
+		#ifdef ARC_DEBUG_ONEOFFS
+		LOGI("[ARC]    Parser function %s available on %s, parsing.\n", parserFunctionName, extensionClassName);
+		#endif// ARC_DEBUG_ONEOFFS
+		//extension = parser(extensionXml);
+		parser(extension, extensionXml);
 	}
-	
-	//strcpy(((Extension *)extension)->id, ezxml_attr(extensionXml, "id"));
-	int extensionsCount = kh_size(extensionsById);
-	char * extensionId = &kv_A(*extensionIds, extensionsCount);
-	strncpy(extensionId, ezxml_attr(extensionXml, "id"), STRLEN_MAX);
-	
+	else //cannot construct extension without function
+	{
+		#ifdef ARC_DEBUG_ONEOFFS
+		LOGI("[ARC]    Parser function %s not found on %s.\n", parserFunctionName, extensionClassName);
+		//exit(EXIT_FAILURE); //error already logged by addressofDynamic()
+		#endif// ARC_DEBUG_ONEOFFS
+	}
+
+	//get extension id and store both this key and its associated value
+	char * extensionId = ezxml_attr(extensionXml, "id");
+	ArcString s;
+	strncpy(s.name, extensionId, STRLEN_MAX);
+	kv_push(ArcString, *extensionIds, s); //copy value
 	kh_set(StrPtr, extensionsById, extensionId, extension);
-	//kv_push(void *, ctrl->extensions, extension);
-	LOGI("extension built.\n");
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Extension %s of class %s built.\n", s.name, extensionClassName);
+	LOGI("[ARC] ...Builder_buildExtension   \n");
+	#endif// ARC_DEBUG_ONEOFFS
 }
 
 void Builder_buildExtensions(ezxml_t ctrlXml, khash_t(StrPtr) * extensionsById, kvec_t(ArcString) * extensionIds)
 {
-	LOGI("Builder_buildExtensions\n");
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Builder_buildExtensions...\n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
 	ezxml_t elementXml, elementXmlCopy;
 	//TODO find custom elements and build them using their name as a key into a map provided for each element type
 	for (elementXml = ezxml_child_any(ctrlXml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
@@ -1044,12 +1086,17 @@ void Builder_buildExtensions(ezxml_t ctrlXml, khash_t(StrPtr) * extensionsById, 
 			}
 		}
 	}
-	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Builder_buildExtensions   \n");
+	#endif// ARC_DEBUG_ONEOFFS
 }
 
 App * Builder_buildApp(ezxml_t appXml)
 {
-	LOGI("Builder_buildApp\n");
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Builder_buildApp...\n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
 	ezxml_t modelXml, viewXml, subviewXml, rootctrlXml, ctrlXml;
 	char nameAssembled[STRLEN_MAX];
 	const char * name;
@@ -1084,12 +1131,19 @@ App * Builder_buildApp(ezxml_t appXml)
 	ctrlXml = ezxml_child(appXml, "ctrl");
 	ctrl = Builder_buildCtrl(app, ctrlXml, model);
 	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Builder_buildApp   \n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
 	return app;
 }
 
 void Builder_buildHub(Hub * hub, ezxml_t hubXml)
 {
-	LOGI("Builder_buildHub\n");
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Builder_buildHub...\n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
 	char nameAssembled[STRLEN_MAX];
 	const char * name;
 	const char * hubClass = "Hub";
@@ -1103,14 +1157,25 @@ void Builder_buildHub(Hub * hub, ezxml_t hubXml)
 		App * app = Builder_buildApp(appXml);
 		Hub_addApp(hub, app);
 	}
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Builder_buildHub   \n");
+	#endif// ARC_DEBUG_ONEOFFS
 }
 
 void Builder_buildFromConfig(Hub * const hub, const char * configFilename)
 {
-	LOGI("Builder_buildFromConfig\n");
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Builder_buildFromConfig...\n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
 	ezxml_t hubXml = ezxml_parse_file(configFilename);
 	Builder_buildHub(hub, hubXml);
 	ezxml_free(hubXml);
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Builder_buildFromConfig   \n");
+	#endif// ARC_DEBUG_ONEOFFS
 }
 
 //--------- misc ---------//

@@ -116,7 +116,7 @@ void implementTypesAndFunctions(FILE * hFile, ArcType types[], int * typesCount,
 	}
 	fprintf(hFile, "\t}\n");
 	
-	fprintf(hFile, "\tLOGI(\"[ARC] Function name not found: %%s.\\n\", name);\n");
+	fprintf(hFile, "\tLOGI(\"[ARC]    Function not found: %%s.\\n\", name);\n");
 	fprintf(hFile, "\treturn NULL;\n");
 	
 	fprintf(hFile, "}\n");
@@ -133,7 +133,7 @@ void implementTypesAndFunctions(FILE * hFile, ArcType types[], int * typesCount,
 		fprintf(hFile, "\t\tif (strcmp(name, \"%s\") == 0) return sizeof(%s);\n", type->className, type->className);
 	}
 	fprintf(hFile, "\t}\n");
-	fprintf(hFile, "\tLOGI(\"[ARC] Class name not found: %%s.\\n\", name);\n");
+	fprintf(hFile, "\tLOGI(\"[ARC]    Class not found: %%s.\\n\", name);\n");
 	fprintf(hFile, "\treturn NULL;\n");
 	fprintf(hFile, "}\n");
 	
@@ -433,43 +433,31 @@ void getFunctionName(char * buffer, char ** namePtr)
 
 void extractFunctionsFromHeaders(ArcType types[], int * typesCount, const char * functions[], int * functionsCount)
 {	
-LOGI("extractFunctionsFromHeaders\n");
+	//LOGI("extractFunctionsFromHeaders\n");
 	ArcType * type = &types[(*typesCount-1)];
-	LOGI("arcfilename=%s\n", type->filename);
+	//LOGI("arcfilename=%s\n", type->filename);
 	char filename[256];
 	strcpy(filename, srcPath);
 	strcat(filename, "/");
 	strcat(filename, type->filename); // for the most recently added type
 	strcat(filename, ".h");
-	LOGI("filename=%s\n", filename);
+	//LOGI("filename=%s\n", filename);
 	char * fileString = Text_load(filename); //NB not freed till program ends - thus we keep valid strings till implementTypesAndFunctions()
-	//LOGI("---------------------------1\n");
-	//LOGI("fileString=%s\n", fileString);
-	//char buffer[strlen(fileString)];
-	//strcpy(buffer, fileString);
 	stripPreprocessorDirectives	(fileString);
 	stripBlockComments			(fileString);
 	stripLineComments			(fileString);
 	stripTypedefs				(fileString);
 	newlinesAndTabsToSpaces		(fileString);
-	//LOGI("---------------------------2\n");
 	int c = countValidEntries(fileString);
 	char * declarations[c];
-	LOGI("c=%d\n", c);
 	getFunctionDeclarations(fileString, declarations);
-//	LOGI("---------------------------3\n%s\n", fileString);
 	char * functionNames[c];
 	
 	//LOGI("count of functions = %d", c);
 	for (int i = 0; i < c; ++i)
 	{
 		getFunctionName(declarations[i], &functionNames[i]);
-		LOGI("declarations[i]=%s\n");
-		//removeRedundantSpacesFromElement(declarations[i]);
-		//LOGI("(decl) %d | %s\n", i, declarations[i]);
 		functions[(*functionsCount)++] = functionNames[i];
-		LOGI("%2d | %s\n", i, functionNames[i]);
-		
 	}
 	
 	//aLOGI("---------------------------4\n");
@@ -479,13 +467,13 @@ void setClassAndFileNames(ezxml_t xml, ArcType * type)
 {
 	type->className = ezxml_attr(xml, "class");
 	type->filename = ezxml_attr(xml, "path") ? ezxml_attr(xml, "path") : type->className;
-	LOGI("classname=%s\n", type->className);
-	LOGI("filename=%s\n", type->filename);
+	//LOGI("classname=%s\n", type->className);
+	//LOGI("filename=%s\n", type->filename);
 }
 
 void extractTypesAndFunctionsFromExtensionsXML(ezxml_t parentXml, ArcType types[], int * typesCount, const char * functions[], int * functionsCount)
 {
-	LOGI("extractTypesAndFunctionsFromExtensionsXML\n");
+	//LOGI("extractTypesAndFunctionsFromExtensionsXML\n");
 	for (ezxml_t elementXml = ezxml_child_any(parentXml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
 	{
 		bool allowCustomElementsAsExtensions = false; //DEV -get from <hub> as an arg (or pass hub as arg)
@@ -500,13 +488,9 @@ void extractTypesAndFunctionsFromExtensionsXML(ezxml_t parentXml, ArcType types[
 				ezxml_t elementXmlCopy = elementXml;
 				while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
 				{
-				//LOGI("A\n");
 					ArcType * type = &types[(*typesCount)++];
 					setClassAndFileNames(elementXmlCopy, type);
-				//LOGI("B\n");
-					//types[(*typesCount)++].className = ezxml_attr(elementXmlCopy, "class");
 					extractFunctionsFromHeaders(types, typesCount, functions, functionsCount);
-				//aLOGI("C\n");
 					elementXmlCopy = elementXmlCopy->next;
 				}
 				
@@ -521,8 +505,6 @@ void recurseViews(ezxml_t viewXml, ArcType types[], int * typesCount, const char
 	{
 		ArcType * type = &types[(*typesCount)++];
 		setClassAndFileNames(viewXml, type);
-		//types[(*typesCount)++].className = ezxml_attr(viewXml, "class");
-		//extractFunctionsFromConfigXML(viewXml, functions, functionsCount);
 		extractFunctionsFromHeaders(types, typesCount, functions, functionsCount);
 		extractTypesAndFunctionsFromExtensionsXML(viewXml, types, typesCount, functions, functionsCount);
 		recurseViews(viewXml, types, typesCount, functions, functionsCount);
@@ -531,53 +513,41 @@ void recurseViews(ezxml_t viewXml, ArcType types[], int * typesCount, const char
 
 void extractTypesAndFunctionsFromConfigXML(ezxml_t hubXml, ArcType types[], int * typesCount, const char * functions[], int * functionsCount)
 {
-	ArcType * type;
+	//LOGI("extractTypesAndFunctionsFromConfigXML\n");
 	
-	LOGI("extractTypesAndFunctionsFromConfigXML\n");
+	ArcType * type;
 	
 	extractTypesAndFunctionsFromExtensionsXML(hubXml, types, typesCount, functions, functionsCount);
 	
 	ezxml_t appsXml = ezxml_child(hubXml, "apps");
 	for (ezxml_t appXml = ezxml_child(appsXml, "app"); appXml; appXml = appXml->next)
 	{
-	//LOGI("1---------------------------\n");
 		//app
 		type = &types[(*typesCount)++];
 		setClassAndFileNames(appXml, type);
-		//types[(*typesCount)++].className = ezxml_attr(appXml, "class");
-		//extractFunctionsFromConfigXML(appXml, functions, functionsCount);
 		extractFunctionsFromHeaders(types, typesCount, functions, functionsCount);
 		extractTypesAndFunctionsFromExtensionsXML(appXml, types, typesCount, functions, functionsCount);
 		
-	//LOGI("2---------------------------\n");
 		//model
 		ezxml_t modelXml = ezxml_child(appXml, "model");
 		type = &types[(*typesCount)++];
 		setClassAndFileNames(modelXml, type);
-		//types[(*typesCount)++].className = ezxml_attr(modelXml, "class");
 		
-	//LOGI("3---------------------------\n");
 		//ctrl
 		ezxml_t ctrlXml = ezxml_child(appXml, "ctrl");
 		type = &types[(*typesCount)++];
 		setClassAndFileNames(ctrlXml, type);
-		//types[(*typesCount)++].className = ezxml_attr(ctrlXml, "class");
-		//extractFunctionsFromConfigXML(ctrlXml, functions, functionsCount);
 		extractFunctionsFromHeaders(types, typesCount, functions, functionsCount);
 		extractTypesAndFunctionsFromExtensionsXML(ctrlXml, types, typesCount, functions, functionsCount);
 	
-	//LOGI("4---------------------------\n");
 		//views
 		ezxml_t viewXml = ezxml_child(appXml, "view");
 		type = &types[(*typesCount)++];
 		setClassAndFileNames(viewXml, type);
-		//types[(*typesCount)++].className = ezxml_attr(viewXml, "class");
-		//extractFunctionsFromConfigXML(viewXml, functions, functionsCount);
 		extractFunctionsFromHeaders(types, typesCount, functions, functionsCount);
 		extractTypesAndFunctionsFromExtensionsXML(viewXml, types, typesCount, functions, functionsCount);
-	//LOGI("5---------------------------\n");
+
 		recurseViews(viewXml, types, typesCount, functions, functionsCount);
-	//LOGI("6---------------------------\n");
 	}
 }
 
@@ -614,7 +584,7 @@ void main(int argc, char *argv[])
 	//prepare types and functions arrays to be populated
 	ArcType types_[128];
 	int typesCount_ = 0;
-	const char * functions_[1024];// = {"World_do", "Test_do"};
+	const char * functions_[1024];
 	int functionsCount_ = 0;
 	extractTypesAndFunctionsFromConfigXML(hubXml, types_, &typesCount_, functions_, &functionsCount_);
 	implementTypesAndFunctions			 (cFile,  types_, &typesCount_, functions_, &functionsCount_);
