@@ -1011,15 +1011,16 @@ Ctrl * Builder_buildCtrl(App * app, ezxml_t ctrlXml, void * model)
 
 void Builder_buildExtension(ezxml_t extensionXml, khash_t(StrPtr) * extensionsById, kvec_t(ArcString) * extensionIds)
 {
+	char * extensionId = ezxml_attr(extensionXml, "id");
+	char * extensionClassName = ezxml_attr(extensionXml, "class");
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Builder_buildExtension...\n");
+	LOGI("[ARC]    Builder_buildExtension... (id=%s class=%s)\n", extensionId, extensionClassName);
 	#endif// ARC_DEBUG_ONEOFFS
 	
-	char * extensionClassName = ezxml_attr(extensionXml, "class");
 	void * extension = calloc(1, sizeofDynamic(extensionClassName));
 
 	//check for parser and run it if available
-	//would allow custom <extension initialise="someFunction"> to override this if user desires, but then again,
+	//would allow custom <extension initialise="someFunction"> to override this if user desires, but then
 	//we'd still have to match the function signature so why not just match name, too, as done here.
 	//essentially, an "instance" is only an "extension" if it matches the required function interface.
 	char parserFunctionName[STRLEN_MAX];
@@ -1030,41 +1031,62 @@ void Builder_buildExtension(ezxml_t extensionXml, khash_t(StrPtr) * extensionsBy
 	if (parser) //if extension constructor is available
 	{
 		#ifdef ARC_DEBUG_ONEOFFS
-		LOGI("[ARC]    Parser function %s available on %s, parsing.\n", parserFunctionName, extensionClassName);
+		LOGI("[ARC]    Parser function found: %s :: %s.\n", extensionClassName, parserFunctionName);
+		LOGI("[ARC]    Parsing...\n", parserFunctionName, extensionClassName);
 		#endif// ARC_DEBUG_ONEOFFS
-		//extension = parser(extensionXml);
 		parser(extension, extensionXml);
+		#ifdef ARC_DEBUG_ONEOFFS
+		LOGI("[ARC] ...Parsing\n", parserFunctionName, extensionClassName);
+		#endif// ARC_DEBUG_ONEOFFS
 	}
 	else //cannot construct extension without function
 	{
 		#ifdef ARC_DEBUG_ONEOFFS
-		LOGI("[ARC]    Parser function %s not found on %s.\n", parserFunctionName, extensionClassName);
-		//exit(EXIT_FAILURE); //error already logged by addressofDynamic()
+		LOGI("[ARC]    Parser function  not found: %s :: %s.\n", extensionClassName, parserFunctionName);
 		#endif// ARC_DEBUG_ONEOFFS
 	}
 
-	//get extension id and store both this key and its associated value
-	char * extensionId = ezxml_attr(extensionXml, "id");
+	//get extension id and store both this key and its associated value.
+	//because we already resized Builder_buildExtensions, no issues here with kvec realloc causing  //problems with string key into khash taken from kvec.
 	ArcString s;
 	strncpy(s.name, extensionId, STRLEN_MAX);
 	kv_push(ArcString, *extensionIds, s); //copy value
-	kh_set(StrPtr, extensionsById, extensionId, extension);
+	kh_set(StrPtr, extensionsById, kv_A(*extensionIds, kv_size(*extensionIds)-1).name, extension);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Extension %s of class %s built.\n", s.name, extensionClassName);
-	LOGI("[ARC] ...Builder_buildExtension   \n");
+	LOGI("[ARC] ...Builder_buildExtension    (id=%s class=%s)\n", extensionId, extensionClassName);
 	#endif// ARC_DEBUG_ONEOFFS
 }
 
-void Builder_buildExtensions(ezxml_t ctrlXml, khash_t(StrPtr) * extensionsById, kvec_t(ArcString) * extensionIds)
+void Builder_buildExtensions(ezxml_t xml, khash_t(StrPtr) * extensionsById, kvec_t(ArcString) * extensionIds)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC]    Builder_buildExtensions...\n");
 	#endif// ARC_DEBUG_ONEOFFS
 	
 	ezxml_t elementXml, elementXmlCopy;
+	
+	//first count the elements and resize the vec once-off - this prevents issues
+	//with using the kvec's elements as keys into extensionsById (due to realloc)
+	size_t count = 0;
+	for (elementXml = ezxml_child_any(xml); elementXml; elementXml = elementXml->ordered) //run through distinct child element names
+	{
+		bool allowCustomElementsAsExtensions = false; //DEV -get from <hub> as an arg (or pass hub as arg)
+		
+		if (allowCustomElementsAsExtensions)
+		{
+			//TODO similar to below block, but using a custom element name as extension class name
+		}
+		else //do not allow custom elements - fallback to seeking standard <extension> elements
+		{
+			if (strcmp(ezxml_name(elementXml), "extension") == 0) 
+				++count;
+		}
+	}
+	kv_resize(ArcString, *extensionIds, count);
+	kh_resize(StrPtr,   extensionsById, count);
 	//TODO find custom elements and build them using their name as a key into a map provided for each element type
-	for (elementXml = ezxml_child_any(ctrlXml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
+	for (elementXml = ezxml_child_any(xml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
 	{
 		bool allowCustomElementsAsExtensions = false; //DEV -get from <hub> as an arg (or pass hub as arg)
 		
