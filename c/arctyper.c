@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ezxml/ezxml.h"
+#include "klib/khash.h"
 #include "arc.h" //DEV - for ezxml_child_any()
 
 static char * srcPath;
@@ -37,6 +38,13 @@ typedef struct ArcType
 	const char * className;
 	const char * filename;
 } ArcType;
+
+#ifndef KH_DECL_STR_ARCTYPE
+#define KH_DECL_STR_ARCTYPE
+static const int Str_ArcType = 41;
+KHASH_DECLARE(Str_ArcType, kh_cstr_t, ArcType)
+#endif//KH_DECL_STR_ARCTYPE
+
 
 char* Text_load(char* filename) //as from orb 10/13/2015
 {
@@ -499,15 +507,15 @@ void extractTypesAndFunctionsFromExtensionsXML(ezxml_t parentXml, ArcType types[
 	}
 }
 
-void recurseViews(ezxml_t viewXml, ArcType types[], int * typesCount, const char * functions[], int * functionsCount)
+void recurse(ezxml_t xml, ArcType types[], int * typesCount, const char * functions[], int * functionsCount, const char * recursedName)
 {
-	for (viewXml = ezxml_child(viewXml, "view"); viewXml; viewXml = viewXml->next)
+	for (xml = ezxml_child(xml, recursedName); xml; xml = xml->ordered)
 	{
 		ArcType * type = &types[(*typesCount)++];
-		setClassAndFileNames(viewXml, type);
+		setClassAndFileNames(xml, type);
 		extractFunctionsFromHeaders(types, typesCount, functions, functionsCount);
-		extractTypesAndFunctionsFromExtensionsXML(viewXml, types, typesCount, functions, functionsCount);
-		recurseViews(viewXml, types, typesCount, functions, functionsCount);
+		extractTypesAndFunctionsFromExtensionsXML(xml, types, typesCount, functions, functionsCount);
+		recurse(xml, types, typesCount, functions, functionsCount, recursedName);
 	}
 }
 
@@ -533,21 +541,21 @@ void extractTypesAndFunctionsFromConfigXML(ezxml_t hubXml, ArcType types[], int 
 		type = &types[(*typesCount)++];
 		setClassAndFileNames(modelXml, type);
 		
-		//ctrl
-		ezxml_t ctrlXml = ezxml_child(appXml, "ctrl");
-		type = &types[(*typesCount)++];
-		setClassAndFileNames(ctrlXml, type);
-		extractFunctionsFromHeaders(types, typesCount, functions, functionsCount);
-		extractTypesAndFunctionsFromExtensionsXML(ctrlXml, types, typesCount, functions, functionsCount);
-	
 		//views
 		ezxml_t viewXml = ezxml_child(appXml, "view");
 		type = &types[(*typesCount)++];
 		setClassAndFileNames(viewXml, type);
 		extractFunctionsFromHeaders(types, typesCount, functions, functionsCount);
 		extractTypesAndFunctionsFromExtensionsXML(viewXml, types, typesCount, functions, functionsCount);
-
-		recurseViews(viewXml, types, typesCount, functions, functionsCount);
+		recurse(viewXml, types, typesCount, functions, functionsCount, "view");
+		
+		//ctrls
+		ezxml_t ctrlXml = ezxml_child(appXml, "ctrl");
+		type = &types[(*typesCount)++];
+		setClassAndFileNames(ctrlXml, type);
+		extractFunctionsFromHeaders(types, typesCount, functions, functionsCount);
+		extractTypesAndFunctionsFromExtensionsXML(ctrlXml, types, typesCount, functions, functionsCount);
+		recurse(ctrlXml, types, typesCount, functions, functionsCount, "ctrl");
 	}
 }
 
@@ -555,7 +563,7 @@ void main(int argc, char *argv[])
 {	
 	if (argc < 2)
 	{
-		printf("Usage: arctyper <input: space-separated type names> <output>\n");
+		printf("Usage: arctyper <path to arc.config> <path to source input folder> <path to created output file>\n");
 		printf("Output is <output>.c.\n");
 		exit(EXIT_FAILURE);
 	}
