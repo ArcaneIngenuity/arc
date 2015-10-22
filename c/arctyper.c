@@ -29,7 +29,6 @@
 #include <string.h>
 #include "ezxml/ezxml.h"
 #include "klib/khash.h"
-#include "arc.h" //DEV - for ezxml_child_any()
 
 static char * srcPath;
 
@@ -482,7 +481,7 @@ void setClassAndFileNames(ezxml_t xml, ArcType * type)
 void extractTypesAndFunctionsFromExtensionsXML(ezxml_t parentXml, ArcType types[], int * typesCount, const char * functions[], int * functionsCount)
 {
 	//LOGI("extractTypesAndFunctionsFromExtensionsXML\n");
-	for (ezxml_t elementXml = ezxml_child_any(parentXml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
+	for (ezxml_t elementXml = ezxml_child(parentXml); elementXml; elementXml = elementXml->ordered) //run through distinct child element names
 	{
 		bool allowCustomElementsAsExtensions = false; //DEV -get from <hub> as an arg (or pass hub as arg)
 		if (allowCustomElementsAsExtensions)
@@ -493,15 +492,10 @@ void extractTypesAndFunctionsFromExtensionsXML(ezxml_t parentXml, ArcType types[
 		{
 			if (strcmp(ezxml_name(elementXml), "extension") == 0) 
 			{
-				ezxml_t elementXmlCopy = elementXml;
-				while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
-				{
-					ArcType * type = &types[(*typesCount)++];
-					setClassAndFileNames(elementXmlCopy, type);
-					extractFunctionsFromHeaders(types, typesCount, functions, functionsCount);
-					elementXmlCopy = elementXmlCopy->next;
-				}
-				
+				ArcType * type = &types[(*typesCount)++];
+				setClassAndFileNames(elementXml, type);
+				extractFunctionsFromHeaders(types, typesCount, functions, functionsCount);
+				//elementXml = elementXml->next; //is this even required now, with outer loop iterating on ->ordered?
 			}
 		}
 	}

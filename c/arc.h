@@ -117,11 +117,10 @@ typedef struct View
 	bool initialised; ///< True after first initialise. If re- initialise is required, this should be manually reset to false.
 	void * model; ///< The model associated with this View. May or may not be the same as this View's App's model, depending on \link Configuration \endlink.
 	
-	struct View * root;
-	struct View * parent; ///< View's parent View, if any.
-	kvec_t(struct View *) childrenByZ; ///< View's children, where index is Z-order (Z is the stacking/draw order, i.e. goes positive out of screen).
-	//int childrenCount; ///< The number of child Views held by this parent View. Negative for invalid return values (e.g. on seek).
-	
+	struct View * root; ///< View's root view, i.e. the View attached to the App.
+	struct View * parent; ///< View's parent View, if not root.
+	kvec_t(struct View *) children; ///< View's children, in order added (as config, if used); index may be used as Z-order.
+
 	float dimensions[3]; ///< Dimensions of this View in user-defined units.
 	float position[3]; ///< Position of this View in user-defined units.
 	float orientation[3]; ///< Orientation of this View in user-defined units.
@@ -158,6 +157,11 @@ typedef struct Ctrl
 	bool updating; ///< Should this have Ctrl_update() called on it every frame?
 	bool initialised; ///< True after first initialisation. If re-initialisation is required, manually reset this to false.
 	void * model; ///< The model associated with this View. May or may not be the same as this View's App's (complete) model, depending on \link Configuration \endlink.
+	
+	struct Ctrl * root; ///< Ctrl's root view, i.e. the Ctrl attached to the App.
+	struct Ctrl * parent; ///< Ctrl's parent Ctrl, if not root.
+	kvec_t(struct Ctrl *) children; ///< Ctrl's children, in order added (as config, if used).
+	
 	//kvec_t(void *) configs; ///< Custom configs included in this Ctrl's markup, if any.
 	khash_t(StrPtr) * extensionsById; ///< Extensions included on this Ctrl, if using config.
 	kvec_t(ArcString) extensionIds; ///< Array of fixed-length cstrings used as keys to extensionsById (required once XML and its source strings are freed).

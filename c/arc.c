@@ -450,6 +450,7 @@ Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
 	Ctrl * ctrl = calloc(1, sizeofSubclass);
 	strcpy(ctrl->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
 	//Ctrl_setDefaultCallbacks(ctrl);
+	kv_init(ctrl->children);
 	//kv_init(ctrl->configs);
 	ctrl->extensionsById = kh_init(StrPtr);
 	kv_init(ctrl->extensionIds);
@@ -573,6 +574,67 @@ void Ctrl_destruct(Ctrl * const this)
 	#endif
 }
 
+Ctrl * Ctrl_getChild(Ctrl * const this, char * id)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Ctrl_getChild... (id=%s) (child id=%s)\n", this->id, id);
+	#endif
+	
+	for (int i = 0; i < kv_size(this->children); ++i)
+	{
+		Ctrl * child = kv_A(this->children, i); //NB! dispose in draw order
+		if (strcmp(id, child->id) == 0)
+		{
+			#ifdef ARC_DEBUG_ONEOFFS
+			LOGI("[ARC] ...Ctrl_getChild    (id=%s) (child id=%s)\n", this->id, id);
+			#endif
+			
+			return child;
+		}
+	}
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Ctrl_getChild    (id=%s) (child id=%s)\n", this->id, id);
+	#endif
+	
+	return NULL;
+}
+
+void Ctrl_claimAncestry(Ctrl * const this, Ctrl * const child)
+{
+	child->parent = this;
+	if (this->root)
+		child->root = this->root;
+	else
+		child->root = this;
+	child->app = this->app;
+	child->hub = this->hub;
+	
+	//recurse
+	for (int i = 0; i < kv_size(child->children); ++i)
+	{
+		Ctrl * grandchild = kv_A(this->children, i); //NB! dispose in draw order
+		Ctrl_claimAncestry(child, grandchild);
+	}
+}
+
+Ctrl * Ctrl_addChild(Ctrl * const this, Ctrl * const child)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Ctrl_addChild... (id=%s) (child id=%s)\n", this->id, child->id);
+	#endif
+	
+	Ctrl_claimAncestry(this, child);
+
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Ctrl_addChild    (id=%s) (child id=%s)\n", this->id, child->id);
+	#endif
+	
+	kv_push(Ctrl *, this->children, child); //NB! dispose in draw order
+	//this->children[this->childrenCount++] = child;
+	return child;
+}
+
 void Ctrl_createPub(Ctrl * this, const char * name)
 {
 	App * appPtr = this->app;
@@ -612,7 +674,7 @@ View * View_construct(const char * id, size_t sizeofSubclass)
 	View * view = calloc(1, sizeofSubclass);
 	strcpy(view->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
 	//View_setDefaultCallbacks(view);
-	kv_init(view->childrenByZ);
+	kv_init(view->children);
 	view->extensionsById = kh_init(StrPtr);
 	kv_init(view->extensionIds);
 	//view->subStatusesByName = kh_init(StrPtr);
@@ -657,9 +719,9 @@ void View_suspend(View * const this)
 	LOGI("[ARC]    View_suspend... (id=%s)\n", this->id);
 	#endif
 	
-	for (int i = 0; i < kv_size(this->childrenByZ); ++i)
+	for (int i = 0; i < kv_size(this->children); ++i)
 	{
-		View * child = kv_A(this->childrenByZ, i); //NB! dispose in draw order
+		View * child = kv_A(this->children, i); //NB! dispose in draw order
 		View_suspend(child);
 	}
 	
@@ -676,9 +738,9 @@ void View_resume(View * const this)
 	LOGI("[ARC]    View_resume... (id=%s)\n", this->id);
 	#endif
 	
-	for (int i = 0; i < kv_size(this->childrenByZ); ++i)
+	for (int i = 0; i < kv_size(this->children); ++i)
 	{
-		View * child = kv_A(this->childrenByZ, i); //NB! dispose in draw order
+		View * child = kv_A(this->children, i); //NB! dispose in draw order
 		View_resume(child);
 	}
 	
@@ -700,9 +762,9 @@ void View_initialise(View * const this)
 	
 	this->initialised = true;
 
-	for (int i = 0; i < kv_size(this->childrenByZ); ++i)
+	for (int i = 0; i < kv_size(this->children); ++i)
 	{
-		View * child = kv_A(this->childrenByZ, i); //NB! dispose in draw order
+		View * child = kv_A(this->children, i); //NB! dispose in draw order
 		View_initialise(child);//deltaSec //only works if enabled
 	}
 	
@@ -719,9 +781,9 @@ void View_update(View * const this)
 	
 	this->update(this);//deltaSec
 
-	for (int i = 0; i < kv_size(this->childrenByZ); ++i)
+	for (int i = 0; i < kv_size(this->children); ++i)
 	{
-		View * child = kv_A(this->childrenByZ, i); //NB! dispose in draw order
+		View * child = kv_A(this->children, i); //NB! dispose in draw order
 		if (child->updating)
 			View_update(child);//deltaSec
 	}
@@ -740,13 +802,13 @@ void View_destruct(View * const this)
 	LOGI("[ARC]    View_destruct... (id=%s)\n", id);
 	#endif
 	
-	for (int i = 0; i < kv_size(this->childrenByZ); ++i)
+	for (int i = 0; i < kv_size(this->children); ++i)
 	{
-		View * child = kv_A(this->childrenByZ, i); //NB! dispose in draw order
+		View * child = kv_A(this->children, i); //NB! dispose in draw order
 		View_destruct(child);
 	}
 	
-	kv_destroy(this->childrenByZ);
+	kv_destroy(this->children);
 	this->dispose(this);
 	this->initialised = false;
 	free(this);
@@ -762,9 +824,9 @@ View * View_getChild(View * const this, char * id)
 	LOGI("[ARC]    View_getChild... (id=%s) (child id=%s)\n", this->id, id);
 	#endif
 	
-	for (int i = 0; i < kv_size(this->childrenByZ); ++i)
+	for (int i = 0; i < kv_size(this->children); ++i)
 	{
-		View * child = kv_A(this->childrenByZ, i); //NB! dispose in draw order
+		View * child = kv_A(this->children, i); //NB! dispose in draw order
 		if (strcmp(id, child->id) == 0)
 		{
 			#ifdef ARC_DEBUG_ONEOFFS
@@ -793,9 +855,9 @@ void View_claimAncestry(View * const this, View * const child)
 	child->hub = this->hub;
 	
 	//recurse
-	for (int i = 0; i < kv_size(child->childrenByZ); ++i)
+	for (int i = 0; i < kv_size(child->children); ++i)
 	{
-		View * grandchild = kv_A(this->childrenByZ, i); //NB! dispose in draw order
+		View * grandchild = kv_A(this->children, i); //NB! dispose in draw order
 		View_claimAncestry(child, grandchild);
 	}
 }
@@ -812,8 +874,8 @@ View * View_addChild(View * const this, View * const child)
 	LOGI("[ARC] ...View_addChild    (id=%s) (child id=%s)\n", this->id, child->id);
 	#endif
 	
-	kv_push(View *, this->childrenByZ, child); //NB! dispose in draw order
-	//this->childrenByZ[this->childrenCount++] = child;
+	kv_push(View *, this->children, child); //NB! dispose in draw order
+	//this->children[this->childrenCount++] = child;
 	return child;
 }
 
@@ -823,7 +885,7 @@ View_removeChild(View * const this, View * const child)
 {
 	child->parent = NULL;
 
-	if (kv_size(this->childrenByZ) == 0)
+	if (kv_size(this->children) == 0)
 		return ARRAY_EMPTY;
 	else
 	{
@@ -831,7 +893,7 @@ View_removeChild(View * const this, View * const child)
 		
 		//TODO shift all back
 		
-		kv_size(this->childrenByZ)--;
+		kv_size(this->children)--;
 		return child;
 	}
 }
@@ -857,9 +919,9 @@ void View_onParentResize(View * const this)
 	
 	this->onParentResize(this);
 	
-	for (int i = 0; i < kv_size(this->childrenByZ); ++i)
+	for (int i = 0; i < kv_size(this->children); ++i)
 	{
-		View * child = kv_A(this->childrenByZ, i); //NB! dispose in draw order
+		View * child = kv_A(this->children, i); //NB! dispose in draw order
 		
 		//depth first - update child and then recurse to its children
 		
@@ -965,7 +1027,7 @@ View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model)
 	
 	Builder_buildExtensions(viewXml, view->extensionsById, &view->extensionIds);
 	
-	if (app)
+	if (app) //subviews don't get access to app, see below
 		App_setView(app, view); //must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
 	
 	View * subview;
@@ -983,7 +1045,7 @@ View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model)
 	return view;
 }
 
-Ctrl * Builder_buildCtrl(App * app, ezxml_t ctrlXml, void * model)
+Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC]    Builder_buildCtrl...\n");
@@ -992,15 +1054,24 @@ Ctrl * Builder_buildCtrl(App * app, ezxml_t ctrlXml, void * model)
 	char nameAssembled[STRLEN_MAX];
 	const char * name;
 	const char * ctrlClass = ezxml_attr(ctrlXml, "class");
-	
-	Ctrl * ctrl = Ctrl_construct(ezxml_attr(ctrlXml, "id"), sizeofDynamic(ctrlClass));
+	LOGI("ctrlClass=%s\n", ctrlClass);
+	ctrl = Ctrl_construct(ezxml_attr(ctrlXml, "id"), sizeofDynamic(ctrlClass));
 	ctrl->model = model;
 	
 	FOREACH_CTRL_FUNCTION(GENERATE_ASSIGN_METHOD, ctrl)
 	
 	Builder_buildExtensions(ctrlXml, ctrl->extensionsById, &ctrl->extensionIds);
 	
-	App_setCtrl(app, ctrl);
+	if (app) //subctrls don't get access to app, see below
+		App_setCtrl(app, ctrl);
+	
+	Ctrl * subctrl;
+	for (ezxml_t subctrlXml = ezxml_child(ctrlXml, "ctrl"); subctrlXml; subctrlXml = subctrlXml->next)
+	{
+		subctrl = Builder_buildCtrl(NULL, subctrl, subctrlXml, model);
+
+		Ctrl_addChild(ctrl, subctrl);
+	}
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_buildCtrl   \n");
@@ -1151,7 +1222,7 @@ App * Builder_buildApp(ezxml_t appXml)
 	
 	//ctrl
 	ctrlXml = ezxml_child(appXml, "ctrl");
-	ctrl = Builder_buildCtrl(app, ctrlXml, model);
+	ctrl = Builder_buildCtrl(app, ctrl, ctrlXml, model);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_buildApp   \n");
