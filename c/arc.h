@@ -122,9 +122,11 @@ typedef struct View
 	kvec_t(struct View *) childrenByZ; ///< View's children, where index is Z-order (Z is the stacking/draw order, i.e. goes positive out of screen).
 	//int childrenCount; ///< The number of child Views held by this parent View. Negative for invalid return values (e.g. on seek).
 	
-	int width; ///< Width of this View. (NEEDS REVIEW - should be float to accommodate any user units; perhaps should be in user subclass of View)
-	int height; ///< Height of this View. (NEEDS REVIEW - should be float to accommodate any user units; perhaps should be in user subclass of View)
-
+	float dimensions[3]; ///< Dimensions of this View in user-defined units.
+	float position[3]; ///< Position of this View in user-defined units.
+	float orientation[3]; ///< Orientation of this View in user-defined units.
+	float scale[3]; ///< Scale of this View in user-defined units.
+	
 	khash_t(StrPtr) * extensionsById; ///< Extensions included on this View instance, if using config.
 	kvec_t(ArcString) extensionIds; ///< Array of fixed-length cstrings used as keys to extensionsById (required once XML and its source strings are freed).
 	
