@@ -483,7 +483,7 @@ void setClassAndFileNames(ezxml_t xml, ArcType * type)
 void extractTypesAndFunctionsFromExtensionsXML(ezxml_t parentXml, ArcType types[], int * typesCount, const char * functions[], int * functionsCount)
 {
 	//printf("extractTypesAndFunctionsFromExtensionsXML\n");
-	for (ezxml_t elementXml = parentXml->ordered; elementXml; elementXml = elementXml->ordered) //run through distinct child element names
+	for (ezxml_t elementXml = parentXml->child; elementXml; elementXml = elementXml->ordered) //run through distinct child element names
 	{
 		bool allowCustomElementsAsExtensions = false; //DEV -get from <hub> as an arg (or pass hub as arg)
 		if (allowCustomElementsAsExtensions)

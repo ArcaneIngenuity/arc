@@ -92,10 +92,16 @@ ifeq ($(OS),win)
 	@$(rm) $(subst /,\, ezxml/*.d)
 	@$(rm) *.exe
 	@echo $(subst /,\,All build artifacts cleaned.)
-else
+else ifeq ($(OS),lin)
+	@$(rm) *.o
+	@$(rm) *.d
+	@$(rm) ezxml/*.o
+	@$(rm) ezxml/*.d
+	@$(rm) *.exe
+	@echo $(subst /,\,All build artifacts cleaned.)
 endif
 
-all: $(TARGET)
+all: $(TARGET) | clean 
 
 $(TARGET): $(OBJS)
 	@echo link...
@@ -104,7 +110,7 @@ $(TARGET): $(OBJS)
 	
 VPATH = ./
 
-$(OBJS): %.o: %.c
+$(OBJS): %.o: %.c 
 	@$(CC) -g $(CFLAGS) -c $< -o ./$@
 	@echo Compiled $<.
 
