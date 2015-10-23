@@ -90,14 +90,12 @@ ifeq ($(OS),win)
 	@$(rm) *.d
 	@$(rm) $(subst /,\, ezxml/*.o)
 	@$(rm) $(subst /,\, ezxml/*.d)
-	@$(rm) *.exe
 	@echo $(subst /,\,All build artifacts cleaned.)
 else ifeq ($(OS),lin)
 	@$(rm) *.o
 	@$(rm) *.d
 	@$(rm) ezxml/*.o
 	@$(rm) ezxml/*.d
-	@$(rm) *.exe
 	@echo $(subst /,\,All build artifacts cleaned.)
 endif
 
