@@ -57,17 +57,17 @@ char* Text_load(char* filename) //as from orb 10/13/2015
 		fseek(file, 0, SEEK_END); //seek to end
 		long fileSize = ftell(file); //get current position in stream
 		fseek(file, 0, SEEK_SET); //seek to start
-		LOGI("%s\n", filename);
+		printf("%s\n", filename);
 		
 		str = malloc(fileSize + 1); //allocate enough room for file + null terminator (\0)
 
 		if (str != NULL) //if allocation succeeded
 		{
 			
-			//LOGI(" (fileSize...%ld)\n", fileSize);
+			//printf(" (fileSize...%ld)\n", fileSize);
 			size_t freadResult;
 			freadResult = fread(str, 1, fileSize, file); //read elements as one byte each, into string, from file. 
-			//LOGI("freadResult...%d\n", freadResult);
+			//printf("freadResult...%d\n", freadResult);
 			
 			if (freadResult != fileSize)
 			{
@@ -84,7 +84,7 @@ char* Text_load(char* filename) //as from orb 10/13/2015
 		}
 	}
 	else
-		LOGI("File not found: %s", filename);
+		printf("File not found: %s", filename);
 	
 	return str;
 }
@@ -112,6 +112,7 @@ void implementTypesAndFunctions(FILE * hFile, ArcType types[], int * typesCount,
 	fprintf(hFile, "size_t sizeofCount = 0;\n");
 	fprintf(hFile, "\n");
 	
+	//addressofDynamic
 	fprintf(hFile, "void * addressofDynamic(const char * name)\n");
 	fprintf(hFile, "{\n");
 	fprintf(hFile, "\tif (strlen(name) > 0)\n");
@@ -123,12 +124,13 @@ void implementTypesAndFunctions(FILE * hFile, ArcType types[], int * typesCount,
 	}
 	fprintf(hFile, "\t}\n");
 	
-	fprintf(hFile, "\tLOGI(\"[ARC]    Function not found: %%s.\\n\", name);\n");
+	fprintf(hFile, "\tprintf(\"[ARC]    Function not found: %%s.\\n\", name);\n");
 	fprintf(hFile, "\treturn NULL;\n");
 	
 	fprintf(hFile, "}\n");
 	fprintf(hFile, "\n");
 	
+	//sizeofDynamic
 	fprintf(hFile, "size_t sizeofDynamic(const char * name)\n");
 	fprintf(hFile, "{\n");
 	fprintf(hFile, "\tif (strlen(name) > 0)\n");
@@ -140,7 +142,7 @@ void implementTypesAndFunctions(FILE * hFile, ArcType types[], int * typesCount,
 		fprintf(hFile, "\t\tif (strcmp(name, \"%s\") == 0) return sizeof(%s);\n", type->className, type->className);
 	}
 	fprintf(hFile, "\t}\n");
-	fprintf(hFile, "\tLOGI(\"[ARC]    Class not found: %%s.\\n\", name);\n");
+	fprintf(hFile, "\tprintf(\"[ARC]    Class not found: %%s.\\n\", name);\n");
 	fprintf(hFile, "\treturn NULL;\n");
 	fprintf(hFile, "}\n");
 	
@@ -312,7 +314,7 @@ void stripTypedefs(char * buffer)
 		if (c >= 8)
 		{
 			bufferLastFew = buffer - 8;
-			//LOGI("???%s|", bufferLastFew);
+			//printf("???%s|", bufferLastFew);
 			//if (bufferLastFew[0] == 't') exit(1);
 			if (strncmp(bufferLastFew, "typedef ", 8) == 0)
 			{
@@ -440,15 +442,15 @@ void getFunctionName(char * buffer, char ** namePtr)
 
 void extractFunctionsFromHeaders(ArcType types[], int * typesCount, const char * functions[], int * functionsCount)
 {	
-	//LOGI("extractFunctionsFromHeaders\n");
+	//printf("extractFunctionsFromHeaders\n");
 	ArcType * type = &types[(*typesCount-1)];
-	//LOGI("arcfilename=%s\n", type->filename);
+	//printf("arcfilename=%s\n", type->filename);
 	char filename[256];
 	strcpy(filename, srcPath);
 	strcat(filename, "/");
 	strcat(filename, type->filename); // for the most recently added type
 	strcat(filename, ".h");
-	//LOGI("filename=%s\n", filename);
+	//printf("filename=%s\n", filename);
 	char * fileString = Text_load(filename); //NB not freed till program ends - thus we keep valid strings till implementTypesAndFunctions()
 	stripPreprocessorDirectives	(fileString);
 	stripBlockComments			(fileString);
@@ -460,28 +462,28 @@ void extractFunctionsFromHeaders(ArcType types[], int * typesCount, const char *
 	getFunctionDeclarations(fileString, declarations);
 	char * functionNames[c];
 	
-	//LOGI("count of functions = %d", c);
+	//printf("count of functions = %d", c);
 	for (int i = 0; i < c; ++i)
 	{
 		getFunctionName(declarations[i], &functionNames[i]);
 		functions[(*functionsCount)++] = functionNames[i];
 	}
 	
-	//aLOGI("---------------------------4\n");
+	//aprintf("---------------------------4\n");
 }
 
 void setClassAndFileNames(ezxml_t xml, ArcType * type)
 {
 	type->className = ezxml_attr(xml, "class");
 	type->filename = ezxml_attr(xml, "path") ? ezxml_attr(xml, "path") : type->className;
-	//LOGI("classname=%s\n", type->className);
-	//LOGI("filename=%s\n", type->filename);
+	//printf("classname=%s\n", type->className);
+	//printf("filename=%s\n", type->filename);
 }
 
 void extractTypesAndFunctionsFromExtensionsXML(ezxml_t parentXml, ArcType types[], int * typesCount, const char * functions[], int * functionsCount)
 {
-	//LOGI("extractTypesAndFunctionsFromExtensionsXML\n");
-	for (ezxml_t elementXml = ezxml_child(parentXml); elementXml; elementXml = elementXml->ordered) //run through distinct child element names
+	//printf("extractTypesAndFunctionsFromExtensionsXML\n");
+	for (ezxml_t elementXml = parentXml->ordered; elementXml; elementXml = elementXml->ordered) //run through distinct child element names
 	{
 		bool allowCustomElementsAsExtensions = false; //DEV -get from <hub> as an arg (or pass hub as arg)
 		if (allowCustomElementsAsExtensions)
@@ -515,7 +517,7 @@ void recurse(ezxml_t xml, ArcType types[], int * typesCount, const char * functi
 
 void extractTypesAndFunctionsFromConfigXML(ezxml_t hubXml, ArcType types[], int * typesCount, const char * functions[], int * functionsCount)
 {
-	//LOGI("extractTypesAndFunctionsFromConfigXML\n");
+	//printf("extractTypesAndFunctionsFromConfigXML\n");
 	
 	ArcType * type;
 	

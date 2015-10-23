@@ -4,3 +4,5 @@ js/disjunction-core.min.js
 *.exe
 /.project
 /.project
+*.d
+*.elf
