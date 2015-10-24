@@ -89,7 +89,9 @@ KHASH_DECLARE(Str_ArcType, kh_cstr_t, ArcType)
 
 static char * srcPath;
 khash_t(StrPtr) * types;
+char ** typesAlphabetical;
 static khiter_t k;
+static khiter_t j;
 khash_t(StrPtr) * typesToSkip;
 
 char* Text_load(char* filename) //as from orb 10/13/2015
@@ -160,28 +162,9 @@ void implementTypesAndFunctions(FILE * hFile)
 	fprintf(hFile, "size_t SIZEOF[64];\n");
 	fprintf(hFile, "size_t sizeofCount = 0;\n");
 	fprintf(hFile, "\n");
-	/*
+	
 	//addressofDynamic
 	fprintf(hFile, "void * addressofDynamic(const char * name)\n");
-	fprintf(hFile, "{\n");
-	fprintf(hFile, "\tif (strlen(name) > 0)\n");
-	fprintf(hFile, "\t{\n");
-	for (int i = 0; i < *functionsCount; ++i)
-	{
-		const char * function = functions[i];
-		fprintf(hFile, "\t\tif (strcmp(name, \"%s\") == 0) return &%s;\n", function, function);
-	}
-	fprintf(hFile, "\t}\n");
-	
-	fprintf(hFile, "\tprintf(\"[ARC]    Function not found: %%s.\\n\", name);\n");
-	fprintf(hFile, "\treturn NULL;\n");
-	
-	fprintf(hFile, "}\n");
-	fprintf(hFile, "\n");
-	*/
-	
-	//sizeofDynamic
-	fprintf(hFile, "size_t sizeofDynamic(const char * name)\n");
 	fprintf(hFile, "{\n");
 	fprintf(hFile, "\tif (strlen(name) > 0)\n");
 	fprintf(hFile, "\t{\n");
@@ -190,8 +173,41 @@ void implementTypesAndFunctions(FILE * hFile)
 		if (kh_exist(types, k)) 
 		{
 			ArcType * type = kh_value(types, k);
-			fprintf(hFile, "\t\tif (strcmp(name, \"%s\") == 0) return sizeof(%s);\n", type->classname, type->classname);
+			printf("%s\n", type->classname);
+			for (j = kh_begin(type->functions); j != kh_end(type->functions); ++j)
+			if (kh_exist(type->functions, j)) 
+			{
+				ArcFunction * function = kh_value(type->functions, j);
+				printf("%s\n", function->name);
+				//const char * function = functions[i];
+				fprintf(hFile, "\t\tif (strcmp(name, \"%s\") == 0) return &%s;\n", function->name, function->name);
+			}
+			
 		}
+	
+	fprintf(hFile, "\t}\n");
+	
+	fprintf(hFile, "\tprintf(\"[ARC]    Function not found: %%s.\\n\", name);\n");
+	fprintf(hFile, "\treturn NULL;\n");
+	
+	fprintf(hFile, "}\n");
+	fprintf(hFile, "\n");
+	
+	
+	//sizeofDynamic
+	fprintf(hFile, "size_t sizeofDynamic(const char * name)\n");
+	fprintf(hFile, "{\n");
+	fprintf(hFile, "\tif (strlen(name) > 0)\n");
+	fprintf(hFile, "\t{\n");
+	
+	for (int i = 0; i < kh_size(types); ++i)
+	{
+		char * key = typesAlphabetical[i];
+		printf("key=%s$\n", key);
+		ArcType * type = kh_get_val(StrPtr, types, key, NULL);
+		fprintf(hFile, "\t\tif (strcmp(name, \"%s\") == 0) return sizeof(%s);\n", type->classname, type->classname);
+	}
+	
 	fprintf(hFile, "\t}\n");
 	fprintf(hFile, "\tprintf(\"[ARC]    Class not found: %%s.\\n\", name);\n");
 	fprintf(hFile, "\treturn NULL;\n");
@@ -525,11 +541,18 @@ void getFunctionName(char * buffer, char ** namePtr)
 	}	
 }
 
-/*
-void extractFunctionsFromHeaders()
+ArcType * createType()
+{
+	ArcType * type = calloc(1, sizeof(ArcType));
+	type->members = kh_init(StrPtr);
+	type->functions = kh_init(StrPtr);
+	return type;
+}
+
+void extractFunctionsFromHeaders(ArcType * type)
 {	
 	//printf("extractFunctionsFromHeaders\n");
-	ArcType * type = &types[(*typesCount-1)];
+	//ArcType * type = &types[(*typesCount-1)];
 	//printf("arcfilename=%s\n", type->filename);
 	char filename[256];
 	strcpy(filename, srcPath);
@@ -543,19 +566,35 @@ void extractFunctionsFromHeaders()
 	stripLineComments			(fileString);
 	stripTypedefs				(fileString);
 	newlinesAndTabsToSpaces		(fileString);
-	int c = countValidEntries(fileString);
-	char * declarations[c];
-	splitDeclarations(fileString, declarations);
+	//int c = countValidEntries(fileString);
+	char * declarations[256];
+	int c = splitDeclarations(fileString, declarations);
 	char * functionNames[c];
 	
 	//printf("count of functions = %d", c);
 	for (int i = 0; i < c; ++i)
 	{
 		getFunctionName(declarations[i], &functionNames[i]);
-		functions[(*functionsCount)++] = functionNames[i];
+		
+		//functions[(*functionsCount)++] = functionNames[i];
+		ArcFunction * function = calloc(1, sizeof(ArcFunction));
+		strcpy(function->name, functionNames[i]);
+		
+		
+		k = kh_get(StrPtr, type->functions, function->name);
+		if (k == kh_end(type->functions)) //if function not already present in map
+		{
+			kh_set(StrPtr, type->functions, function->name, function);
+			printf("[ARC] Function %s added.\n", function->name);
+		}
+		else //if type is already present in map, get it
+		{
+			printf("[ARC] Function %s already exists, skipping.\n", function->name);
+			//function = kh_get_val(StrPtr, types, subtype->classname, NULL);
+		}
 	}
 }
-*/
+
 void readTypeFromXml(ezxml_t xml, ArcType * type)
 {
 	strncpy(type->classname, ezxml_attr(xml, "class"), STRLEN_MAX);
@@ -600,8 +639,8 @@ void readMemberAndTypeFromString(char * string, ArcType * type, ArcMember * memb
 		//printf("[1]classname=%s filename=%s useStructKeyword=%d isPointer=%d member->name=%s\n", type->classname, type->filename, type->isPointer, type->useStructKeyword, member->name);
 	}
 }
-/*
-void extractTypesAndFunctionsFromExtensionsXML(ezxml_t parentXml)
+
+void extractTypesAndFunctionsFromExtensionsXML(ezxml_t parentXml, ArcType * type)
 {
 	//printf("extractTypesAndFunctionsFromExtensionsXML\n");
 	for (ezxml_t elementXml = parentXml->child; elementXml; elementXml = elementXml->ordered) //run through distinct child element names
@@ -615,9 +654,11 @@ void extractTypesAndFunctionsFromExtensionsXML(ezxml_t parentXml)
 		{
 			if (strcmp(ezxml_name(elementXml), "extension") == 0) 
 			{
-				ArcType * type = &types[(*typesCount)++];
-				readTypeFromXml(elementXml, type);
-				extractFunctionsFromHeaders();
+				ArcType * subtype = createType();
+				readTypeFromXml(elementXml, subtype);
+				extractFunctionsFromHeaders(subtype);
+				
+				kh_set(StrPtr, types, subtype->classname, subtype);
 				//elementXml = elementXml->next; //is this even required now, with outer loop iterating on ->ordered?
 			}
 		}
@@ -628,14 +669,14 @@ void recurseXml(ezxml_t xml, const char * recursedName)
 {
 	for (xml = ezxml_child(xml, recursedName); xml; xml = xml->ordered)
 	{
-		ArcType * type = &types[(*typesCount)++];
-		readTypeFromXml(xml, type);
-		extractFunctionsFromHeaders();
-		extractTypesAndFunctionsFromExtensionsXML(xml);
+		ArcType * subtype = createType();
+		readTypeFromXml(xml, subtype);
+		kh_set(StrPtr, types, subtype->classname, subtype);
+		extractFunctionsFromHeaders(subtype);
+		extractTypesAndFunctionsFromExtensionsXML(xml, subtype);
 		recurseXml(xml, recursedName);
 	}
 }
-*/
 
 //assumes word "struct" will never be at very beginning of file (consider include guards etc.)
 void stripToStructNamed(char ** bufferRef, ArcType * type)
@@ -864,9 +905,8 @@ void extractModelMemberTypes(ArcType * type)
 		//printf("declaration=%s\n", declarations[i]);
 		stripMultiSpaces(&declarations[i]);
 		
-		ArcType 	* subtype = calloc(1, sizeof(ArcType));
+		ArcType 	* subtype = createType();
 		ArcMember 	* member  = calloc(1, sizeof(ArcMember));
-		subtype->members = kh_init(StrPtr);
 		
 		readMemberAndTypeFromString(declarations[i], subtype, member);
 		
@@ -913,52 +953,77 @@ void extractModelMemberTypes(ArcType * type)
 	//printf("[ARC] Type %s processed.\n", type->classname);
 }
 
-void extractTypesAndFunctionsFromConfigXML(ezxml_t hubXml)
+void extractTypesAndFunctionsFromConfigXML(ezxml_t hubXml, ArcType * type)
 {
 	//printf("extractTypesAndFunctionsFromConfigXML\n");
 	
-	ArcType * type;
 	
-	//extractTypesAndFunctionsFromExtensionsXML(hubXml);
+	readTypeFromXml(hubXml, type);
+	//kh_set(StrPtr, types, type->classname, type);
+	extractTypesAndFunctionsFromExtensionsXML(hubXml, type);
 	
 	ezxml_t appsXml = ezxml_child(hubXml, "apps");
 	for (ezxml_t appXml = ezxml_child(appsXml, "app"); appXml; appXml = appXml->next)
 	{
-		/*
 		//app
-		type = &types[(*typesCount)++];
+		type = createType();
 		readTypeFromXml(appXml, type);
-		extractFunctionsFromHeaders();
-		extractTypesAndFunctionsFromExtensionsXML(appXml);
-		*/
+		kh_set(StrPtr, types, type->classname, type);
+		extractFunctionsFromHeaders(type);
+		extractTypesAndFunctionsFromExtensionsXML(appXml, type);
+		
 		//model
 		ezxml_t modelXml = ezxml_child(appXml, "model");
-		type = calloc(1, sizeof(ArcType));
-		type->members = kh_init(StrPtr);
+		type = createType();
 		readTypeFromXml(modelXml, type);
-		printf("[ARC] Type %s processed.\n", type->classname);
 		kh_set(StrPtr, types, type->classname, type);
+		printf("[ARC] Type %s processed.\n", type->classname);
 		extractModelMemberTypes(type);
-		//walk down through the entire model tree to find all custom submodel types
-		//findSubModelTypes(modelXml, types, typesCount);
 		
-		/*
 		//views
 		ezxml_t viewXml = ezxml_child(appXml, "view");
-		type = &types[(*typesCount)++];
+		type = createType();
 		readTypeFromXml(viewXml, type);
-		extractFunctionsFromHeaders();
-		extractTypesAndFunctionsFromExtensionsXML(viewXml);
+		kh_set(StrPtr, types, type->classname, type);
+		extractFunctionsFromHeaders(type);
+		extractTypesAndFunctionsFromExtensionsXML(viewXml, type);
 		recurseXml(viewXml, "view");
 		
 		//ctrls
 		ezxml_t ctrlXml = ezxml_child(appXml, "ctrl");
-		type = &types[(*typesCount)++];
+		type = createType();
 		readTypeFromXml(ctrlXml, type);
-		extractFunctionsFromHeaders();
-		extractTypesAndFunctionsFromExtensionsXML(ctrlXml);
+		kh_set(StrPtr, types, type->classname, type);
+		extractFunctionsFromHeaders(type);
+		extractTypesAndFunctionsFromExtensionsXML(ctrlXml, type);
 		recurseXml(ctrlXml, "ctrl");
-		*/
+	}
+}
+
+static int cmp(const void *p1, const void *p2){
+    return strcmp(* (char * const *) p1, * (char * const *) p2);
+}
+
+void sortAlphabetical()
+{
+	size_t count = kh_size(types);
+	
+	typesAlphabetical = calloc(count, sizeof(char *));
+	
+	int i = 0;
+	for (k = kh_begin(types); k != kh_end(types); ++k)
+		if (kh_exist(types, k)) 
+		{
+			ArcType * type = kh_value(types, k);
+			typesAlphabetical[i++] = type->classname;
+			
+		}
+		
+	qsort(typesAlphabetical, count, sizeof(char *), cmp);
+	
+	for (i = 0; i < count; ++i)
+	{
+		printf("typesAlphabetical[i]=%s\n",typesAlphabetical[i]); 
 	}
 }
 
@@ -995,9 +1060,11 @@ void main(int argc, char *argv[])
 	//we use StrPtr to avoid a lot of hassle no every kh_set(), as keys are contained in values (copied from xml)
 	//this way, we just create it beforehand and put into the hash, instead of having to create it with a temp key (char[]) etc.
 	types = kh_init(StrPtr);
-	extractTypesAndFunctionsFromConfigXML(hubXml);
+	ArcType * type = createType();
+	extractTypesAndFunctionsFromConfigXML(hubXml, type);
 	
 	//write the file
+	sortAlphabetical();
 	implementTypesAndFunctions(cFile);
 	
 	ezxml_free(hubXml);
