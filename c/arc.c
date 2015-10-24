@@ -1045,7 +1045,7 @@ View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model)
 	return view;
 }
 
-Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model)
+Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model, const char * modelClass)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC]    Builder_buildCtrl...\n");
@@ -1056,7 +1056,19 @@ Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model)
 	const char * ctrlClass = ezxml_attr(ctrlXml, "class");
 	LOGI("ctrlClass=%s\n", ctrlClass);
 	ctrl = Ctrl_construct(ezxml_attr(ctrlXml, "id"), sizeofDynamic(ctrlClass));
-	ctrl->model = model;
+	
+	
+	const char * memberName = ezxml_attr(ctrlXml, "model");
+	if (memberName)
+	{
+		memberName++; //hack to skip .
+		ctrl->model = model + offsetofDynamic(modelClass, memberName);
+		*((int*)ctrl->model) = 7;
+	}
+	else
+	{
+		ctrl->model = model;
+	}
 	
 	FOREACH_CTRL_FUNCTION(GENERATE_ASSIGN_METHOD, ctrl)
 	
@@ -1068,7 +1080,7 @@ Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model)
 	Ctrl * subctrl;
 	for (ezxml_t subctrlXml = ezxml_child(ctrlXml, "ctrl"); subctrlXml; subctrlXml = subctrlXml->next)
 	{
-		subctrl = Builder_buildCtrl(NULL, subctrl, subctrlXml, model);
+		subctrl = Builder_buildCtrl(NULL, subctrl, subctrlXml, model, modelClass);
 
 		Ctrl_addChild(ctrl, subctrl);
 	}
@@ -1222,7 +1234,7 @@ App * Builder_buildApp(ezxml_t appXml)
 	
 	//ctrl
 	ctrlXml = ezxml_child(appXml, "ctrl");
-	ctrl = Builder_buildCtrl(app, ctrl, ctrlXml, model);
+	ctrl = Builder_buildCtrl(app, ctrl, ctrlXml, model, modelClass);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_buildApp   \n");
