@@ -1057,17 +1057,39 @@ Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model, 
 	LOGI("ctrlClass=%s\n", ctrlClass);
 	ctrl = Ctrl_construct(ezxml_attr(ctrlXml, "id"), sizeofDynamic(ctrlClass));
 	
+	ctrl->model = model;
+	const char * modelPathString = ezxml_attr(ctrlXml, "model");
+	int c = 0;
+	const char * modelClassNew;
+	if (modelPathString)
+	{
+		//memberName++; //hack to skip .
+		char * memberName = strtok(modelPathString, "."); //get leftmost token
+		int totaloffset = 0;
+		//LOGI("[%d] memberName=%s on type=%s @ offset=%u\n", c, memberName, modelClass, offset);
+		while (memberName != NULL)
+		{
+			LOGI("size of MWorld       =%u\n", sizeofDynamic("MWorld"));
+			LOGI("size of MWorldOptions=%u\n", sizeofDynamic("MWorldOptions"));
+			LOGI("size of MThing       =%u\n", sizeofDynamic("MThing"));
+			int offset = offsetofDynamic(modelClass, memberName);
+			totaloffset += offset;
+			LOGI("[%d] %s.%s @ offset=%u totaloffset=%u\n", c, modelClass, memberName, offset, totaloffset);
+			
+			modelClass = typeofMemberDynamic(modelClass, memberName);
+			
+			ctrl->model += offset;
+			
+			
+			//finally, prep for next cycle
+			memberName = strtok(NULL, ".");
+			
+			c++;
+		}
+		//TODO test what happens with multiple .'s, or strip these beforehand
+		//if (c==0) 
+		*((int*)ctrl->model) = atoi(ezxml_attr(ctrlXml, "value"));
 	
-	const char * memberName = ezxml_attr(ctrlXml, "model");
-	if (memberName)
-	{
-		memberName++; //hack to skip .
-		ctrl->model = model + offsetofDynamic(modelClass, memberName);
-		*((int*)ctrl->model) = 7;
-	}
-	else
-	{
-		ctrl->model = model;
 	}
 	
 	FOREACH_CTRL_FUNCTION(GENERATE_ASSIGN_METHOD, ctrl)

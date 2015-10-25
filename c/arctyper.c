@@ -55,7 +55,7 @@ struct ArcType;
 typedef struct ArcMember
 {
 	char name[STRLEN_MAX];
-	struct ArcType * type;
+	const char * typename; //we store the typename because not every member has a type in the types table, e.g. primitives
 } ArcMember;
 
 typedef struct ArcType
@@ -247,6 +247,44 @@ void implementTypesAndFunctions(FILE * hFile)
 	}
 	
 	fprintf(hFile, "\t}\n");
+	fprintf(hFile, "\n");
+	
+	fprintf(hFile, "\tprintf(\"[ARC]    Class / member not found: %%s :: %%s.\\n\", typename, membername);\n");
+	fprintf(hFile, "\treturn NULL;\n");
+	fprintf(hFile, "}\n");
+	
+	//typeofMember
+	fprintf(hFile, "const char * typeofMemberDynamic(const char * typename, const char * membername)\n");
+	fprintf(hFile, "{\n");
+	fprintf(hFile, "\tif (strlen(typename) > 0 && strlen(membername) > 0)\n");
+	fprintf(hFile, "\t{\n");
+	
+	for (int i = 0; i < kh_size(types); ++i)
+	{
+		char * keyType = typesAlphabetical[i];
+		//printf("keyType=%s$\n", keyType);
+		ArcType * type = kh_get_val(StrPtr, types, keyType, NULL);
+		if (kh_size(type->members) > 0)
+		{
+			fprintf(hFile, "\t\tif (strcmp(typename, \"%s\") == 0)\n", type->name);
+			fprintf(hFile, "\t\t{\n");
+			for (int h = 0; h < kh_size(type->members); ++h)
+			{
+				char * keyMember = type->membersAlphabetical[h];
+				//printf("keyMember=%s$\n", keyMember);
+				ArcMember * member = kh_get_val(StrPtr, type->members, keyMember, NULL);
+				
+				if (strstr(member->name, "[") != NULL) //if it's an array, comment it for now to prevent compile problems(?) with offsetof
+					fprintf(hFile, "//");
+				fprintf(hFile, "\t\t\tif (strcmp(membername, \"%s\") == 0) return \"%s\";\n", member->name, member->typename);
+			} 
+			fprintf(hFile, "\t\t}\n");
+		}
+	}
+	
+	fprintf(hFile, "\t}\n");
+	fprintf(hFile, "\n");
+	
 	fprintf(hFile, "\tprintf(\"[ARC]    Class / member not found: %%s :: %%s.\\n\", typename, membername);\n");
 	fprintf(hFile, "\treturn NULL;\n");
 	fprintf(hFile, "}\n");
@@ -599,6 +637,8 @@ void readMemberAndTypeFromString(char * string, ArcType * type, ArcMember * memb
 		strcpy(member->name, string);
 		//printf("[1]classname=%s filename=%s useStructKeyword=%d isPointer=%d member->name=%s\n", type->name, type->filename, type->isPointer, type->useStructKeyword, member->name);
 	}
+	
+	member->typename = type->name;
 }
 
 void extractTypesAndFunctionsFromExtensionsXML(ezxml_t parentXml)
