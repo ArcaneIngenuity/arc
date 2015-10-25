@@ -1,3 +1,5 @@
+![](https://github.com/github/ArcaneIngenuity/arc/edit/gh-pages/html/img/arc-logo.gif)
+
 **Clone this repository** rather than "Download ZIP" or else you will lack submodule dependencies!
 
 Refer to the [API documentation](http://arcaneingenuity.github.io/arc/).
