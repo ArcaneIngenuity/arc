@@ -1,4 +1,4 @@
-![arc logo](https://github.com/github/ArcaneIngenuity/arc/edit/gh-pages/html/img/arc-logo.gif)
+![arc logo](https://github.com/ArcaneIngenuity/arc/edit/gh-pages/html/img/arc-logo.gif)
 
 **Clone this repository** rather than "Download ZIP" or else you will lack submodule dependencies!
 
