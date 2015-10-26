@@ -92,120 +92,6 @@ typedef struct ArcString
 } ArcString;
 
 
-/// Base class for a user-defined extension created from config.
-typedef struct Extension
-{
-	char id[STRLEN_MAX]; ///< ID by which a user extension is retrieved from its owning View, Ctrl, App or Hub's ->extensionsById.
-} Extension;
-
-/// Base class for a user-defined view that has specific rendering responsibilities.
-
-/// For every discrete View needed, allocate it and set the appropriate callbacks.<br>
-/// When implementing a View this way, remember that it should be monolithic and represent a conceptual viewport that may be activated / deactivated, rather than every instance of something visible. Examples: in a game, a View might be the first person renderer rather than every instance of a game character; in a UI application, a View is better suited to representing a specific UI panel rather than each of the many controls within that Panel.<br>
-/// A View instance may then be added to an App by setting App.view; this will be the root View. Further View%s should then be added as children of the root View, and so on, creating a View tree.<br>
-/// Views may be accessed either by their View.id (which is set on construction) or zero-based depth/Z index.<br>
-/// A View reads from a model in order to update its state. See Ctrl's description for more on models.
-///
-typedef struct View
-{
-	//TODO fix this!
-	char id[STRLEN_MAX]; ///< (unimplemented) ID by which a View is retrieved from its App->viewsById.
-	struct Hub * hub; ///< \brief The Hub which owns and manages this View's owner App.
-	struct App * app; ///< \brief The App which owns and manages this View.
-	
-	bool updating; ///< Should this have View_update() called on it every frame?
-	bool initialised; ///< True after first initialise. If re- initialise is required, this should be manually reset to false.
-	void * model; ///< The model associated with this View. May or may not be the same as this View's App's model, depending on \link Configuration \endlink.
-	
-	struct View * root; ///< View's root view, i.e. the View attached to the App.
-	struct View * parent; ///< View's parent View, if not root.
-	kvec_t(struct View *) children; ///< View's children, in order added (as config, if used); index may be used as Z-order.
-
-	float dimensions[3]; ///< Dimensions of this View in user-defined units.
-	float position[3]; ///< Position of this View in user-defined units.
-	float orientation[3]; ///< Orientation of this View in user-defined units.
-	float scale[3]; ///< Scale of this View in user-defined units.
-	
-	khash_t(StrPtr) * extensionsById; ///< Extensions included on this View instance, if using config.
-	kvec_t(ArcString) extensionIds; ///< Array of fixed-length cstrings used as keys to extensionsById (required once XML and its source strings are freed).
-	
-	void (*start)(struct View * const this); ///< \brief User-supplied callback for when this View start()s.
-	void (*stop)(struct View * const this); ///< \brief User-supplied callback for when this View stop()s.
-	void (*suspend)(struct View * const this); ///< \brief User-supplied callback for when this View must suspend() due to a loss of rendering context.
-	void (*resume)(struct View * const this); ///< \brief User-supplied callback for when this View must resume() due to regaining rendering context.
-	void (*initialise)(struct View * const this); ///< \brief User-supplied callback for when this View initialise()s.
-	void (*dispose)(struct View * const this); ///< \brief User-supplied callback for when this View dispose()s of its resources.
-	void (*update)(struct View * const this); ///< \brief User-supplied callback for when this View update()s, i.e. update this View before its children update.
-	void (*updatePost)(struct View * const this); ///< \brief User-supplied callback for when this View updatePost()s, i.e. update this View after its children update.
-	void (*onParentResize)(struct View * const this); ///< \brief User-supplied callback for when this View's parent is resized. Root View resize is handled by some external (platform-specific) callback.
-	//void (*enable)(struct View * const this); //start
-	//void (*disable)(struct View * const this); //stop
-} View;
-
-/// Base class for a user-defined controller that handles specific game / business / simulation logic within an App.
-
-/// For every discrete Ctrl needed, allocate it and set the appropriate callbacks.<br>
-/// A Ctrl instance may then be added to an App by setting App.ctrl; this will be the root Ctrl. Often, this will be the only Ctrl needed; though in some cases the user may prefer to use sub-%Ctrl%s attached to root.<br>
-/// Sub-%Ctrl%s may be accessed through the App's root Ctrl.<br>
-/// A Ctrl operates on a model. In arc, models need no specific type; they can be anything (and are internally denoted as void *). Ctrl writes new model state by reading extant model state, inputs and View state.
-typedef struct Ctrl
-{
-	char id[STRLEN_MAX]; ///< ID used for Arc debugging mode.
-	struct Hub * hub; ///< \brief The Hub which owns and manages this Ctrl's owner App.
-	struct App * app; ///< \brief The App which owns and manages this Ctrl.
-	
-	bool updating; ///< Should this have Ctrl_update() called on it every frame?
-	bool initialised; ///< True after first initialisation. If re-initialisation is required, manually reset this to false.
-	void * model; ///< The model associated with this View. May or may not be the same as this View's App's (complete) model, depending on \link Configuration \endlink.
-	
-	struct Ctrl * root; ///< Ctrl's root view, i.e. the Ctrl attached to the App.
-	struct Ctrl * parent; ///< Ctrl's parent Ctrl, if not root.
-	kvec_t(struct Ctrl *) children; ///< Ctrl's children, in order added (as config, if used).
-	
-	//kvec_t(void *) configs; ///< Custom configs included in this Ctrl's markup, if any.
-	khash_t(StrPtr) * extensionsById; ///< Extensions included on this Ctrl, if using config.
-	kvec_t(ArcString) extensionIds; ///< Array of fixed-length cstrings used as keys to extensionsById (required once XML and its source strings are freed).
-	
-	//void (*mustStart)(struct Ctrl * const this); ///< \brief User-supplied callback for checking when this Ctrl mustStart().
-	//void (*mustStop)(struct Ctrl * const this); ///< \brief User-supplied callback for checking when this Ctrl mustStop().
-	void (*start)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl start()s.
-	void (*stop)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl stop()s.
-	void (*suspend)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl must suspend() due to a loss of rendering context.
-	void (*resume)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl must resume() due to regaining rendering context.
-	void (*initialise)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl initialise()s.
-	void (*dispose)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl dispose()s of its resources.
-	void (*update)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl update()s, i.e. update this Ctrl before any of its App's View%s update.
-	void (*updatePost)(struct Ctrl * const this); ///< \brief User-supplied callback for when this Ctrl updatePost()s, i.e. update this Ctrl after any of its App's View%s update.
-} Ctrl;
-
-/// An application that consists of model, View%s and Ctrl%s; resides within a global application Hub.
-
-/// Often, only a single App will be required within the (singleton)Hub.
-/// If an App is to be run less frequently than specified by the rate dictated by its Hub, this can be handled in App_update by only updating full update logic when some accumulator reaches a certain amount of elapsed time or frames.
-typedef struct App
-{
-	char id[STRLEN_MAX]; ///< \brief ID by which an App may be retrieved from its Hub (TODO); irrelevant except where updating multiple apps through the same Hub. (NEEDS REVIEW, apps go into indexed slots)
-	struct Hub * hub; ///< \brief The Hub which owns and manages this App.
-	//in spite of typedef, use struct due to circular ref App->Hub TODO remove this ref, and allow Apps to send messages up to DJ?
-	//struct khash_t(StrPtr) services;
-	
-	bool updating; ///< Should this have App_update() called on it every frame?
-	bool initialised; ///< True after first initialisation. If re-initialisation is required, manually reset this to false.
-	void * model; ///< The model associated with this App.
-	struct View * view; ///< The root View associated with this App.
-	struct Ctrl * ctrl; ///< The root Ctrl associated with this App.
-	
-	khash_t(StrPtr) * extensionsById; ///< Extensions included on this App instance, if using config.
-	kvec_t(ArcString) extensionIds; ///< Array of fixed-length cstrings used as keys to extensionsById (required once XML and its source strings are freed).
-	
-	void (*initialise)(struct App * const this); ///< \brief User-supplied callback for when this App initialise()s.
-	void (*dispose)(struct App * const this); ///< \brief User-supplied callback for when this App dispose()s of its resources.
-	void (*suspend)(struct App * const this); ///< \brief User-supplied callback for when this App must suspend() due to a loss of rendering context.
-	void (*resume)(struct App * const this); ///< \brief User-supplied callback for when this App must resume() due to regaining rendering context.
-	
-	khash_t(StrPtr) * pubsByName;
-} App;
-
 /// Base class for a user-defined service that acts as a hybrid View / Ctrl or proxy between View and Ctrl aspects of an App, or as an interface to external mechanisms / event loops.
 
 /// For every discrete Ctrl needed, allocate it and set the appropriate callbacks.<br>
@@ -217,30 +103,142 @@ typedef struct Service
 	void * models;
 } Service;
 
+/// Collection of Extension-related information.
+typedef struct Extensions
+{
+	khash_t(StrPtr) * byId; ///< Extensions included on this instance, if using config.
+	kvec_t(ArcString) ids; ///< Array of fixed-length cstrings used as keys to extensions.byId (required once XML and its source strings are freed).
+} Extensions;
+
+/// Base class for a user-defined extension created from config.
+typedef struct Extension
+{
+	char id[STRLEN_MAX]; ///< ID by which a user extension is retrieved from its owning View, Ctrl, App or Hub's ->extensions.byId.
+	Extensions * extensions;
+} Extension;
+
+/// A generic framework element, acts as base for VCAH which may be case hereto to use fields that way. 
+typedef struct Element
+{
+	bool initialised; ///< True after first initialise of the owner instance. If re- initialise is required, this should be manually reset to false. Always true for Hub.
+	
+	bool suspended; ///< (new, implement)
+	
+	void (*initialise)(struct Hub * const this); ///< \brief User-supplied callback for when owner instance initialise()s.
+	void (*dispose)(struct Hub * const this); ///< \brief User-supplied callback for when owner instance dispose()s of its resources.
+	void (*suspend)(struct Hub * const this); ///< \brief User-supplied callback for when owner instance must suspend() due to a loss of rendering context.
+	void (*resume)(struct Hub * const this); ///< \brief User-supplied callback for when owner instance must resume() due to regaining rendering context.
+	
+	Extensions extensions; ///< Extensions owned by this View, if any.
+} Element;
+
+/// Base class for framework elements with custom update-related functions, i.e. Views and Ctrls.
+typedef struct Updater
+{
+	bool updating; ///< Should this have update() called on it every frame?
+	
+	void (*start)(struct View * const this); ///< \brief User-supplied callback for when owner instance start()s.
+	void (*stop)(struct View * const this); ///< \brief User-supplied callback for when owner instance stop()s.
+	void (*update)(struct View * const this); ///< \brief User-supplied callback for when owner instance update()s, i.e. update this View before its children update.
+	void (*updatePost)(struct View * const this); ///< \brief User-supplied callback for when owner instance updatePost()s, i.e. update this View after its children update.
+
+} Updater;
+
+/// Base class for a user-defined view that has specific rendering responsibilities.
+
+/// For every discrete View needed, allocate it and set the appropriate callbacks.<br>
+/// When implementing a View this way, remember that it should be monolithic and represent a conceptual viewport that may be activated / deactivated, rather than every instance of something visible. Examples: in a game, a View might be the first person renderer rather than every instance of a game character; in a UI application, a View is better suited to representing a specific UI panel rather than each of the many controls within that Panel.<br>
+/// A View instance may then be added to an App by setting App.view; this will be the root View. Further View%s should then be added as children of the root View, and so on, creating a View tree.<br>
+/// Views may be accessed either by their View.id (which is set on construction) or zero-based depth/Z index.<br>
+/// A View reads from a model in order to update its state. See Ctrl's description for more on models.
+///
+typedef struct View
+{
+	Element element;
+	void * model; ///< The model associated with this instance; may depend on \link Configuration \endlink.
+	char id[STRLEN_MAX]; ///< (unimplemented) ID by which a View is retrieved from its parent view->childrenById.
+	
+	Updater updater;
+	
+	struct View * root; ///< View's root view, i.e. the View attached to the App.
+	struct View * parent; ///< View's parent View, if not root.
+	kvec_t(struct View *) children; ///< View's children, in order added (as config, if used); index may be used as Z-order.
+	struct Hub * hub; ///< \brief The Hub which owns and manages this instance's owner App.
+	struct App * app; ///< \brief The App which owns and manages this instance.
+	
+	void (*onParentResize)(struct View * const this); ///< \brief User-supplied callback for when this View's parent is resized. Root View resize is handled by some external (platform-specific) callback.
+	//void (*enable)(struct View * const this); //start
+	//void (*disable)(struct View * const this); //stop
+	
+	float dimensions[3]; ///< Dimensions of this View in user-defined units.
+	float position[3]; ///< Position of this View in user-defined units.
+	float orientation[3]; ///< Orientation of this View in user-defined units.
+	float scale[3]; ///< Scale of this View in user-defined units.
+	
+} View;
+
+/// Base class for a user-defined controller that handles specific game / business / simulation logic within an App.
+
+/// For every discrete Ctrl needed, allocate it and set the appropriate callbacks.<br>
+/// A Ctrl instance may then be added to an App by setting App.ctrl; this will be the root Ctrl. Often, this will be the only Ctrl needed; though in some cases the user may prefer to use sub-%Ctrl%s attached to root.<br>
+/// Sub-%Ctrl%s may be accessed through the App's root Ctrl.<br>
+/// A Ctrl operates on a model. In arc, models need no specific type; they can be anything (and are internally denoted as void *). Ctrl writes new model state by reading extant model state, inputs and View state.
+typedef struct Ctrl
+{
+	Element element;
+	void * model; ///< The model associated with this instance; may depend on \link Configuration \endlink.
+	char id[STRLEN_MAX]; ///< (unimplemented) ID by which this instance is retrieved from its parent via Ctrl_getChild(id).
+	
+	Updater updater;
+	
+	struct Ctrl * root; ///< Ctrl's root view, i.e. the Ctrl attached to the App.
+	struct Ctrl * parent; ///< Ctrl's parent Ctrl, if not root.
+	kvec_t(struct Ctrl *) children; ///< Ctrl's children, in order added (as config, if used).
+	struct Hub * hub; ///< \brief The Hub which owns and manages this instance's owner App.
+	struct App * app; ///< \brief The App which owns and manages this instance.
+	
+	//void (*mustStart)(struct Ctrl * const this); ///< \brief User-supplied callback for checking when this Ctrl mustStart().
+	//void (*mustStop)(struct Ctrl * const this); ///< \brief User-supplied callback for checking when this Ctrl mustStop().
+} Ctrl;
+
+/// An application that consists of model, View%s and Ctrl%s; resides within a global application Hub.
+
+/// Often, only a single App will be required within the (singleton)Hub.
+/// If an App is to be run less frequently than specified by the rate dictated by its Hub, this can be handled in App_update by only updating full update logic when some accumulator reaches a certain amount of elapsed time or frames.
+typedef struct App
+{
+	Element element;
+	void * model; ///< The model associated with this instance; may depend on \link Configuration \endlink.
+	char id[STRLEN_MAX]; ///< (unimplemented) ID by which this instance is retrieved from its Hub->appsById (DEFUNCT).
+	
+	bool updating;
+	
+	struct Hub * hub; ///< \brief The Hub which owns and manages this App.
+	struct View * view; ///< The root View associated with this App.
+	struct Ctrl * ctrl; ///< The root Ctrl associated with this App.
+	
+	khash_t(StrPtr) * pubsByName;
+	
+	//struct khash_t(StrPtr) services;
+} App;
+
+
 /// A central point from which all App%s may be managed / updated.
 
 /// A single timing mechanism (loop or callback) is used to run a Hub, from which each App's \link App_update \endlink will be called via Hub_update. This provides implicit synchronisation and best performance across multiple App%s that may be updating side-by-side.
 /// As such, Hub needs no start / stop like App; Hub_update is run perpetually until the executable terminates.
 typedef struct Hub
 {
+	Element element;
+	
+	//TODO use kvec_t(App *)
 	App * apps[APPS_MAX]; //malloc'd array of pointers to apps -- allows ad-hoc allocation or batched pre-allocation
 	int appsCount; ///< The number of valid App%s (counted from zero) currently in the Hub.apps array. (NEEDS REVIEW - these should act as slots and all should be checked, so don't need this)
 	
-	//TODO global Services?
-	//struct Service _services[SERVICES_MAX];
-	//Key _serviceKeys[SERVICES_MAX];
-	
-	khash_t(StrPtr) * extensionsById; ///< Extensions included on this Hub, if using config.
-	kvec_t(ArcString) extensionIds; ///< Array of fixed-length cstrings used as keys to extensionsById (required once XML and its source strings are freed).
-	
-	//TODO Builder
-	void (*initialise)(struct Hub * const this); ///< \brief User-supplied callback for when this Hub initialise()s.
-	void (*dispose)(struct Hub * const this); ///< \brief User-supplied callback for when this Hub dispose()s of its resources.
-	void (*suspend)(struct Hub * const this); ///< \brief User-supplied callback for when this Hub must suspend() due to a loss of rendering context.
-	void (*resume)(struct Hub * const this); ///< \brief User-supplied callback for when this Hub must resume() due to regaining rendering context.
-	
 	void * external; ///< User-defined reference to global state; useful if avoiding global variables.
-
+	
+	//TODO Services?
+	//TODO Builder
 } Hub;
 
 //FINAL/BASE METHODS

@@ -83,10 +83,10 @@ void Hub_setDefaultCallbacks(Hub * hub)
 	LOGI("[ARC]    Hub_setDefaultCallbacks\n");
 	#endif
 	
-	hub->initialise = (void * const)&doNothing;
-	hub->dispose 	= (void * const)&doNothing;
-	hub->suspend 	= (void * const)&doNothing;
-	hub->resume 	= (void * const)&doNothing;
+	hub->element.initialise = (void * const)&doNothing;
+	hub->element.dispose 	= (void * const)&doNothing;
+	hub->element.suspend 	= (void * const)&doNothing;
+	hub->element.resume 	= (void * const)&doNothing;
 }
 
 void Hub_update(Hub * const this)
@@ -120,8 +120,8 @@ Hub * Hub_construct()
 	//#else //no auto destructor!
 	Hub * hub = calloc(1, sizeof(Hub));
 	//#endif//__GNUC__
-	hub->extensionsById = kh_init(StrPtr);
-	kv_init(hub->extensionIds);
+	hub->element.extensions.byId = kh_init(StrPtr);
+	kv_init(hub->element.extensions.ids);
 	//Hub_setDefaultCallbacks(hub);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -144,9 +144,9 @@ void Hub_destruct(Hub * const this)
 			App_destruct(app);
 	}
 	
-	this->dispose((void *)this);
+	this->element.dispose((void *)this);
 	
-	//this->initialised = false;
+	//this->element.initialised = false;
 	free(this); //hub object is not a pointer!
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -166,7 +166,7 @@ void Hub_suspend(Hub * const this)
 			App_suspend(app);
 	}
 
-	this->suspend((void *)this);
+	this->element.suspend((void *)this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Hub_suspend");
@@ -185,7 +185,7 @@ void Hub_resume(Hub * const this)
 			App_resume(app);
 	}
 	
-	this->resume((void *)this);
+	this->element.resume((void *)this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Hub_resume");
@@ -247,10 +247,10 @@ void App_setDefaultCallbacks(App * app)
 	LOGI("[ARC]    App_setDefaultCallbacks\n");
 	#endif
 	
-	app->initialise = (void * const)&doNothing;
-	app->dispose 	= (void * const)&doNothing;
-	app->suspend 	= (void * const)&doNothing;
-	app->resume 	= (void * const)&doNothing;
+	app->element.initialise = (void * const)&doNothing;
+	app->element.dispose 	= (void * const)&doNothing;
+	app->element.suspend 	= (void * const)&doNothing;
+	app->element.resume 	= (void * const)&doNothing;
 }
 
 
@@ -267,8 +267,8 @@ App * App_construct(const char * id)//App ** app)
 	App * app = calloc(1, sizeof(App));
 	//#endif//__GNUC__
 	strcpy(app->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
-	app->extensionsById = kh_init(StrPtr);
-	kv_init(app->extensionIds);
+	app->element.extensions.byId = kh_init(StrPtr);
+	kv_init(app->element.extensions.ids);
 	app->pubsByName = kh_init(StrPtr);
 	//App_setDefaultCallbacks(app);
 	
@@ -291,7 +291,7 @@ void App_update(App * const this)
 	Ctrl_update(ctrl); //abstract
 	//if (view != NULL) //JIC user turns off the root view by removing it (since this is the enable/disable mechanism)
 	//really, we should just exit if either View or Ctrl are null, at App_start()
-	if (view->updating)
+	if (view->updater.updating)
 		View_update(view);
 	Ctrl_updatePost(ctrl); //abstract
 	
@@ -302,8 +302,8 @@ void App_update(App * const this)
 
 void App_initialise(App * const this)
 {
-	this->initialise((void *)this);
-	this->initialised = true;
+	this->element.initialise((void *)this);
+	this->element.initialised = true;
 	
 	Ctrl_initialise(this->ctrl);
 	View_initialise(this->view); //initialises all descendants too
@@ -316,7 +316,7 @@ void App_start(App * const this)
 	#endif
 	if (!this->updating)
 	{
-		if (this->initialised)
+		if (this->element.initialised)
 		{
 			Ctrl * ctrl = this->ctrl;
 			Ctrl_start(ctrl); //it is left to Ctrls to start Views
@@ -367,8 +367,8 @@ void App_destruct(App * const this)
 	
 	//this->services.dispose();
 	
-	this->dispose((void *)this);
-	this->initialised = false;
+	this->element.dispose((void *)this);
+	this->element.initialised = false;
 	free(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -384,7 +384,7 @@ void App_suspend(App * const this)
 	
 	View_suspend(this->view);
 	
-	this->ctrl->suspend((void *)this);
+	this->ctrl->element.suspend((void *)this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...App_suspend    (id=%s)\n", this->id);
@@ -399,7 +399,7 @@ void App_resume(App * const this)
 	
 	View_resume(this->view);
 
-	this->ctrl->resume((void *)this);
+	this->ctrl->element.resume((void *)this);
 
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...App_resume    (id=%s)\n", this->id);
@@ -429,14 +429,14 @@ void Ctrl_setDefaultCallbacks(Ctrl * const this)
 	
 	//this->mustStart = (void * const)&doNothing;
 	//this->mustStop 	= (void * const)&doNothing;
-	this->start 	= (void * const)&doNothing;
-	this->stop 		= (void * const)&doNothing;
-	this->suspend 	= (void * const)&doNothing;
-	this->resume 	= (void * const)&doNothing;
-	this->initialise= (void * const)&doNothing;
-	this->dispose 	= (void * const)&doNothing;
-	this->update 	= (void * const)&doNothing;
-	this->updatePost= (void * const)&doNothing;
+	this->updater.start 	= (void * const)&doNothing;
+	this->updater.stop 		= (void * const)&doNothing;
+	this->element.suspend 	= (void * const)&doNothing;
+	this->element.resume 	= (void * const)&doNothing;
+	this->element.initialise= (void * const)&doNothing;
+	this->element.dispose 	= (void * const)&doNothing;
+	this->updater.update 	= (void * const)&doNothing;
+	this->updater.updatePost= (void * const)&doNothing;
 }
 
 Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
@@ -452,8 +452,8 @@ Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
 	//Ctrl_setDefaultCallbacks(ctrl);
 	kv_init(ctrl->children);
 	//kv_init(ctrl->configs);
-	ctrl->extensionsById = kh_init(StrPtr);
-	kv_init(ctrl->extensionIds);
+	ctrl->element.extensions.byId = kh_init(StrPtr);
+	kv_init(ctrl->element.extensions.ids);
 	//ctrl->construct(ctrl);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -469,8 +469,8 @@ void Ctrl_start(Ctrl * const this)
 	LOGI("[ARC]    Ctrl_start... (id=%s)\n", this->id);
 	#endif
 	
-	this->start((void *)this);
-	this->updating = true;
+	this->updater.start((void *)this);
+	this->updater.updating = true;
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Ctrl_start    (id=%s)\n", this->id);
@@ -483,8 +483,8 @@ void Ctrl_stop(Ctrl * const this)
 	LOGI("[ARC]    Ctrl_stop... (id=%s)\n", this->id);
 	#endif
 	
-	this->stop((void *)this);
-	this->updating = false;
+	this->updater.stop((void *)this);
+	this->updater.updating = false;
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Ctrl_stop    (id=%s)\n", this->id);
@@ -497,7 +497,7 @@ void Ctrl_suspend(Ctrl * const this)
 	LOGI("[ARC]    Ctrl_suspend... (id=%s)\n", this->id);
 	#endif
 	
-	this->suspend(this);
+	this->element.suspend(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Ctrl_suspend    (id=%s)\n", this->id);
@@ -510,7 +510,7 @@ void Ctrl_resume(Ctrl * const this)
 	LOGI("[ARC]    Ctrl_resume... (id=%s)\n", this->id);
 	#endif
 	
-	this->resume(this);	
+	this->element.resume(this);	
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Ctrl_resume    (id=%s)\n", this->id);
@@ -523,9 +523,9 @@ void Ctrl_initialise(Ctrl * const this)
 	LOGI("[ARC]    Ctrl_initialise... (id=%s)\n", this->id);
 	#endif
 	
-	this->initialise(this);
+	this->element.initialise(this);
 	
-	this->initialised = true;
+	this->element.initialised = true;
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Ctrl_initialise    (id=%s)\n", this->id);
@@ -538,7 +538,7 @@ void Ctrl_update(Ctrl * const this)
 	LOGI("[ARC]    Ctrl_update... (id=%s)\n", this->id);
 	#endif
 	
-	this->update(this);//deltaSec
+	this->updater.update(this);//deltaSec
 	
 	#ifdef ARC_DEBUG_UPDATES
 	LOGI("[ARC] ...Ctrl_update    (id=%s)\n", this->id);
@@ -551,7 +551,7 @@ void Ctrl_updatePost(Ctrl * const this)
 	LOGI("[ARC]    Ctrl_updatePost... (id=%s)\n", this->id);
 	#endif
 	
-	this->updatePost(this);//deltaSec
+	this->updater.updatePost(this);//deltaSec
 	
 	#ifdef ARC_DEBUG_UPDATES
 	LOGI("[ARC] ...Ctrl_updatePost    (id=%s)\n", this->id);
@@ -565,8 +565,8 @@ void Ctrl_destruct(Ctrl * const this)
 	LOGI("[ARC]    Ctrl_destruct... (id=%s)\n", id);
 	#endif
 	
-	this->dispose(this);
-	this->initialised = false;
+	this->element.dispose(this);
+	this->element.initialised = false;
 	free(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -651,14 +651,14 @@ void View_setDefaultCallbacks(View * const this)
 	
 	//null id
 	//null model
-	this->start 			= (void * const)&doNothing;
-	this->stop 				= (void * const)&doNothing;
-	this->suspend 			= (void * const)&doNothing;
-	this->resume 			= (void * const)&doNothing;
-	this->initialise		= (void * const)&doNothing;
-	this->dispose 			= (void * const)&doNothing;
-	this->update 			= (void * const)&doNothing;
-	this->updatePost		= (void * const)&doNothing;
+	this->updater.start 			= (void * const)&doNothing;
+	this->updater.stop 				= (void * const)&doNothing;
+	this->element.suspend 			= (void * const)&doNothing;
+	this->element.resume 			= (void * const)&doNothing;
+	this->element.initialise		= (void * const)&doNothing;
+	this->element.dispose 			= (void * const)&doNothing;
+	this->updater.update 			= (void * const)&doNothing;
+	this->updater.updatePost		= (void * const)&doNothing;
 	this->onParentResize 	= (void * const)&doNothing;
 }
 
@@ -675,8 +675,8 @@ View * View_construct(const char * id, size_t sizeofSubclass)
 	strcpy(view->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
 	//View_setDefaultCallbacks(view);
 	kv_init(view->children);
-	view->extensionsById = kh_init(StrPtr);
-	kv_init(view->extensionIds);
+	view->element.extensions.byId = kh_init(StrPtr);
+	kv_init(view->element.extensions.ids);
 	//view->subStatusesByName = kh_init(StrPtr);
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...View_construct    (id=%s)\n", id);
@@ -691,8 +691,8 @@ void View_start(View * const this)
 	LOGI("[ARC]    View_start... (id=%s)\n", this->id);
 	#endif
 	
-	this->start((void *)this);
-	this->updating = true;
+	this->updater.start((void *)this);
+	this->updater.updating = true;
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...View_start    (id=%s)\n", this->id);
@@ -705,8 +705,8 @@ void View_stop(View * const this)
 	LOGI("[ARC]    View_stop... (id=%s)\n", this->id);
 	#endif
 	
-	this->stop((void *)this);
-	this->updating = false;
+	this->updater.stop((void *)this);
+	this->updater.updating = false;
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...View_stop    (id=%s)\n", this->id);
@@ -725,7 +725,7 @@ void View_suspend(View * const this)
 		View_suspend(child);
 	}
 	
-	this->suspend(this);
+	this->element.suspend(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...View_suspend    (id=%s)\n", this->id);
@@ -744,7 +744,7 @@ void View_resume(View * const this)
 		View_resume(child);
 	}
 	
-	this->resume(this);	
+	this->element.resume(this);	
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...View_resume    (id=%s)\n", this->id);
@@ -758,9 +758,9 @@ void View_initialise(View * const this)
 	LOGI("[ARC]    View_initialise... (id=%s)\n", this->id);
 	#endif
 	
-	this->initialise(this);
+	this->element.initialise(this);
 	
-	this->initialised = true;
+	this->element.initialised = true;
 
 	for (int i = 0; i < kv_size(this->children); ++i)
 	{
@@ -779,16 +779,16 @@ void View_update(View * const this)
 	LOGI("[ARC]    View_update... (id=%s)\n", this->id);
 	#endif
 	
-	this->update(this);//deltaSec
+	this->updater.update(this);//deltaSec
 
 	for (int i = 0; i < kv_size(this->children); ++i)
 	{
 		View * child = kv_A(this->children, i); //NB! dispose in draw order
-		if (child->updating)
+		if (child->updater.updating)
 			View_update(child);//deltaSec
 	}
 	
-	this->updatePost(this);//deltaSec
+	this->updater.updatePost(this);//deltaSec
 	
 	#ifdef ARC_DEBUG_UPDATES
 	LOGI("[ARC] ...View_update    (id=%s)\n", this->id);
@@ -809,8 +809,8 @@ void View_destruct(View * const this)
 	}
 	
 	kv_destroy(this->children);
-	this->dispose(this);
-	this->initialised = false;
+	this->element.dispose(this);
+	this->element.initialised = false;
 	free(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -958,58 +958,36 @@ void View_listen(View * const this)
 
 typedef void * (*BuildFunction) (ezxml_t xml);
 
-#define FOREACH_CTRL_FUNCTION(HANDLER, T) \
-	HANDLER(start, T) \
-	HANDLER(stop, T) \
-	HANDLER(update, T) \
-	HANDLER(updatePost, T) \
-	HANDLER(initialise, T) \
-	HANDLER(dispose, T) \
-	HANDLER(suspend, T) \
-	HANDLER(resume, T)
-	//HANDLER(construct, T) \
-	//HANDLER(destruct, T)
-	//HANDLER(mustStart, T) \
-	//HANDLER(mustStop, T) \
-
-#define FOREACH_VIEW_FUNCTION(HANDLER, T) \
-	HANDLER(onParentResize, T) \
-	HANDLER(start, T) \
-	HANDLER(stop, T) \
-	HANDLER(update, T) \
-	HANDLER(updatePost, T) \
-	HANDLER(initialise, T) \
-	HANDLER(dispose, T) \
-	HANDLER(suspend, T) \
-	HANDLER(resume, T)
+#define FOREACH_UPDATER_FUNCTION(instance, name, HANDLER) \
+	HANDLER(instance, name, start) \
+	HANDLER(instance, name, stop) \
+	HANDLER(instance, name, update) \
+	HANDLER(instance, name, updatePost)
 	
-#define FOREACH_HUB_FUNCTION(HANDLER, T) \
-	HANDLER(initialise, T) \
-	HANDLER(dispose, T) \
-	HANDLER(suspend, T) \
-	HANDLER(resume, T)
-	
-#define FOREACH_APP_FUNCTION(HANDLER, T) \
-	HANDLER(initialise, T) \
-	HANDLER(dispose, T) \
-	HANDLER(suspend, T) \
-	HANDLER(resume, T)
+#define FOREACH_ELEMENT_FUNCTION(instance, name, HANDLER) \
+	HANDLER(instance, name, initialise) \
+	HANDLER(instance, name, dispose) \
+	HANDLER(instance, name, suspend) \
+	HANDLER(instance, name, resume)
 
-#define GENERATE_ASSIGN_METHOD(member, instance) name = ezxml_attr(instance##Xml, #member); \
-	if (name) instance->member = addressofDynamic(name); \
+#define FOREACH_VIEW_FUNCTION(instance, name, HANDLER) \
+	HANDLER(instance, name, onParentResize) \
+
+#define GENERATE_ASSIGN_METHOD(instance, instancename, member) name = ezxml_attr(instancename##Xml, #member); \
+	if (name) instance member = addressofDynamic(name); \
 	else \
 	{ \
-		strcpy(nameAssembled, instance##Class); \
+		strcpy(nameAssembled, instancename##Class); \
 		strcat(nameAssembled, "_"); \
 		strcat(nameAssembled, #member); \
-		instance->member = addressofDynamic(nameAssembled); \
+		instance member = addressofDynamic(nameAssembled); \
 	} \
-	if (!instance->member) \
+	if (!instance member) \
 	{ \
-		instance->member = &doNothing; \
+		instance member = &doNothing; \
 		LOGI("[ARC]    Using default function: doNothing.\n"); \
 	}
-
+	
 View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -1023,9 +1001,11 @@ View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model)
 	view = View_construct(ezxml_attr(viewXml, "id"), sizeofDynamic(viewClass));
 	view->model = model;
 	
-	FOREACH_VIEW_FUNCTION(GENERATE_ASSIGN_METHOD, view)
+	FOREACH_ELEMENT_FUNCTION(view->element.,view, GENERATE_ASSIGN_METHOD)
+	FOREACH_UPDATER_FUNCTION(view->updater.,view, GENERATE_ASSIGN_METHOD)
+	FOREACH_VIEW_FUNCTION	(view->, 		view, GENERATE_ASSIGN_METHOD)
 	
-	Builder_buildExtensions(viewXml, view->extensionsById, &view->extensionIds);
+	Builder_buildExtensions(viewXml, &view->element.extensions);
 	
 	if (app) //subviews don't get access to app, see below
 		App_setView(app, view); //must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
@@ -1057,6 +1037,7 @@ Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model, 
 	LOGI("ctrlClass=%s\n", ctrlClass);
 	ctrl = Ctrl_construct(ezxml_attr(ctrlXml, "id"), sizeofDynamic(ctrlClass));
 	
+	//TODO factor out into a function that may be used by extensions to do member drilldown
 	ctrl->model = model;
 	const char * modelPathString = ezxml_attr(ctrlXml, "model");
 	int c = 0;
@@ -1092,9 +1073,10 @@ Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model, 
 	
 	}
 	
-	FOREACH_CTRL_FUNCTION(GENERATE_ASSIGN_METHOD, ctrl)
+	FOREACH_ELEMENT_FUNCTION(ctrl->element., ctrl, GENERATE_ASSIGN_METHOD)
+	FOREACH_UPDATER_FUNCTION(ctrl->updater., ctrl, GENERATE_ASSIGN_METHOD)
 	
-	Builder_buildExtensions(ctrlXml, ctrl->extensionsById, &ctrl->extensionIds);
+	Builder_buildExtensions(ctrlXml, &ctrl->element.extensions);
 	
 	if (app) //subctrls don't get access to app, see below
 		App_setCtrl(app, ctrl);
@@ -1114,7 +1096,7 @@ Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model, 
 	return ctrl;
 }
 
-void Builder_buildExtension(ezxml_t extensionXml, khash_t(StrPtr) * extensionsById, kvec_t(ArcString) * extensionIds)
+void Builder_buildExtension(ezxml_t extensionXml, Extensions * extensions)
 {
 	char * extensionId = ezxml_attr(extensionXml, "id");
 	char * extensionClassName = ezxml_attr(extensionXml, "class");
@@ -1155,15 +1137,15 @@ void Builder_buildExtension(ezxml_t extensionXml, khash_t(StrPtr) * extensionsBy
 	//because we already resized Builder_buildExtensions, no issues here with kvec realloc causing  //problems with string key into khash taken from kvec.
 	ArcString s;
 	strncpy(s.name, extensionId, STRLEN_MAX);
-	kv_push(ArcString, *extensionIds, s); //copy value
-	kh_set(StrPtr, extensionsById, kv_A(*extensionIds, kv_size(*extensionIds)-1).name, extension);
+	kv_push(ArcString, extensions->ids, s); //copy value
+	kh_set(StrPtr, extensions->byId, kv_A(extensions->ids, kv_size(extensions->ids)-1).name, extension);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_buildExtension    (id=%s class=%s)\n", extensionId, extensionClassName);
 	#endif// ARC_DEBUG_ONEOFFS
 }
 
-void Builder_buildExtensions(ezxml_t xml, khash_t(StrPtr) * extensionsById, kvec_t(ArcString) * extensionIds)
+void Builder_buildExtensions(ezxml_t xml, Extensions * extensions)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC]    Builder_buildExtensions...\n");
@@ -1172,7 +1154,7 @@ void Builder_buildExtensions(ezxml_t xml, khash_t(StrPtr) * extensionsById, kvec
 	ezxml_t elementXml, elementXmlCopy;
 	
 	//first count the elements and resize the vec once-off - this prevents issues
-	//with using the kvec's elements as keys into extensionsById (due to realloc)
+	//with using the kvec's elements as keys into extensions.byId (due to realloc)
 	size_t count = 0;
 	for (elementXml = ezxml_child_any(xml); elementXml; elementXml = elementXml->ordered) //run through distinct child element names
 	{
@@ -1188,8 +1170,8 @@ void Builder_buildExtensions(ezxml_t xml, khash_t(StrPtr) * extensionsById, kvec
 				++count;
 		}
 	}
-	kv_resize(ArcString, *extensionIds, count);
-	kh_resize(StrPtr,   extensionsById, count);
+	kv_resize(ArcString, extensions->ids, count);
+	kh_resize(StrPtr,   extensions->byId, count);
 	//TODO find custom elements and build them using their name as a key into a map provided for each element type
 	for (elementXml = ezxml_child_any(xml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
 	{
@@ -1206,7 +1188,7 @@ void Builder_buildExtensions(ezxml_t xml, khash_t(StrPtr) * extensionsById, kvec
 				elementXmlCopy = elementXml;
 				while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
 				{
-					Builder_buildExtension(elementXmlCopy, extensionsById, extensionIds);
+					Builder_buildExtension(elementXmlCopy, extensions);
 
 					elementXmlCopy = elementXmlCopy->next;
 				}
@@ -1240,9 +1222,9 @@ App * Builder_buildApp(ezxml_t appXml)
 	appClass = ezxml_attr(appXml, "class");
 	App * app = App_construct(ezxml_attr(appXml, "id"));
 	
-	FOREACH_APP_FUNCTION(GENERATE_ASSIGN_METHOD, app)
+	FOREACH_ELEMENT_FUNCTION(app->element., app, GENERATE_ASSIGN_METHOD)
 	
-	Builder_buildExtensions(appXml, app->extensionsById, &app->extensionIds);
+	Builder_buildExtensions(appXml, &app->element.extensions);
 
 	//model
 	modelXml = ezxml_child(appXml, "model");
@@ -1275,8 +1257,9 @@ void Builder_buildHub(Hub * hub, ezxml_t hubXml)
 	const char * name;
 	const char * hubClass = "Hub";
 	
-	FOREACH_HUB_FUNCTION(GENERATE_ASSIGN_METHOD, hub)
-	Builder_buildExtensions(hubXml, hub->extensionsById, &hub->extensionIds);
+	FOREACH_ELEMENT_FUNCTION(hub->element., hub, GENERATE_ASSIGN_METHOD)
+	LOGI("[ARC]    Builder_buildHub...\n");
+	Builder_buildExtensions(hubXml, &hub->element.extensions);
 	ezxml_t appsXml = ezxml_child(hubXml, "apps");
 	
 	for (ezxml_t appXml = ezxml_child(appsXml, "app"); appXml; appXml = appXml->next)
@@ -1307,3 +1290,77 @@ void Builder_buildFromConfig(Hub * const hub, const char * configFilename)
 
 //--------- misc ---------//
 void doNothing(void * const this){/*LOGI("[ARC] doNothing\n");*/}
+
+/*
+DYNAMIC MEMBERS
+
+
+split string by dots first
+
+from fragments, create a linked list - each node void * - containing either individual names OR groups (see below)
+this linked list is representative of the final code structure, but first we must break up the groups...
+
+1. dots are simple - they are just offsets onto the total pointer counted up to by the previous value (i.e. the one before the dot) - isPointer = false
+
+2. each group contains one or more deref ops "->" in sequence, so,
+	-split the group on '->'
+	-remainders should be individual terms/members
+	-the final one could be a value or pointer, so make no assumptions on it
+	-but the others are all pointers, and need to be derefed as (*ptrname) - so they are marked with "isPointer=true"
+    -conclude the group when all are done.
+	
+(repeat 2 for each group)
+
+	what this gets us is the ability to join everything up safely using just the dot operator, in the final code, provided we use deref where needed.
+	
+3. process the chain to get final address
+get a result pointer ready - set it to the intial element
+
+for each element in chain
+	if isPointer
+	else not pointer
+		add offset to current result
+			
+	
+	
+	
+	
+
+is this a pointer? if so, use it just so
+else get its address
+
+1.	
+this->element.position->member.another.here.and->some->else //is a pointer - we know because no &
+
+this is a pointer (followed by ->)   			- initialise result to it
+element is a value (followed by .)   			- add its offset to result
+position is a pointer (follow by ->) 			- replace result with it
+member is a value (followed by .)    			- add its offset to result
+another is a value (followed by .)   			- add its offset to result
+here is a value (followed by .)      			- add its offset to result
+and is a pointer (followed by ->)    			- replace result with it
+some is a pointer (followed by ->)   			- replace result with it
+else is a pointer (final + no &)  				- replace result with it
+
+2.
+&this->element.position->member.another.here.and->something->else //is a value - we know because of &
+
+as above, but final element 'else' must be a value (final + set has &), so - replace result with addressofDynamic(else).
+
+3.
+this.some.thing->else
+
+this is a value (first el, followed by .)		- result = addressofDynamic(this) 
+some is a value (followed by .)					- add its offset to result
+thing is a pointer (followed by ->)  			- replace result with it
+else is a pointer (final, no &)					- replace result with it
+
+4.
+this.some.thing
+
+this is a value (first el, followed by .)		- result = addressofDynamic(this) 
+some is a value (followed by .)					- add its offset to result
+thing is a value (followed by .)				- add its offset to result
+
+...in this case, we can only assume that final element 'thing' is a pointer, so on reaching it, we have to ????
+*/
