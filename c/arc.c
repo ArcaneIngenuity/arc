@@ -34,7 +34,63 @@ KHASH_DEFINE(StrPtr, 	kh_cstr_t, uintptr_t, kh_str_hash_func, kh_str_hash_equal,
 
 static khiter_t k;
 
+//---------Extension-----------//
 
+void Extension_initialise(Extension * extension)
+{
+	
+	//get parser if available
+	char * extensionClassName = ezxml_attr(extension->config, "class");
+	char parserFunctionName[STRLEN_MAX];
+	strcpy(parserFunctionName, extensionClassName);
+	strcat(parserFunctionName, "_fromConfigXML");
+	LOGI("[ARC]    Extension_initialise() (id=%s)\n", extensionClassName);
+	ParserFunctionXML parser = addressofDynamic(parserFunctionName);
+	
+	Element * element = extension->group;
+	
+	if (parser) //if extension constructor is available
+	{
+		#ifdef ARC_DEBUG_ONEOFFS
+		LOGI("[ARC]    Parser function found: %s :: %s.\n", extensionClassName, parserFunctionName);
+		#endif// ARC_DEBUG_ONEOFFS
+		parser(extension, element);
+	}
+	else //cannot construct extension without function
+	{
+		#ifdef ARC_DEBUG_ONEOFFS
+		LOGI("[ARC]    Parser function  not found: %s :: %s.\n", extensionClassName, parserFunctionName);
+		#endif// ARC_DEBUG_ONEOFFS
+		exit(EXIT_FAILURE);
+	}
+}
+
+//---------Element-----------//
+
+/// Sets up Extensions collections at startup time so they are ready for Builder to populate (to be used at initialise time).
+void Element_construct(Element * element)
+{
+	element->extensions.byId = kh_init(StrPtr);
+	kv_init(element->extensions.ordered);
+}
+
+/// Uses the Extensions created by Builder, at initialise time.
+void Element_initialise(Element * element)
+{
+	Extensions * extensions = &element->extensions;
+	
+	//parser all extensions in order of declaration
+	for (int i = 0; i < kv_size(extensions->ordered); ++i)
+	{
+		Extension * extension = kv_A(extensions->ordered, i);
+		LOGI("[ARC]    Processing Extension during initialisation...\n");
+		Extension_initialise(extension);
+	}
+	
+	//initialise element
+	element->initialise(element);
+	element->initialised = true;
+}
 
 //--------- Pub/Sub ---------//
 
@@ -120,8 +176,7 @@ Hub * Hub_construct()
 	//#else //no auto destructor!
 	Hub * hub = calloc(1, sizeof(Hub));
 	//#endif//__GNUC__
-	hub->element.extensions.byId = kh_init(StrPtr);
-	kv_init(hub->element.extensions.ids);
+	Element_construct(hub);
 	//Hub_setDefaultCallbacks(hub);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -267,8 +322,7 @@ App * App_construct(const char * id)//App ** app)
 	App * app = calloc(1, sizeof(App));
 	//#endif//__GNUC__
 	strcpy(app->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
-	app->element.extensions.byId = kh_init(StrPtr);
-	kv_init(app->element.extensions.ids);
+	Element_construct(app);
 	app->pubsByName = kh_init(StrPtr);
 	//App_setDefaultCallbacks(app);
 	
@@ -302,8 +356,7 @@ void App_update(App * const this)
 
 void App_initialise(App * const this)
 {
-	this->element.initialise((void *)this);
-	this->element.initialised = true;
+	Element_initialise(this);
 	
 	Ctrl_initialise(this->ctrl);
 	View_initialise(this->view); //initialises all descendants too
@@ -452,8 +505,7 @@ Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
 	//Ctrl_setDefaultCallbacks(ctrl);
 	kv_init(ctrl->children);
 	//kv_init(ctrl->configs);
-	ctrl->element.extensions.byId = kh_init(StrPtr);
-	kv_init(ctrl->element.extensions.ids);
+	Element_construct(ctrl);
 	//ctrl->construct(ctrl);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -523,9 +575,7 @@ void Ctrl_initialise(Ctrl * const this)
 	LOGI("[ARC]    Ctrl_initialise... (id=%s)\n", this->id);
 	#endif
 	
-	this->element.initialise(this);
-	
-	this->element.initialised = true;
+	Element_initialise(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Ctrl_initialise    (id=%s)\n", this->id);
@@ -675,8 +725,9 @@ View * View_construct(const char * id, size_t sizeofSubclass)
 	strcpy(view->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
 	//View_setDefaultCallbacks(view);
 	kv_init(view->children);
-	view->element.extensions.byId = kh_init(StrPtr);
-	kv_init(view->element.extensions.ids);
+	
+	Element_construct(view);
+	
 	//view->subStatusesByName = kh_init(StrPtr);
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...View_construct    (id=%s)\n", id);
@@ -758,9 +809,7 @@ void View_initialise(View * const this)
 	LOGI("[ARC]    View_initialise... (id=%s)\n", this->id);
 	#endif
 	
-	this->element.initialise(this);
-	
-	this->element.initialised = true;
+	Element_initialise(this);
 
 	for (int i = 0; i < kv_size(this->children); ++i)
 	{
@@ -988,7 +1037,7 @@ typedef void * (*BuildFunction) (ezxml_t xml);
 		LOGI("[ARC]    Using default function: doNothing.\n"); \
 	}
 	
-View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model)
+View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model, const char * modelClass)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC]    Builder_buildView...\n");
@@ -1005,18 +1054,18 @@ View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model)
 	FOREACH_UPDATER_FUNCTION(view->updater.,view, GENERATE_ASSIGN_METHOD)
 	FOREACH_VIEW_FUNCTION	(view->, 		view, GENERATE_ASSIGN_METHOD)
 	
-	Builder_buildExtensions(viewXml, &view->element.extensions);
-	
 	if (app) //subviews don't get access to app, see below
 		App_setView(app, view); //must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
 	
 	View * subview;
 	for (ezxml_t subviewXml = ezxml_child(viewXml, "view"); subviewXml; subviewXml = subviewXml->next)
 	{
-		subview = Builder_buildView(NULL, subview, subviewXml, model);
+		subview = Builder_buildView(NULL, subview, subviewXml, model, modelClass);
 
 		View_addChild(view, subview);
 	}
+	
+	Builder_buildExtensions(viewXml, &view->element.extensions, modelClass);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_buildView   \n");
@@ -1037,6 +1086,7 @@ Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model, 
 	LOGI("ctrlClass=%s\n", ctrlClass);
 	ctrl = Ctrl_construct(ezxml_attr(ctrlXml, "id"), sizeofDynamic(ctrlClass));
 	
+	//drilldown to Ctrl's specific model, if any
 	//TODO factor out into a function that may be used by extensions to do member drilldown
 	ctrl->model = model;
 	const char * modelPathString = ezxml_attr(ctrlXml, "model");
@@ -1057,7 +1107,7 @@ Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model, 
 			totaloffset += offset;
 			LOGI("[%d] %s.%s @ offset=%u totaloffset=%u\n", c, modelClass, memberName, offset, totaloffset);
 			
-			modelClass = typeofMemberDynamic(modelClass, memberName);
+			//modelClass = typeofMemberDynamic(modelClass, memberName);
 			
 			ctrl->model += offset;
 			
@@ -1070,13 +1120,10 @@ Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model, 
 		//TODO test what happens with multiple .'s, or strip these beforehand
 		//if (c==0) 
 		*((int*)ctrl->model) = atoi(ezxml_attr(ctrlXml, "value"));
-	
 	}
 	
 	FOREACH_ELEMENT_FUNCTION(ctrl->element., ctrl, GENERATE_ASSIGN_METHOD)
 	FOREACH_UPDATER_FUNCTION(ctrl->updater., ctrl, GENERATE_ASSIGN_METHOD)
-	
-	Builder_buildExtensions(ctrlXml, &ctrl->element.extensions);
 	
 	if (app) //subctrls don't get access to app, see below
 		App_setCtrl(app, ctrl);
@@ -1088,6 +1135,8 @@ Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model, 
 
 		Ctrl_addChild(ctrl, subctrl);
 	}
+	
+	Builder_buildExtensions(ctrlXml, &ctrl->element.extensions, modelClass);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_buildCtrl   \n");
@@ -1104,48 +1153,28 @@ void Builder_buildExtension(ezxml_t extensionXml, Extensions * extensions)
 	LOGI("[ARC]    Builder_buildExtension... (id=%s class=%s)\n", extensionId, extensionClassName);
 	#endif// ARC_DEBUG_ONEOFFS
 	
-	void * extension = calloc(1, sizeofDynamic(extensionClassName));
-
-	//check for parser and run it if available
-	//would allow custom <extension initialise="someFunction"> to override this if user desires, but then
-	//we'd still have to match the function signature so why not just match name, too, as done here.
-	//essentially, an "instance" is only an "extension" if it matches the required function interface.
-	char parserFunctionName[STRLEN_MAX];
-	strcpy(parserFunctionName, extensionClassName);
-	strcat(parserFunctionName, "_fromConfigXML");
-	ParserFunctionXML parser = addressofDynamic(parserFunctionName);
+	Extension * extension = calloc(1, sizeofDynamic(extensionClassName));
+	strncpy(extension->id, extensionId, STRLEN_MAX);
+	extension->config = extensionXml;
+	extension->group = extensions;
+	kv_push(Extension, extensions->ordered, extension);
+	kh_set(StrPtr, extensions->byId, extension->id, extension);
 	
-	if (parser) //if extension constructor is available
+	bool runOnBuild = ezxml_attr(extensionXml, "runOnBuild"); //don't need ="something", just need "runOnBuild"
+	
+	if (runOnBuild)
 	{
-		#ifdef ARC_DEBUG_ONEOFFS
-		LOGI("[ARC]    Parser function found: %s :: %s.\n", extensionClassName, parserFunctionName);
-		LOGI("[ARC]    Parsing...\n", parserFunctionName, extensionClassName);
-		#endif// ARC_DEBUG_ONEOFFS
-		parser(extension, extensionXml);
-		#ifdef ARC_DEBUG_ONEOFFS
-		LOGI("[ARC] ...Parsing\n", parserFunctionName, extensionClassName);
-		#endif// ARC_DEBUG_ONEOFFS
+		LOGI("[ARC]    Processing Extension during build...\n");
+		Extension_initialise(extension);
 	}
-	else //cannot construct extension without function
-	{
-		#ifdef ARC_DEBUG_ONEOFFS
-		LOGI("[ARC]    Parser function  not found: %s :: %s.\n", extensionClassName, parserFunctionName);
-		#endif// ARC_DEBUG_ONEOFFS
-	}
-
-	//get extension id and store both this key and its associated value.
-	//because we already resized Builder_buildExtensions, no issues here with kvec realloc causing  //problems with string key into khash taken from kvec.
-	ArcString s;
-	strncpy(s.name, extensionId, STRLEN_MAX);
-	kv_push(ArcString, extensions->ids, s); //copy value
-	kh_set(StrPtr, extensions->byId, kv_A(extensions->ids, kv_size(extensions->ids)-1).name, extension);
+	
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_buildExtension    (id=%s class=%s)\n", extensionId, extensionClassName);
 	#endif// ARC_DEBUG_ONEOFFS
 }
 
-void Builder_buildExtensions(ezxml_t xml, Extensions * extensions)
+void Builder_buildExtensions(ezxml_t xml, Extensions * extensions, const char * modelClass)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC]    Builder_buildExtensions...\n");
@@ -1170,8 +1199,10 @@ void Builder_buildExtensions(ezxml_t xml, Extensions * extensions)
 				++count;
 		}
 	}
-	kv_resize(ArcString, extensions->ids, count);
-	kh_resize(StrPtr,   extensions->byId, count);
+	
+	kv_resize(Extension *, 	extensions->ordered, 	count);
+	kh_resize(StrPtr,   	extensions->byId, 		count);
+	
 	//TODO find custom elements and build them using their name as a key into a map provided for each element type
 	for (elementXml = ezxml_child_any(xml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
 	{
@@ -1218,13 +1249,10 @@ App * Builder_buildApp(ezxml_t appXml)
 	Ctrl * ctrl;
 	
 	//app (create)
-	
 	appClass = ezxml_attr(appXml, "class");
 	App * app = App_construct(ezxml_attr(appXml, "id"));
 	
 	FOREACH_ELEMENT_FUNCTION(app->element., app, GENERATE_ASSIGN_METHOD)
-	
-	Builder_buildExtensions(appXml, &app->element.extensions);
 
 	//model
 	modelXml = ezxml_child(appXml, "model");
@@ -1234,11 +1262,14 @@ App * Builder_buildApp(ezxml_t appXml)
 	
 	//views
 	viewXml = ezxml_child(appXml, "view");
-	view = Builder_buildView(app, view, viewXml, model);
+	view = Builder_buildView(app, view, viewXml, model, modelClass);
 	
 	//ctrl
 	ctrlXml = ezxml_child(appXml, "ctrl");
 	ctrl = Builder_buildCtrl(app, ctrl, ctrlXml, model, modelClass);
+	
+	//extensions
+	Builder_buildExtensions(appXml, &app->element.extensions, modelClass);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_buildApp   \n");
@@ -1259,14 +1290,15 @@ void Builder_buildHub(Hub * hub, ezxml_t hubXml)
 	
 	FOREACH_ELEMENT_FUNCTION(hub->element., hub, GENERATE_ASSIGN_METHOD)
 	LOGI("[ARC]    Builder_buildHub...\n");
-	Builder_buildExtensions(hubXml, &hub->element.extensions);
-	ezxml_t appsXml = ezxml_child(hubXml, "apps");
-	
+
+	ezxml_t appsXml = ezxml_child(hubXml, "apps");	
 	for (ezxml_t appXml = ezxml_child(appsXml, "app"); appXml; appXml = appXml->next)
 	{
 		App * app = Builder_buildApp(appXml);
 		Hub_addApp(hub, app);
 	}
+	
+	Builder_buildExtensions(hubXml, &hub->element.extensions, NULL);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_buildHub   \n");
@@ -1281,7 +1313,7 @@ void Builder_buildFromConfig(Hub * const hub, const char * configFilename)
 	
 	ezxml_t hubXml = ezxml_parse_file(configFilename);
 	Builder_buildHub(hub, hubXml);
-	ezxml_free(hubXml);
+	//ezxml_free(hubXml);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_buildFromConfig   \n");

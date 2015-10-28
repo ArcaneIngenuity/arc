@@ -103,19 +103,25 @@ typedef struct Service
 	void * models;
 } Service;
 
-/// Collection of Extension-related information.
-typedef struct Extensions
-{
-	khash_t(StrPtr) * byId; ///< Extensions included on this instance, if using config.
-	kvec_t(ArcString) ids; ///< Array of fixed-length cstrings used as keys to extensions.byId (required once XML and its source strings are freed).
-} Extensions;
+struct Extensions;
+struct Element;
 
 /// Base class for a user-defined extension created from config.
 typedef struct Extension
 {
 	char id[STRLEN_MAX]; ///< ID by which a user extension is retrieved from its owning View, Ctrl, App or Hub's ->extensions.byId.
-	Extensions * extensions;
+	ezxml_t config;
+	struct Extensions * group;
 } Extension;
+
+/// Collection of Extension-related information.
+typedef struct Extensions
+{
+	kvec_t(Extension *) ordered; ///< Extensions included on this instance, in order of declaration in config. (must be list of pointers - each is allocated as a wider user type, see Builder_buildExtension() - so lost of Extension would truncate these).
+	khash_t(StrPtr) * byId; ///< Extensions included on this instance, if using config.
+	//kvec_t(ArcString) ids; ///< Array of fixed-length cstrings used as keys to extensions.byId (required once XML and its source strings are freed).
+	struct Element * owner; ///< String class name of the owning Element's model; accesible to extensions in case of dynamic model drilldown.
+} Extensions;
 
 /// A generic framework element, acts as base for VCAH which may be case hereto to use fields that way. 
 typedef struct Element
@@ -130,6 +136,7 @@ typedef struct Element
 	void (*resume)(struct Hub * const this); ///< \brief User-supplied callback for when owner instance must resume() due to regaining rendering context.
 	
 	Extensions extensions; ///< Extensions owned by this View, if any.
+	char * modelClassName[STRLEN_MAX];
 } Element;
 
 /// Base class for framework elements with custom update-related functions, i.e. Views and Ctrls.
@@ -286,6 +293,7 @@ void 		App_setView(App * app, View * ciew); ///< \memberof App Sets the root Vie
 Hub * 		Hub_construct(); ///< \memberof Hub Constructs the Hub.
 void 		Hub_destruct(Hub * const this); ///< \memberof Hub Destructs the Hub after \link App_destruct \endlink ing its App%s (e.g. OpenGL, OpenAL), optionally using \link dispose \endlink.
 void 		Hub_initialise(Hub * const this); ///< \memberof Hub Initialises context that affects all App%s held by the Hub (e.g. OpenGL, OpenAL), using \link initialise \endlink.
+void 		Hub_dispose(Hub * const this); ///< \memberof Hub Disposes of context that affects all App%s held by the Hub (e.g. OpenGL, OpenAL), using \link initialise \endlink.
 void 		Hub_update(Hub * const this); ///< \memberof Hub Updates all Apps within the Hub.
 void 		Hub_suspend(Hub * const this); ///< \memberof Hub Has all App%s \link suspend \endlink operations due to a loss of rendering context.
 void 		Hub_resume(Hub * const this); ///< \memberof Hub Has all App%s \link resume \endlink operations due to regaining rendering context.
@@ -296,7 +304,7 @@ App * const Hub_getApp(Hub * const this, const char * const id); ///< \memberof 
 //TODO... void Hub_removeDevice(Hub * const this, const char * id);
 
 void 		Builder_buildFromConfig(Hub * const hub, const char * configFilename); ///< Build the Hub contents from a config file; path should be relative to executable.
-typedef void * (*ParserFunctionXML)(void * this, ezxml_t xml);
+typedef void * (*ParserFunctionXML)(Extension * extension, Element * element);
 void doNothing(void * const this); ///< A null-pattern callback which is the default when no user-defined callback has yet been supplied (prevents null pointer crashes).
 
 #endif //ARC_H
