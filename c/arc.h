@@ -142,6 +142,8 @@ typedef struct Element
 /// Base class for framework elements with custom update-related functions, i.e. Views and Ctrls.
 typedef struct Updater
 {
+	Element base;
+	
 	bool updating; ///< Should this have update() called on it every frame?
 	
 	void (*start)(struct View * const this); ///< \brief User-supplied callback for when owner instance start()s.
@@ -161,11 +163,9 @@ typedef struct Updater
 ///
 typedef struct View
 {
-	Element element;
+	Updater base;
 	void * model; ///< The model associated with this instance; may depend on \link Configuration \endlink.
 	char id[STRLEN_MAX]; ///< (unimplemented) ID by which a View is retrieved from its parent view->childrenById.
-	
-	Updater updater;
 	
 	struct View * root; ///< View's root view, i.e. the View attached to the App.
 	struct View * parent; ///< View's parent View, if not root.
@@ -192,11 +192,9 @@ typedef struct View
 /// A Ctrl operates on a model. In arc, models need no specific type; they can be anything (and are internally denoted as void *). Ctrl writes new model state by reading extant model state, inputs and View state.
 typedef struct Ctrl
 {
-	Element element;
+	Updater base;
 	void * model; ///< The model associated with this instance; may depend on \link Configuration \endlink.
 	char id[STRLEN_MAX]; ///< (unimplemented) ID by which this instance is retrieved from its parent via Ctrl_getChild(id).
-	
-	Updater updater;
 	
 	struct Ctrl * root; ///< Ctrl's root view, i.e. the Ctrl attached to the App.
 	struct Ctrl * parent; ///< Ctrl's parent Ctrl, if not root.
@@ -214,7 +212,7 @@ typedef struct Ctrl
 /// If an App is to be run less frequently than specified by the rate dictated by its Hub, this can be handled in App_update by only updating full update logic when some accumulator reaches a certain amount of elapsed time or frames.
 typedef struct App
 {
-	Element element;
+	Element base;
 	void * model; ///< The model associated with this instance; may depend on \link Configuration \endlink.
 	char id[STRLEN_MAX]; ///< (unimplemented) ID by which this instance is retrieved from its Hub->appsById (DEFUNCT).
 	
@@ -236,7 +234,7 @@ typedef struct App
 /// As such, Hub needs no start / stop like App; Hub_update is run perpetually until the executable terminates.
 typedef struct Hub
 {
-	Element element;
+	Element base;
 	
 	//TODO use kvec_t(App *)
 	App * apps[APPS_MAX]; //malloc'd array of pointers to apps -- allows ad-hoc allocation or batched pre-allocation

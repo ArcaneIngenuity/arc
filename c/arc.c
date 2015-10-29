@@ -139,10 +139,10 @@ void Hub_setDefaultCallbacks(Hub * hub)
 	LOGI("[ARC]    Hub_setDefaultCallbacks\n");
 	#endif
 	
-	hub->element.initialise = (void * const)&doNothing;
-	hub->element.dispose 	= (void * const)&doNothing;
-	hub->element.suspend 	= (void * const)&doNothing;
-	hub->element.resume 	= (void * const)&doNothing;
+	hub->base.initialise = (void * const)&doNothing;
+	hub->base.dispose 	= (void * const)&doNothing;
+	hub->base.suspend 	= (void * const)&doNothing;
+	hub->base.resume 	= (void * const)&doNothing;
 }
 
 void Hub_update(Hub * const this)
@@ -199,9 +199,9 @@ void Hub_destruct(Hub * const this)
 			App_destruct(app);
 	}
 	
-	this->element.dispose((void *)this);
+	this->base.dispose((void *)this);
 	
-	//this->element.initialised = false;
+	//this->base.initialised = false;
 	free(this); //hub object is not a pointer!
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -221,7 +221,7 @@ void Hub_suspend(Hub * const this)
 			App_suspend(app);
 	}
 
-	this->element.suspend((void *)this);
+	this->base.suspend((void *)this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Hub_suspend");
@@ -240,7 +240,7 @@ void Hub_resume(Hub * const this)
 			App_resume(app);
 	}
 	
-	this->element.resume((void *)this);
+	this->base.resume((void *)this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Hub_resume");
@@ -302,10 +302,10 @@ void App_setDefaultCallbacks(App * app)
 	LOGI("[ARC]    App_setDefaultCallbacks\n");
 	#endif
 	
-	app->element.initialise = (void * const)&doNothing;
-	app->element.dispose 	= (void * const)&doNothing;
-	app->element.suspend 	= (void * const)&doNothing;
-	app->element.resume 	= (void * const)&doNothing;
+	app->base.initialise = (void * const)&doNothing;
+	app->base.dispose 	= (void * const)&doNothing;
+	app->base.suspend 	= (void * const)&doNothing;
+	app->base.resume 	= (void * const)&doNothing;
 }
 
 
@@ -345,7 +345,7 @@ void App_update(App * const this)
 	Ctrl_update(ctrl); //abstract
 	//if (view != NULL) //JIC user turns off the root view by removing it (since this is the enable/disable mechanism)
 	//really, we should just exit if either View or Ctrl are null, at App_start()
-	if (view->updater.updating)
+	if (((Updater *)view)->updating)
 		View_update(view);
 	Ctrl_updatePost(ctrl); //abstract
 	
@@ -369,7 +369,7 @@ void App_start(App * const this)
 	#endif
 	if (!this->updating)
 	{
-		if (this->element.initialised)
+		if (this->base.initialised)
 		{
 			Ctrl * ctrl = this->ctrl;
 			Ctrl_start(ctrl); //it is left to Ctrls to start Views
@@ -420,8 +420,8 @@ void App_destruct(App * const this)
 	
 	//this->services.dispose();
 	
-	this->element.dispose((void *)this);
-	this->element.initialised = false;
+	this->base.dispose((void *)this);
+	this->base.initialised = false;
 	free(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -437,7 +437,7 @@ void App_suspend(App * const this)
 	
 	View_suspend(this->view);
 	
-	this->ctrl->element.suspend((void *)this);
+	((Element *)this->ctrl)->suspend((void *)this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...App_suspend    (id=%s)\n", this->id);
@@ -452,8 +452,8 @@ void App_resume(App * const this)
 	
 	View_resume(this->view);
 
-	this->ctrl->element.resume((void *)this);
-
+	((Element *)this->ctrl)->resume((void *)this);
+	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...App_resume    (id=%s)\n", this->id);
 	#endif//ARC_DEBUG_ONEOFFS
@@ -480,16 +480,16 @@ void Ctrl_setDefaultCallbacks(Ctrl * const this)
 	LOGI("[ARC]    Ctrl_setDefaultCallbacks (id=%s)\n", this->id);
 	#endif
 	
+	((Element *)this)->suspend 		= (void * const)&doNothing;
+	((Element *)this)->resume 		= (void * const)&doNothing;
+	((Element *)this)->initialise	= (void * const)&doNothing;
+	((Element *)this)->dispose 		= (void * const)&doNothing;
+	((Updater *)this)->start		= (void * const)&doNothing;
+	((Updater *)this)->stop 		= (void * const)&doNothing;
+	((Updater *)this)->update 		= (void * const)&doNothing;
+	((Updater *)this)->updatePost	= (void * const)&doNothing;
 	//this->mustStart = (void * const)&doNothing;
 	//this->mustStop 	= (void * const)&doNothing;
-	this->updater.start 	= (void * const)&doNothing;
-	this->updater.stop 		= (void * const)&doNothing;
-	this->element.suspend 	= (void * const)&doNothing;
-	this->element.resume 	= (void * const)&doNothing;
-	this->element.initialise= (void * const)&doNothing;
-	this->element.dispose 	= (void * const)&doNothing;
-	this->updater.update 	= (void * const)&doNothing;
-	this->updater.updatePost= (void * const)&doNothing;
 }
 
 Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
@@ -521,8 +521,8 @@ void Ctrl_start(Ctrl * const this)
 	LOGI("[ARC]    Ctrl_start... (id=%s)\n", this->id);
 	#endif
 	
-	this->updater.start((void *)this);
-	this->updater.updating = true;
+	((Updater *)this)->start((void *)this);
+	((Updater *)this)->updating = true;
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Ctrl_start    (id=%s)\n", this->id);
@@ -535,8 +535,8 @@ void Ctrl_stop(Ctrl * const this)
 	LOGI("[ARC]    Ctrl_stop... (id=%s)\n", this->id);
 	#endif
 	
-	this->updater.stop((void *)this);
-	this->updater.updating = false;
+	((Updater *)this)->stop((void *)this);
+	((Updater *)this)->updating = false;
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Ctrl_stop    (id=%s)\n", this->id);
@@ -549,7 +549,7 @@ void Ctrl_suspend(Ctrl * const this)
 	LOGI("[ARC]    Ctrl_suspend... (id=%s)\n", this->id);
 	#endif
 	
-	this->element.suspend(this);
+	((Element *)this)->suspend(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Ctrl_suspend    (id=%s)\n", this->id);
@@ -562,7 +562,7 @@ void Ctrl_resume(Ctrl * const this)
 	LOGI("[ARC]    Ctrl_resume... (id=%s)\n", this->id);
 	#endif
 	
-	this->element.resume(this);	
+	((Element *)this)->resume(this);	
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Ctrl_resume    (id=%s)\n", this->id);
@@ -588,7 +588,7 @@ void Ctrl_update(Ctrl * const this)
 	LOGI("[ARC]    Ctrl_update... (id=%s)\n", this->id);
 	#endif
 	
-	this->updater.update(this);//deltaSec
+	((Updater *)this)->update(this);//deltaSec
 	
 	#ifdef ARC_DEBUG_UPDATES
 	LOGI("[ARC] ...Ctrl_update    (id=%s)\n", this->id);
@@ -601,7 +601,7 @@ void Ctrl_updatePost(Ctrl * const this)
 	LOGI("[ARC]    Ctrl_updatePost... (id=%s)\n", this->id);
 	#endif
 	
-	this->updater.updatePost(this);//deltaSec
+	((Updater *)this)->updatePost(this);//deltaSec
 	
 	#ifdef ARC_DEBUG_UPDATES
 	LOGI("[ARC] ...Ctrl_updatePost    (id=%s)\n", this->id);
@@ -615,8 +615,8 @@ void Ctrl_destruct(Ctrl * const this)
 	LOGI("[ARC]    Ctrl_destruct... (id=%s)\n", id);
 	#endif
 	
-	this->element.dispose(this);
-	this->element.initialised = false;
+	((Element *)this)->dispose(this);
+	((Element *)this)->initialised = false;
 	free(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -699,16 +699,14 @@ void View_setDefaultCallbacks(View * const this)
 	LOGI("[ARC]    View_setDefaultCallbacks (id=%s)\n", this->id);
 	#endif
 	
-	//null id
-	//null model
-	this->updater.start 			= (void * const)&doNothing;
-	this->updater.stop 				= (void * const)&doNothing;
-	this->element.suspend 			= (void * const)&doNothing;
-	this->element.resume 			= (void * const)&doNothing;
-	this->element.initialise		= (void * const)&doNothing;
-	this->element.dispose 			= (void * const)&doNothing;
-	this->updater.update 			= (void * const)&doNothing;
-	this->updater.updatePost		= (void * const)&doNothing;
+	((Element *)this)->suspend 			= (void * const)&doNothing;
+	((Element *)this)->resume 			= (void * const)&doNothing;
+	((Element *)this)->initialise		= (void * const)&doNothing;
+	((Element *)this)->dispose 			= (void * const)&doNothing;
+	((Updater *)this)->start 			= (void * const)&doNothing;
+	((Updater *)this)->stop 			= (void * const)&doNothing;
+	((Updater *)this)->update 			= (void * const)&doNothing;
+	((Updater *)this)->updatePost		= (void * const)&doNothing;
 	this->onParentResize 	= (void * const)&doNothing;
 }
 
@@ -742,8 +740,8 @@ void View_start(View * const this)
 	LOGI("[ARC]    View_start... (id=%s)\n", this->id);
 	#endif
 	
-	this->updater.start((void *)this);
-	this->updater.updating = true;
+	((Updater *)this)->start((void *)this);
+	((Updater *)this)->updating = true;
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...View_start    (id=%s)\n", this->id);
@@ -756,8 +754,8 @@ void View_stop(View * const this)
 	LOGI("[ARC]    View_stop... (id=%s)\n", this->id);
 	#endif
 	
-	this->updater.stop((void *)this);
-	this->updater.updating = false;
+	((Updater *)this)->stop((void *)this);
+	((Updater *)this)->updating = false;
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...View_stop    (id=%s)\n", this->id);
@@ -776,7 +774,7 @@ void View_suspend(View * const this)
 		View_suspend(child);
 	}
 	
-	this->element.suspend(this);
+	((Element *)this)->suspend(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...View_suspend    (id=%s)\n", this->id);
@@ -795,7 +793,7 @@ void View_resume(View * const this)
 		View_resume(child);
 	}
 	
-	this->element.resume(this);	
+	((Element *)this)->resume(this);	
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...View_resume    (id=%s)\n", this->id);
@@ -828,16 +826,16 @@ void View_update(View * const this)
 	LOGI("[ARC]    View_update... (id=%s)\n", this->id);
 	#endif
 	
-	this->updater.update(this);//deltaSec
+	((Updater *)this)->update(this);//deltaSec
 
 	for (int i = 0; i < kv_size(this->children); ++i)
 	{
 		View * child = kv_A(this->children, i); //NB! dispose in draw order
-		if (child->updater.updating)
+		if (((Updater *)child)->updating)
 			View_update(child);//deltaSec
 	}
 	
-	this->updater.updatePost(this);//deltaSec
+	((Updater *)this)->updatePost(this);//deltaSec
 	
 	#ifdef ARC_DEBUG_UPDATES
 	LOGI("[ARC] ...View_update    (id=%s)\n", this->id);
@@ -858,8 +856,8 @@ void View_destruct(View * const this)
 	}
 	
 	kv_destroy(this->children);
-	this->element.dispose(this);
-	this->element.initialised = false;
+	((Element *)this)->dispose(this);
+	((Element *)this)->initialised = false;
 	free(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -1050,8 +1048,8 @@ View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model, 
 	view = View_construct(ezxml_attr(viewXml, "id"), sizeofDynamic(viewClass));
 	view->model = model;
 	
-	FOREACH_ELEMENT_FUNCTION(view->element.,view, GENERATE_ASSIGN_METHOD)
-	FOREACH_UPDATER_FUNCTION(view->updater.,view, GENERATE_ASSIGN_METHOD)
+	FOREACH_ELEMENT_FUNCTION(((Element *)view)->,view, GENERATE_ASSIGN_METHOD)
+	FOREACH_UPDATER_FUNCTION(((Updater *)view)->,view, GENERATE_ASSIGN_METHOD)
 	FOREACH_VIEW_FUNCTION	(view->, 		view, GENERATE_ASSIGN_METHOD)
 	
 	if (app) //subviews don't get access to app, see below
@@ -1065,7 +1063,7 @@ View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model, 
 		View_addChild(view, subview);
 	}
 	
-	Builder_buildExtensions(viewXml, &view->element.extensions, modelClass);
+	Builder_buildExtensions(viewXml, &((Element *)view)->extensions, modelClass);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_buildView   \n");
@@ -1122,8 +1120,8 @@ Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model, 
 		*((int*)ctrl->model) = atoi(ezxml_attr(ctrlXml, "value"));
 	}
 	
-	FOREACH_ELEMENT_FUNCTION(ctrl->element., ctrl, GENERATE_ASSIGN_METHOD)
-	FOREACH_UPDATER_FUNCTION(ctrl->updater., ctrl, GENERATE_ASSIGN_METHOD)
+	FOREACH_ELEMENT_FUNCTION(((Element *)ctrl)->, ctrl, GENERATE_ASSIGN_METHOD)
+	FOREACH_UPDATER_FUNCTION(((Updater *)ctrl)->, ctrl, GENERATE_ASSIGN_METHOD)
 	
 	if (app) //subctrls don't get access to app, see below
 		App_setCtrl(app, ctrl);
@@ -1136,7 +1134,7 @@ Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model, 
 		Ctrl_addChild(ctrl, subctrl);
 	}
 	
-	Builder_buildExtensions(ctrlXml, &ctrl->element.extensions, modelClass);
+	Builder_buildExtensions(ctrlXml, &((Element *)ctrl)->extensions, modelClass);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_buildCtrl   \n");
@@ -1252,7 +1250,7 @@ App * Builder_buildApp(ezxml_t appXml)
 	appClass = ezxml_attr(appXml, "class");
 	App * app = App_construct(ezxml_attr(appXml, "id"));
 	
-	FOREACH_ELEMENT_FUNCTION(app->element., app, GENERATE_ASSIGN_METHOD)
+	FOREACH_ELEMENT_FUNCTION(app->base., app, GENERATE_ASSIGN_METHOD)
 
 	//model
 	modelXml = ezxml_child(appXml, "model");
@@ -1269,7 +1267,7 @@ App * Builder_buildApp(ezxml_t appXml)
 	ctrl = Builder_buildCtrl(app, ctrl, ctrlXml, model, modelClass);
 	
 	//extensions
-	Builder_buildExtensions(appXml, &app->element.extensions, modelClass);
+	Builder_buildExtensions(appXml, &app->base.extensions, modelClass);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_buildApp   \n");
@@ -1288,7 +1286,7 @@ void Builder_buildHub(Hub * hub, ezxml_t hubXml)
 	const char * name;
 	const char * hubClass = "Hub";
 	
-	FOREACH_ELEMENT_FUNCTION(hub->element., hub, GENERATE_ASSIGN_METHOD)
+	FOREACH_ELEMENT_FUNCTION(hub->base., hub, GENERATE_ASSIGN_METHOD)
 	LOGI("[ARC]    Builder_buildHub...\n");
 
 	ezxml_t appsXml = ezxml_child(hubXml, "apps");	
@@ -1298,7 +1296,7 @@ void Builder_buildHub(Hub * hub, ezxml_t hubXml)
 		Hub_addApp(hub, app);
 	}
 	
-	Builder_buildExtensions(hubXml, &hub->element.extensions, NULL);
+	Builder_buildExtensions(hubXml, &hub->base.extensions, NULL);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_buildHub   \n");
@@ -1362,7 +1360,7 @@ is this a pointer? if so, use it just so
 else get its address
 
 1.	
-this->element.position->member.another.here.and->some->else //is a pointer - we know because no &
+this->base.position->member.another.here.and->some->else //is a pointer - we know because no &
 
 this is a pointer (followed by ->)   			- initialise result to it
 element is a value (followed by .)   			- add its offset to result
@@ -1375,7 +1373,7 @@ some is a pointer (followed by ->)   			- replace result with it
 else is a pointer (final + no &)  				- replace result with it
 
 2.
-&this->element.position->member.another.here.and->something->else //is a value - we know because of &
+&this->base.position->member.another.here.and->something->else //is a value - we know because of &
 
 as above, but final element 'else' must be a value (final + set has &), so - replace result with addressofDynamic(else).
 
