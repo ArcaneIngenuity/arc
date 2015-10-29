@@ -216,7 +216,7 @@ void Hub_destruct(Hub * const this)
 	this->base.dispose((void *)this);
 	
 	//this->base.initialised = false;
-	free(this); //hub object is not a pointer!
+	free(this); //hub object must always be dynamically allocated!
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Hub_destruct\n"); 
@@ -1017,7 +1017,7 @@ View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model, 
 	const char * viewClass = ezxml_attr(viewXml, "class");
 	
 	view = View_construct(ezxml_attr(viewXml, "id"), sizeofDynamic(viewClass));
-	view->model = model;
+	((Element *)view)->model = model;
 	
 	FOREACH_ELEMENT_FUNCTION(((Element *)view)->,view, GENERATE_ASSIGN_METHOD)
 	FOREACH_UPDATER_FUNCTION(((Updater *)view)->,view, GENERATE_ASSIGN_METHOD)
@@ -1057,7 +1057,7 @@ Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model, 
 	
 	//drilldown to Ctrl's specific model, if any
 	//TODO factor out into a function that may be used by extensions to do member drilldown
-	ctrl->model = model;
+	((Element *)ctrl)->model = model;
 	const char * modelPathString = ezxml_attr(ctrlXml, "model");
 	int c = 0;
 	const char * modelClassNew;
@@ -1078,7 +1078,7 @@ Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model, 
 			
 			//modelClass = typeofMemberDynamic(modelClass, memberName);
 			
-			ctrl->model += offset;
+			((Element *)ctrl)->model += offset;
 			
 			
 			//finally, prep for next cycle
@@ -1088,7 +1088,7 @@ Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model, 
 		}
 		//TODO test what happens with multiple .'s, or strip these beforehand
 		//if (c==0) 
-		*((int*)ctrl->model) = atoi(ezxml_attr(ctrlXml, "value"));
+		*((int*)((Element *)ctrl)->model) = atoi(ezxml_attr(ctrlXml, "value"));
 	}
 	
 	FOREACH_ELEMENT_FUNCTION(((Element *)ctrl)->, ctrl, GENERATE_ASSIGN_METHOD)
@@ -1227,7 +1227,7 @@ App * Builder_buildApp(ezxml_t appXml)
 	modelXml = ezxml_child(appXml, "model");
 	modelClass = ezxml_attr(modelXml, "class");
 	model = calloc(1, sizeofDynamic(modelClass));
-	app->model 		= model;
+	((Element *)app)->model 		= model;
 	
 	//views
 	viewXml = ezxml_child(appXml, "view");

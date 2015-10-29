@@ -126,6 +126,8 @@ typedef struct Extensions
 /// A generic framework element, acts as base for VCAH which may be case hereto to use fields that way. 
 typedef struct Element
 {
+	void * model; ///< The model associated with this instance; may depend on \link Configuration \endlink.
+	
 	bool initialised; ///< True after first initialise of the owner instance. If re- initialise is required, this should be manually reset to false. Always true for Hub.
 	
 	bool suspended; ///< (new, implement)
@@ -164,7 +166,6 @@ typedef struct Updater
 typedef struct View
 {
 	Updater base;
-	void * model; ///< The model associated with this instance; may depend on \link Configuration \endlink.
 	char id[STRLEN_MAX]; ///< (unimplemented) ID by which a View is retrieved from its parent view->childrenById.
 	
 	struct View * root; ///< View's root view, i.e. the View attached to the App.
@@ -193,8 +194,7 @@ typedef struct View
 typedef struct Ctrl
 {
 	Updater base;
-	void * model; ///< The model associated with this instance; may depend on \link Configuration \endlink.
-	char id[STRLEN_MAX]; ///< (unimplemented) ID by which this instance is retrieved from its parent via Ctrl_getChild(id).
+	char id[STRLEN_MAX]; ///< (unimplemented) ID by which a View is retrieved from its parent view->childrenById.
 	
 	struct Ctrl * root; ///< Ctrl's root view, i.e. the Ctrl attached to the App.
 	struct Ctrl * parent; ///< Ctrl's parent Ctrl, if not root.
@@ -213,8 +213,7 @@ typedef struct Ctrl
 typedef struct App
 {
 	Element base;
-	void * model; ///< The model associated with this instance; may depend on \link Configuration \endlink.
-	char id[STRLEN_MAX]; ///< (unimplemented) ID by which this instance is retrieved from its Hub->appsById (DEFUNCT).
+	char id[STRLEN_MAX]; ///< (unimplemented) ID by which a View is retrieved from its parent view->childrenById.
 	
 	bool updating;
 	
