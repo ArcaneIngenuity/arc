@@ -92,6 +92,32 @@ void Element_initialise(Element * element)
 	element->initialised = true;
 }
 
+void Element_setDefaultCallbacks(Ctrl * const this)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Element_setDefaultCallbacks (id=%s)\n", this->id);
+	#endif
+	
+	((Element *)this)->suspend 		= (void * const)&doNothing;
+	((Element *)this)->resume 		= (void * const)&doNothing;
+	((Element *)this)->initialise	= (void * const)&doNothing;
+	((Element *)this)->dispose 		= (void * const)&doNothing;
+}
+
+//---------Updater-----------//
+void Updater_setDefaultCallbacks(Ctrl * const this)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Updater_setDefaultCallbacks (id=%s)\n", this->id);
+	#endif
+	
+	Element_setDefaultCallbacks(this);
+	((Updater *)this)->stop 		= (void * const)&doNothing;
+	((Updater *)this)->update 		= (void * const)&doNothing;
+	((Updater *)this)->updatePost	= (void * const)&doNothing;
+}
+
+
 //--------- Pub/Sub ---------//
 
 /// Construct a Pub(lisher). This is usually called by Ctrl.initialise(), or possibly by Ctrl.update().
@@ -133,18 +159,6 @@ void Sub_scribe(Sub * subPtr, Pub * pubPtr)
 
 //--------- Hub ---------//
 
-void Hub_setDefaultCallbacks(Hub * hub)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Hub_setDefaultCallbacks\n");
-	#endif
-	
-	hub->base.initialise = (void * const)&doNothing;
-	hub->base.dispose 	= (void * const)&doNothing;
-	hub->base.suspend 	= (void * const)&doNothing;
-	hub->base.resume 	= (void * const)&doNothing;
-}
-
 void Hub_update(Hub * const this)
 {
 	#ifdef ARC_DEBUG_UPDATES
@@ -177,7 +191,7 @@ Hub * Hub_construct()
 	Hub * hub = calloc(1, sizeof(Hub));
 	//#endif//__GNUC__
 	Element_construct(hub);
-	//Hub_setDefaultCallbacks(hub);
+	//Element_setDefaultCallbacks(hub);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Hub_construct\n");
@@ -296,18 +310,6 @@ App * const Hub_getApp(Hub * const this, const char * const id)
 }
 
 //--------- App ---------//
-void App_setDefaultCallbacks(App * app)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    App_setDefaultCallbacks\n");
-	#endif
-	
-	app->base.initialise = (void * const)&doNothing;
-	app->base.dispose 	= (void * const)&doNothing;
-	app->base.suspend 	= (void * const)&doNothing;
-	app->base.resume 	= (void * const)&doNothing;
-}
-
 
 App * App_construct(const char * id)//App ** app)
 {
@@ -324,7 +326,7 @@ App * App_construct(const char * id)//App ** app)
 	strcpy(app->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
 	Element_construct(app);
 	app->pubsByName = kh_init(StrPtr);
-	//App_setDefaultCallbacks(app);
+	//Element_setDefaultCallbacks(app);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...App_construct    (id=%s)\n", id);
@@ -474,23 +476,6 @@ void App_setView(App * app, View * view)
 }
 
 //--------- Ctrl ---------//
-void Ctrl_setDefaultCallbacks(Ctrl * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Ctrl_setDefaultCallbacks (id=%s)\n", this->id);
-	#endif
-	
-	((Element *)this)->suspend 		= (void * const)&doNothing;
-	((Element *)this)->resume 		= (void * const)&doNothing;
-	((Element *)this)->initialise	= (void * const)&doNothing;
-	((Element *)this)->dispose 		= (void * const)&doNothing;
-	((Updater *)this)->start		= (void * const)&doNothing;
-	((Updater *)this)->stop 		= (void * const)&doNothing;
-	((Updater *)this)->update 		= (void * const)&doNothing;
-	((Updater *)this)->updatePost	= (void * const)&doNothing;
-	//this->mustStart = (void * const)&doNothing;
-	//this->mustStop 	= (void * const)&doNothing;
-}
 
 Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
 {
@@ -502,7 +487,9 @@ Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
 	//struct is situated from zero in this allocated space
 	Ctrl * ctrl = calloc(1, sizeofSubclass);
 	strcpy(ctrl->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
-	//Ctrl_setDefaultCallbacks(ctrl);
+	//Updater_setDefaultCallbacks(ctrl);
+	//this->mustStart = (void * const)&doNothing;
+	//this->mustStop 	= (void * const)&doNothing;
 	kv_init(ctrl->children);
 	//kv_init(ctrl->configs);
 	Element_construct(ctrl);
@@ -693,22 +680,6 @@ void Ctrl_createPub(Ctrl * this, const char * name)
 }
 
 //--------- View ---------//
-void View_setDefaultCallbacks(View * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    View_setDefaultCallbacks (id=%s)\n", this->id);
-	#endif
-	
-	((Element *)this)->suspend 			= (void * const)&doNothing;
-	((Element *)this)->resume 			= (void * const)&doNothing;
-	((Element *)this)->initialise		= (void * const)&doNothing;
-	((Element *)this)->dispose 			= (void * const)&doNothing;
-	((Updater *)this)->start 			= (void * const)&doNothing;
-	((Updater *)this)->stop 			= (void * const)&doNothing;
-	((Updater *)this)->update 			= (void * const)&doNothing;
-	((Updater *)this)->updatePost		= (void * const)&doNothing;
-	this->onParentResize 	= (void * const)&doNothing;
-}
 
 View * View_construct(const char * id, size_t sizeofSubclass)
 {
@@ -721,12 +692,12 @@ View * View_construct(const char * id, size_t sizeofSubclass)
 	//struct is situated from zero in this allocated space
 	View * view = calloc(1, sizeofSubclass);
 	strcpy(view->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
-	//View_setDefaultCallbacks(view);
+	//Updater_setDefaultCallbacks(view);
+	view->onParentResize 	= (void * const)&doNothing;
 	kv_init(view->children);
 	
 	Element_construct(view);
 	
-	//view->subStatusesByName = kh_init(StrPtr);
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...View_construct    (id=%s)\n", id);
 	#endif
