@@ -47,7 +47,7 @@ void Extension_initialise(Extension * extension)
 	LOGI("[ARC]    Extension_initialise() (id=%s)\n", extensionClassName);
 	ParserFunctionXML parser = addressofDynamic(parserFunctionName);
 	
-	Element * element = extension->group;
+	Element * element = extension->group->owner;
 	
 	if (parser) //if extension constructor is available
 	{
@@ -70,6 +70,8 @@ void Extension_initialise(Extension * extension)
 /// Sets up Extensions collections at startup time so they are ready for Builder to populate (to be used at initialise time).
 void Element_construct(Element * element)
 {
+	Extensions * extensions = &element->extensions;
+	extensions->owner = element;
 	element->extensions.byId = kh_init(StrPtr);
 	kv_init(element->extensions.ordered);
 }
@@ -79,7 +81,7 @@ void Element_initialise(Element * element)
 {
 	Extensions * extensions = &element->extensions;
 	
-	//parser all extensions in order of declaration
+	//parse all extensions in order of declaration
 	for (int i = 0; i < kv_size(extensions->ordered); ++i)
 	{
 		Extension * extension = kv_A(extensions->ordered, i);
@@ -102,6 +104,156 @@ void Element_setDefaultCallbacks(Ctrl * const this)
 	((Element *)this)->resume 		= (void * const)&doNothing;
 	((Element *)this)->initialise	= (void * const)&doNothing;
 	((Element *)this)->dispose 		= (void * const)&doNothing;
+}
+
+void Element_resolveDataPath(void ** dataPtr, const char * dataClass, const char * dataPathString)
+{
+	//extension->data = node->data;
+	void * data = *dataPtr; 
+	int c = 0;
+	int g = 0; //group count
+	const char * dataClassNew;
+	
+	kvec_t(DataPathNode) nodes;
+	kv_init(nodes);
+	
+	if (dataPathString)
+	{
+		//prep the buffer in which we will have pointers to different membernames
+		//necessary as we need to null-terminate each.
+		char dataPath[strlen(dataPathString)];
+		strcpy(dataPath, dataPathString);
+		
+		char * dataPathPtr = dataPath;
+		
+		DataPathNode node = {0};
+		bool inMemberName = true;
+		bool lastWasSep = true;
+
+		//we must first get the full list of symbols, only then can we operate on them
+		if (dataPathPtr[0] == '&')
+		{
+			LOGI("is address\n");
+			
+			node.symbol = 1;
+			kv_push(DataPathNode, nodes, node);
+			memset(&node, 0, sizeof(node));
+			lastWasSep = true;
+			dataPathPtr[0] = '\0';
+			++dataPathPtr;
+			
+		}
+		
+		while (dataPathPtr[0] != '\0') //seek char by char to end
+		{
+			if (dataPathPtr[0] == '.') //dot operator - offset to existing address
+			{
+				node.symbol = 2;
+				kv_push(DataPathNode, nodes, node);
+				memset(&node, 0, sizeof(node));
+				
+				inMemberName = false;
+				dataPathPtr[0] = '\0';
+			}
+			else
+			{
+				if (dataPathPtr[0] == '-' &&
+					dataPathPtr[1] == '>') //deref operator - dereference / reset existing address to new
+				{
+					node.symbol = 3;
+					kv_push(DataPathNode, nodes, node);
+					memset(&node, 0, sizeof(node));
+					
+					inMemberName = false;
+					dataPathPtr[0] = dataPathPtr[1] = '\0';
+					
+					++dataPathPtr; //get past the extra character
+				}
+			}
+		
+			if (!inMemberName) //we just had a separator
+			{
+				//kv_push(DataPathNode, nodes, node);
+				memset(&node, 0, sizeof(node));
+				inMemberName = true; //immediately assume next char begins a valid member name.
+				lastWasSep = true;
+			}
+			else //in member name
+			{
+				if (lastWasSep)
+				{
+					//memset(&node, 0, sizeof(node));
+					node.symbol = 0;
+					node.memberName = dataPathPtr;
+					lastWasSep = false;
+					LOGI("!\n");
+				}
+			}
+			
+			++dataPathPtr;
+		}
+		kv_push(DataPathNode, nodes, node); //push in the final node (should certainly be a member name)
+		
+		//void * address = data; //initial - start with the node itself
+		//TODO the above only if we don't have a member name before first sep
+		LOGI("-data=%p\n", data);
+		//we now have the full list of symbols - get final result
+		DataPathNode nodeLast;
+		bool reference = false;
+		for (int i = 0; i < kv_size(nodes); ++i)
+		{
+			node = kv_A(nodes, i);
+			LOGI("symbol=%d\n", node.symbol);
+			LOGI("class=%s member=%s\n", dataClass, node.memberName);
+
+			switch (node.symbol)
+			{
+				case Address:
+					reference = true;
+					break;
+				case Member:
+					LOGI("member: %s\n", node.memberName);
+					
+					if (nodeLast.symbol == Offset)
+					{
+						size_t offset = offsetofDynamic(dataClass, node.memberName);
+						LOGI("offset to member=%u\n", offset);
+						data += offset;
+					}
+					else if (nodeLast.symbol == Deref)
+					{
+						char * memberClass = typeofMemberDynamic(dataClass, node.memberName);
+						size_t offset = offsetofDynamic(dataClass, node.memberName);
+						size_t size = sizeofDynamic(memberClass);
+						
+						//work with individual bytes in the absence of compile-time types
+						char * ptr = (char*)data; 
+						ptr += offset;
+						//LOGI("member size of=%u / offset to=%u\n", size, offset);
+						//LOGI("deref to member of type %s\n", memberClass);
+						//LOGI("ptr+offset=%p\n", ptr);
+						char buffer[size];
+						memcpy(buffer, ptr, size);
+						data = ptr;
+						int b = *(int*)data;
+						LOGI("result: %i\n", b);
+					}
+					break;
+				case Offset:
+					break;
+				case Deref:
+					break;
+				
+			}
+			
+			LOGI("data=%p\n", data);
+			nodeLast = node;
+		}
+		//if (!reference)
+		//	data = *data;
+	}
+	
+	*dataPtr = data;
 }
 
 //---------Updater-----------//
@@ -1018,6 +1170,7 @@ View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model, 
 	
 	view = View_construct(ezxml_attr(viewXml, "id"), sizeofDynamic(viewClass));
 	((Element *)view)->model = model;
+	Element * viewAsElement = &view->base.base;
 	
 	FOREACH_ELEMENT_FUNCTION(((Element *)view)->,view, GENERATE_ASSIGN_METHOD)
 	FOREACH_UPDATER_FUNCTION(((Updater *)view)->,view, GENERATE_ASSIGN_METHOD)
@@ -1034,6 +1187,10 @@ View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model, 
 		View_addChild(view, subview);
 	}
 	
+	LOGI("modelClass=%s\n", modelClass);
+	//get type names used for reflection in Extension data path drilldown, then build Extensions
+	viewAsElement->modelClassName = modelClass;
+	viewAsElement->ownClassName = viewClass;
 	Builder_buildExtensions(viewXml, &((Element *)view)->extensions, modelClass);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -1054,10 +1211,12 @@ Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model, 
 	const char * ctrlClass = ezxml_attr(ctrlXml, "class");
 	LOGI("ctrlClass=%s\n", ctrlClass);
 	ctrl = Ctrl_construct(ezxml_attr(ctrlXml, "id"), sizeofDynamic(ctrlClass));
+	((Element *)ctrl)->model = model;
+	Element * ctrlAsElement = &ctrl->base.base;
 	
 	//drilldown to Ctrl's specific model, if any
 	//TODO factor out into a function that may be used by extensions to do member drilldown
-	((Element *)ctrl)->model = model;
+	
 	const char * modelPathString = ezxml_attr(ctrlXml, "model");
 	int c = 0;
 	const char * modelClassNew;
@@ -1105,6 +1264,9 @@ Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model, 
 		Ctrl_addChild(ctrl, subctrl);
 	}
 	
+	//get type names used for reflection in Extension data path drilldown, then build Extensions
+	ctrlAsElement->modelClassName = modelClass;
+	ctrlAsElement->ownClassName = ctrlClass;
 	Builder_buildExtensions(ctrlXml, &((Element *)ctrl)->extensions, modelClass);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -1126,6 +1288,7 @@ void Builder_buildExtension(ezxml_t extensionXml, Extensions * extensions)
 	strncpy(extension->id, extensionId, STRLEN_MAX);
 	extension->config = extensionXml;
 	extension->group = extensions;
+	//TODO this part (attachment) should happen after buildExtension returns a valid Extension *
 	kv_push(Extension, extensions->ordered, extension);
 	kh_set(StrPtr, extensions->byId, extension->id, extension);
 	
@@ -1220,6 +1383,7 @@ App * Builder_buildApp(ezxml_t appXml)
 	//app (create)
 	appClass = ezxml_attr(appXml, "class");
 	App * app = App_construct(ezxml_attr(appXml, "id"));
+	Element * appAsElement = &app->base;
 	
 	FOREACH_ELEMENT_FUNCTION(app->base., app, GENERATE_ASSIGN_METHOD)
 
@@ -1238,6 +1402,9 @@ App * Builder_buildApp(ezxml_t appXml)
 	ctrl = Builder_buildCtrl(app, ctrl, ctrlXml, model, modelClass);
 	
 	//extensions
+	//get type names used for reflection in Extension data path drilldown, then build Extensions
+	appAsElement->modelClassName = modelClass;
+	appAsElement->ownClassName = appClass;
 	Builder_buildExtensions(appXml, &app->base.extensions, modelClass);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -1291,77 +1458,3 @@ void Builder_buildFromConfig(Hub * const hub, const char * configFilename)
 
 //--------- misc ---------//
 void doNothing(void * const this){/*LOGI("[ARC] doNothing\n");*/}
-
-/*
-DYNAMIC MEMBERS
-
-
-split string by dots first
-
-from fragments, create a linked list - each node void * - containing either individual names OR groups (see below)
-this linked list is representative of the final code structure, but first we must break up the groups...
-
-1. dots are simple - they are just offsets onto the total pointer counted up to by the previous value (i.e. the one before the dot) - isPointer = false
-
-2. each group contains one or more deref ops "->" in sequence, so,
-	-split the group on '->'
-	-remainders should be individual terms/members
-	-the final one could be a value or pointer, so make no assumptions on it
-	-but the others are all pointers, and need to be derefed as (*ptrname) - so they are marked with "isPointer=true"
-    -conclude the group when all are done.
-	
-(repeat 2 for each group)
-
-	what this gets us is the ability to join everything up safely using just the dot operator, in the final code, provided we use deref where needed.
-	
-3. process the chain to get final address
-get a result pointer ready - set it to the intial element
-
-for each element in chain
-	if isPointer
-	else not pointer
-		add offset to current result
-			
-	
-	
-	
-	
-
-is this a pointer? if so, use it just so
-else get its address
-
-1.	
-this->base.position->member.another.here.and->some->else //is a pointer - we know because no &
-
-this is a pointer (followed by ->)   			- initialise result to it
-element is a value (followed by .)   			- add its offset to result
-position is a pointer (follow by ->) 			- replace result with it
-member is a value (followed by .)    			- add its offset to result
-another is a value (followed by .)   			- add its offset to result
-here is a value (followed by .)      			- add its offset to result
-and is a pointer (followed by ->)    			- replace result with it
-some is a pointer (followed by ->)   			- replace result with it
-else is a pointer (final + no &)  				- replace result with it
-
-2.
-&this->base.position->member.another.here.and->something->else //is a value - we know because of &
-
-as above, but final element 'else' must be a value (final + set has &), so - replace result with addressofDynamic(else).
-
-3.
-this.some.thing->else
-
-this is a value (first el, followed by .)		- result = addressofDynamic(this) 
-some is a value (followed by .)					- add its offset to result
-thing is a pointer (followed by ->)  			- replace result with it
-else is a pointer (final, no &)					- replace result with it
-
-4.
-this.some.thing
-
-this is a value (first el, followed by .)		- result = addressofDynamic(this) 
-some is a value (followed by .)					- add its offset to result
-thing is a value (followed by .)				- add its offset to result
-
-...in this case, we can only assume that final element 'thing' is a pointer, so on reaching it, we have to ????
-*/

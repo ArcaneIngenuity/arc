@@ -103,6 +103,23 @@ typedef struct Service
 	void * models;
 } Service;
 
+typedef enum DataPathSymbol
+{
+	Member,
+	Address,
+	Offset,
+	Deref
+	
+} DataPathSymbol;
+
+/// One drilldown group comes after a single deref operator (or at beginning of chain).
+typedef struct DataPathNode
+{
+	DataPathSymbol symbol; //0 = member, 1 = &, 2 = ., 3 = ->
+	char * memberName; //use only if symbol == Member
+	struct DataPathNode * next;
+} DataPathNode;
+
 struct Extensions;
 struct Element;
 
@@ -120,7 +137,7 @@ typedef struct Extensions
 	kvec_t(Extension *) ordered; ///< Extensions included on this instance, in order of declaration in config. (must be list of pointers - each is allocated as a wider user type, see Builder_buildExtension() - so lost of Extension would truncate these).
 	khash_t(StrPtr) * byId; ///< Extensions included on this instance, if using config.
 	//kvec_t(ArcString) ids; ///< Array of fixed-length cstrings used as keys to extensions.byId (required once XML and its source strings are freed).
-	struct Element * owner; ///< String class name of the owning Element's model; accesible to extensions in case of dynamic model drilldown.
+	struct Element * owner; ///< \internal Used to get a reference to the owning element when doing data path drilldown for Extensions. \endinternal
 } Extensions;
 
 /// A generic framework element, acts as base for VCAH which may be case hereto to use fields that way. 
@@ -138,7 +155,8 @@ typedef struct Element
 	void (*resume)(struct Hub * const this); ///< \brief User-supplied callback for when owner instance must resume() due to regaining rendering context.
 	
 	Extensions extensions; ///< Extensions owned by this View, if any.
-	char * modelClassName[STRLEN_MAX];
+	char * ownClassName; ///< \internal String class name of the owning Element's model; accesible to extensions in case of model datapath drilldown. \endinternal
+	char * modelClassName; ///< \internal String class name of the owning Element; accesible to extensions in case of model datapath drilldown. \endinternal
 } Element;
 
 /// Base class for framework elements with custom update-related functions, i.e. Views and Ctrls.

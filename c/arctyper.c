@@ -689,7 +689,7 @@ void recurseXml(ezxml_t xml, const char * recursedName)
 			kh_set(StrPtr, types, subtype->name, subtype);
 			printf("[ARC] Type %s added.\n", subtype->name);
 			extractFunctionsFromHeaders(subtype);
-			
+			extractMembersFromHeaders(subtype);
 			
 			
 		}
@@ -899,9 +899,9 @@ void stripMultiSpaces(char ** bufferRef)
 	
 }
 
-void extractModelMembers(ArcType * type)
+void extractMembersFromHeaders(ArcType * type)
 {
-	//printf("extractModelMembers header filename=%s.h\n", type->filename);
+	//printf("extractMembersFromHeaders header filename=%s.h\n", type->filename);
 
 	char 	filename[256];
 	strcpy(	filename, srcPath);
@@ -953,7 +953,7 @@ void extractModelMembers(ArcType * type)
 				printf("[ARC] Type %s added.\n", subtype->name);
 				kh_set(StrPtr, types, subtype->name, subtype);
 			
-				extractModelMembers(subtype);
+				extractMembersFromHeaders(subtype);
 			}
 			else
 			{
@@ -997,7 +997,7 @@ void extractTypesAndFunctionsFromConfigXML(ezxml_t hubXml, ArcType * type)
 		readTypeFromXml(modelXml, type);
 		kh_set(StrPtr, types, type->name, type);
 		printf("[ARC] Type %s added.\n", type->name);
-		extractModelMembers(type);
+		extractMembersFromHeaders(type);
 		
 		//views
 		ezxml_t viewXml = ezxml_child(appXml, "view");
@@ -1006,9 +1006,9 @@ void extractTypesAndFunctionsFromConfigXML(ezxml_t hubXml, ArcType * type)
 		kh_set(StrPtr, types, type->name, type);
 		printf("[ARC] Type %s added.\n", type->name);
 		extractFunctionsFromHeaders(type);
+		extractMembersFromHeaders(type);
 		extractTypesAndFunctionsFromExtensionsXML(viewXml);
 		recurseXml(viewXml, "view");
-		
 		//ctrls
 		ezxml_t ctrlXml = ezxml_child(appXml, "ctrl");
 		type = createType();
@@ -1016,6 +1016,7 @@ void extractTypesAndFunctionsFromConfigXML(ezxml_t hubXml, ArcType * type)
 		kh_set(StrPtr, types, type->name, type);
 		printf("[ARC] Type %s added.\n", type->name);
 		extractFunctionsFromHeaders(type);
+		extractMembersFromHeaders(type);
 		extractTypesAndFunctionsFromExtensionsXML(ctrlXml);
 		recurseXml(ctrlXml, "ctrl");
 	}
