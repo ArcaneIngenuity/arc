@@ -56,11 +56,13 @@ typedef struct ArcMember
 {
 	char name[STRLEN_MAX];
 	const char * typename; //we store the typename because not every member has a type in the types table, e.g. primitives
+	
 } ArcMember;
 
 typedef struct ArcType
 {
 	char name[STRLEN_MAX];
+	const basetypename[STRLEN_MAX];
 	char filename[STRLEN_MAX];
 	char ** functionsAlphabetical;
 	char ** membersAlphabetical;
@@ -68,6 +70,7 @@ typedef struct ArcType
 	khash_t(StrPtr) * members;
 	bool useStructKeyword;
 	bool isPointer;
+	
 } ArcType;
 
 /*
@@ -277,7 +280,10 @@ void implementTypesAndFunctions(FILE * hFile)
 				if (strstr(member->name, "[") != NULL) //if it's an array, comment it for now to prevent compile problems(?) with offsetof
 					fprintf(hFile, "//");
 				fprintf(hFile, "\t\t\tif (strcmp(membername, \"%s\") == 0) return \"%s\";\n", member->name, member->typename);
-			} 
+			}
+			if (strlen(type->basetypename) > 0)
+				fprintf(hFile, "\t\t\treturn offsetofDynamic(\"%s\", membername);\n", type->basetypename);
+			
 			fprintf(hFile, "\t\t}\n");
 		}
 	}
@@ -935,6 +941,11 @@ void extractMembersFromHeaders(ArcType * type)
 		ArcMember 	* member  = calloc(1, sizeof(ArcMember));
 		
 		readMemberAndTypeFromString(declarations[i], subtype, member);
+		
+		if (strcmp("base", member->name) == 0)
+		{
+			strcpy(type->basetypename, member->typename);
+		}
 		
 		char 	subfilename[256];
 		strcpy(	subfilename, srcPath);

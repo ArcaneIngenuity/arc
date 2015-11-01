@@ -1158,23 +1158,6 @@ typedef void * (*BuildFunction) (ezxml_t xml);
 		LOGI("[ARC]    Using default function: doNothing.\n"); \
 	}
 	
-void * Builder_buildFloatArray(float array[3], const char * arrayString)
-{
-	if (arrayString)
-	{
-		char * componentString = strtok(arrayString, ","); //get leftmost token
-		int totaloffset = 0;
-		int i = 0;
-		while (componentString != NULL)
-		{
-			array[i] = atof(componentString);
-			//LOGI("pos[%d] = %.3f\n", i, array[i]);
-			componentString = strtok(NULL, ",");
-			++i;
-		}
-	}
-}
-	
 View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model, const char * modelClass)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -1188,12 +1171,6 @@ View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model, 
 	view = View_construct(ezxml_attr(viewXml, "id"), sizeofDynamic(viewClass));
 	((Element *)view)->model = model;
 	Element * viewAsElement = &view->base.base;
-	
-	//data members
-	Builder_buildFloatArray(view->dimensions, 	ezxml_attr(viewXml, "dimensions"));
-	Builder_buildFloatArray(view->position, 	ezxml_attr(viewXml, "position"));
-	Builder_buildFloatArray(view->orientation, 	ezxml_attr(viewXml, "orientation"));
-	Builder_buildFloatArray(view->scale, 		ezxml_attr(viewXml, "scale"));
 
 	//function members
 	FOREACH_ELEMENT_FUNCTION(((Element *)view)->,view, GENERATE_ASSIGN_METHOD)

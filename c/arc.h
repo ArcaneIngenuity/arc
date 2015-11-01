@@ -194,13 +194,7 @@ typedef struct View
 	
 	void (*onParentResize)(struct View * const this); ///< \brief User-supplied callback for when this View's parent is resized. Root View resize is handled by some external (platform-specific) callback.
 	//void (*enable)(struct View * const this); //start
-	//void (*disable)(struct View * const this); //stop
-	
-	float dimensions[3]; ///< Dimensions of this View in user-defined units.
-	float position[3]; ///< Position of this View in user-defined units.
-	float orientation[3]; ///< Orientation of this View in user-defined units.
-	float scale[3]; ///< Scale of this View in user-defined units.
-	
+	//void (*disable)(struct View * const this); //stop	
 } View;
 
 /// Base class for a user-defined controller that handles specific game / business / simulation logic within an App.
