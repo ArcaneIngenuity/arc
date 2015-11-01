@@ -154,6 +154,8 @@ typedef struct Element
 	void (*suspend)(struct Hub * const this); ///< \brief User-supplied callback for when owner instance must suspend() due to a loss of rendering context.
 	void (*resume)(struct Hub * const this); ///< \brief User-supplied callback for when owner instance must resume() due to regaining rendering context.
 	
+	void * config; ///< Attachment point for config specific to this element, for possible implementation-specific parsing in Element subclasses.
+	
 	Extensions extensions; ///< Extensions owned by this View, if any.
 	char * ownClassName; ///< \internal String class name of the owning Element's model; accesible to extensions in case of model datapath drilldown. \endinternal
 	char * modelClassName; ///< \internal String class name of the owning Element; accesible to extensions in case of model datapath drilldown. \endinternal

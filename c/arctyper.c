@@ -94,6 +94,7 @@ KHASH_DECLARE(Str_ArcType, kh_cstr_t, ArcType)
 
 static char * srcPath;
 khash_t(StrPtr) * types;
+khash_t(StrPtr) * typesExternal;
 char ** typesAlphabetical;
 static khiter_t k;
 static khiter_t j;
@@ -184,6 +185,16 @@ void implementTypesAndFunctions(FILE * hFile)
 		fprintf(hFile, "\t\tif (strcmp(name, \"%s\") == 0) return sizeof(%s);\n", type->name, type->name);
 	}
 	
+	fprintf(hFile, "\t\n");
+	for (k = kh_begin(typesExternal); k != kh_end(typesExternal); ++k)
+	{
+		if (kh_exist(typesExternal, k))
+		{
+			char * keyType = kh_key(typesExternal, k);
+			fprintf(hFile, "\t\tif (strcmp(name, \"%s\") == 0) return sizeof(%s);\n", keyType, keyType);
+		}
+	}
+	
 	fprintf(hFile, "\t}\n");
 	fprintf(hFile, "\tprintf(\"[ARC]    Class not found: %%s.\\n\", name);\n");
 	fprintf(hFile, "\treturn NULL;\n");
@@ -210,7 +221,7 @@ void implementTypesAndFunctions(FILE * hFile)
 			fprintf(hFile, "\t\tif (strcmp(name, \"%s\") == 0) return &%s;\n", function->name, function->name);
 		}
 	}
-	
+
 	fprintf(hFile, "\t}\n");
 	
 	fprintf(hFile, "\tprintf(\"[ARC]    Function not found: %%s.\\n\", name);\n");
@@ -244,7 +255,10 @@ void implementTypesAndFunctions(FILE * hFile)
 				if (strstr(member->name, "[") != NULL) //if it's an array, comment it for now to prevent compile problems(?) with offsetof
 					fprintf(hFile, "//");
 				fprintf(hFile, "\t\t\tif (strcmp(membername, \"%s\") == 0) return offsetof(%s, %s);\n", member->name, type->name, member->name);
-			} 
+			}
+			if (strlen(type->basetypename) > 0)
+				fprintf(hFile, "\t\t\treturn offsetofDynamic(\"%s\", membername);\n", type->basetypename);
+			
 			fprintf(hFile, "\t\t}\n");
 		}
 	}
@@ -282,7 +296,7 @@ void implementTypesAndFunctions(FILE * hFile)
 				fprintf(hFile, "\t\t\tif (strcmp(membername, \"%s\") == 0) return \"%s\";\n", member->name, member->typename);
 			}
 			if (strlen(type->basetypename) > 0)
-				fprintf(hFile, "\t\t\treturn offsetofDynamic(\"%s\", membername);\n", type->basetypename);
+				fprintf(hFile, "\t\t\treturn typeofMemberDynamic(\"%s\", membername);\n", type->basetypename);
 			
 			fprintf(hFile, "\t\t}\n");
 		}
@@ -970,6 +984,8 @@ void extractMembersFromHeaders(ArcType * type)
 			{
 				//printf("[ARC] Type %s file %s.h could not be found!\n", subtype->name, subtype->filename);
 				//exit(EXIT_FAILURE);
+				
+				kh_set(StrPtr, typesExternal, member->typename, NULL); //use this as a set - keys but no values
 			}
 		}
 		else //if type is already present in map, get it
@@ -1114,7 +1130,8 @@ void main(int argc, char *argv[])
 	
 	//we use StrPtr to avoid a lot of hassle no every kh_set(), as keys are contained in values (copied from xml)
 	//this way, we just create it beforehand and put into the hash, instead of having to create it with a temp key (char[]) etc.
-	types = kh_init(StrPtr);
+	types 			= kh_init(StrPtr); //types found in the project (data path resolution needed for these, possibly)
+	typesExternal 	= kh_init(StrPtr); //types found externally  (no data path resolution needed for these)
 	ArcType * type = createType();
 	extractTypesAndFunctionsFromConfigXML(hubXml, type);
 	

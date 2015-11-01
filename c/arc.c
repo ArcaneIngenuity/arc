@@ -223,20 +223,20 @@ void Element_resolveDataPath(void ** dataPtr, const char * dataClass, const char
 					else if (nodeLast.symbol == Deref)
 					{
 						char * memberClass = typeofMemberDynamic(dataClass, node.memberName);
-						size_t offset = offsetofDynamic(dataClass, node.memberName);
 						size_t size = sizeofDynamic(memberClass);
+						size_t offset = offsetofDynamic(dataClass, node.memberName);
 						
 						//work with individual bytes in the absence of compile-time types
 						char * ptr = (char*)data; 
 						ptr += offset;
-						//LOGI("member size of=%u / offset to=%u\n", size, offset);
-						//LOGI("deref to member of type %s\n", memberClass);
-						//LOGI("ptr+offset=%p\n", ptr);
+						LOGI("member size of=%u / offset to=%u\n", size, offset);
+						LOGI("deref to member of type %s\n", memberClass);
+						LOGI("ptr+offset=%p\n", ptr);
 						char buffer[size];
 						memcpy(buffer, ptr, size);
 						data = ptr;
-						int b = *(int*)data;
-						LOGI("result: %i\n", b);
+						//int b = *(int*)data;
+						//LOGI("result: %i\n", b);
 					}
 					break;
 				case Offset:
@@ -1170,6 +1170,7 @@ View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model, 
 	
 	view = View_construct(ezxml_attr(viewXml, "id"), sizeofDynamic(viewClass));
 	((Element *)view)->model = model;
+	((Element *)view)->config = viewXml;
 	Element * viewAsElement = &view->base.base;
 
 	//function members
@@ -1177,6 +1178,7 @@ View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model, 
 	FOREACH_UPDATER_FUNCTION(((Updater *)view)->,view, GENERATE_ASSIGN_METHOD)
 	FOREACH_VIEW_FUNCTION	(view->, 		view, GENERATE_ASSIGN_METHOD)
 	
+	//parent-child chain
 	if (app) //subviews don't get access to app, see below
 		App_setView(app, view); //must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
 	
@@ -1213,6 +1215,7 @@ Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model, 
 	LOGI("ctrlClass=%s\n", ctrlClass);
 	ctrl = Ctrl_construct(ezxml_attr(ctrlXml, "id"), sizeofDynamic(ctrlClass));
 	((Element *)ctrl)->model = model;
+	((Element *)ctrl)->config = ctrlXml;
 	Element * ctrlAsElement = &ctrl->base.base;
 	
 	//drilldown to Ctrl's specific model, if any
@@ -1393,6 +1396,7 @@ App * Builder_buildApp(ezxml_t appXml)
 	modelClass = ezxml_attr(modelXml, "class");
 	model = calloc(1, sizeofDynamic(modelClass));
 	((Element *)app)->model 		= model;
+	((Element *)app)->config 		= appXml;
 	
 	//views
 	viewXml = ezxml_child(appXml, "view");
@@ -1424,6 +1428,9 @@ void Builder_buildHub(Hub * hub, ezxml_t hubXml)
 	char nameAssembled[STRLEN_MAX];
 	const char * name;
 	const char * hubClass = "Hub";
+	
+	//TODO set global model
+	((Element *)hub)->config 		= hubXml;
 	
 	FOREACH_ELEMENT_FUNCTION(hub->base., hub, GENERATE_ASSIGN_METHOD)
 	LOGI("[ARC]    Builder_buildHub...\n");
