@@ -45,7 +45,7 @@ void Extension_initialise(Extension * extension)
 	strcpy(parserFunctionName, extensionClassName);
 	strcat(parserFunctionName, "_fromConfigXML");
 	LOGI("[ARC]    Extension_initialise() (id=%s)\n", extensionClassName);
-	ParserFunctionXML parser = addressofDynamic(parserFunctionName);
+	ParserFunction parser = addressofDynamic(parserFunctionName);
 	
 	Element * element = extension->group->owner;
 	

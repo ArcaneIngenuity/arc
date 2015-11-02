@@ -315,7 +315,7 @@ App * const Hub_getApp(Hub * const this, const char * const id); ///< \memberof 
 //TODO... void Hub_removeDevice(Hub * const this, const char * id);
 
 void 		Builder_buildFromConfig(Hub * const hub, const char * configFilename); ///< Build the Hub contents from a config file; path should be relative to executable.
-typedef void * (*ParserFunctionXML)(Extension * extension);
+typedef void * (*ParserFunction)(Extension * extension);
 void doNothing(void * const this); ///< A null-pattern callback which is the default when no user-defined callback has yet been supplied (prevents null pointer crashes).
 
 #endif //ARC_H
