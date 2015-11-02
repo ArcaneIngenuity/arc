@@ -649,6 +649,9 @@ void readMemberAndTypeFromString(char * string, ArcType * type, ArcMember * memb
 	}
 	if (word != NULL)
 	{
+		char * ptr = strstr(word, "[");
+		if (ptr != NULL)
+			ptr[0] = '\0';
 		strcpy(member->name, word);
 		//printf("[0]classname=%s filename=%s useStructKeyword=%d isPointer=%d member->name=%s\n", type->name, type->filename, type->isPointer, type->useStructKeyword, member->name);
 	}

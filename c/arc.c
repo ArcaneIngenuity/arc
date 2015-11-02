@@ -54,7 +54,7 @@ void Extension_initialise(Extension * extension)
 		#ifdef ARC_DEBUG_ONEOFFS
 		LOGI("[ARC]    Parser function found: %s :: %s.\n", extensionClassName, parserFunctionName);
 		#endif// ARC_DEBUG_ONEOFFS
-		parser(extension, element);
+		parser(extension);
 	}
 	else //cannot construct extension without function
 	{
