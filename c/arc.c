@@ -43,7 +43,7 @@ void Extension_initialise(Extension * extension)
 	char * extensionClassName = ezxml_attr(extension->config, "class");
 	char parserFunctionName[STRLEN_MAX];
 	strcpy(parserFunctionName, extensionClassName);
-	strcat(parserFunctionName, "_fromConfigXML");
+	strcat(parserFunctionName, "_fromConfig");
 	LOGI("[ARC]    Extension_initialise() (id=%s)\n", extensionClassName);
 	ParserFunction parser = addressofDynamic(parserFunctionName);
 	
