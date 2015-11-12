@@ -34,242 +34,6 @@ KHASH_DEFINE(StrPtr, 	kh_cstr_t, uintptr_t, kh_str_hash_func, kh_str_hash_equal,
 
 static khiter_t k;
 
-//---------Extension-----------//
-
-void Extension_initialise(Extension * extension)
-{
-	
-	//get parser if available
-	char * extensionClassName = ezxml_attr(extension->config, "class");
-	char parserFunctionName[STRLEN_MAX];
-	strcpy(parserFunctionName, extensionClassName);
-	strcat(parserFunctionName, "_fromConfig");
-	LOGI("[ARC]    Extension_initialise() (id=%s)\n", extensionClassName);
-	ParserFunction parser = addressofDynamic(parserFunctionName);
-	
-	Element * element = extension->group->owner;
-	
-	if (parser) //if extension constructor is available
-	{
-		#ifdef ARC_DEBUG_ONEOFFS
-		LOGI("[ARC]    Parser function found: %s :: %s.\n", extensionClassName, parserFunctionName);
-		#endif// ARC_DEBUG_ONEOFFS
-		parser(extension);
-	}
-	else //cannot construct extension without function
-	{
-		#ifdef ARC_DEBUG_ONEOFFS
-		LOGI("[ARC]    Parser function  not found: %s :: %s.\n", extensionClassName, parserFunctionName);
-		#endif// ARC_DEBUG_ONEOFFS
-		exit(EXIT_FAILURE);
-	}
-}
-
-//---------Element-----------//
-
-/// Sets up Extensions collections at startup time so they are ready for Builder to populate (to be used at initialise time).
-void Element_construct(Element * element)
-{
-	Extensions * extensions = &element->extensions;
-	extensions->owner = element;
-	element->extensions.byId = kh_init(StrPtr);
-	kv_init(element->extensions.ordered);
-}
-
-/// Uses the Extensions created by Builder, at initialise time.
-void Element_initialise(Element * element)
-{
-	Extensions * extensions = &element->extensions;
-	
-	//parse all extensions in order of declaration
-	for (int i = 0; i < kv_size(extensions->ordered); ++i)
-	{
-		Extension * extension = kv_A(extensions->ordered, i);
-		LOGI("[ARC]    Processing Extension during initialisation...\n");
-		Extension_initialise(extension);
-	}
-	
-	//initialise element
-	element->initialise(element);
-	element->initialised = true;
-}
-
-void Element_setDefaultCallbacks(Ctrl * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Element_setDefaultCallbacks (id=%s)\n", this->id);
-	#endif
-	
-	((Element *)this)->suspend 		= (void * const)&doNothing;
-	((Element *)this)->resume 		= (void * const)&doNothing;
-	((Element *)this)->initialise	= (void * const)&doNothing;
-	((Element *)this)->dispose 		= (void * const)&doNothing;
-}
-
-void Element_resolveDataPath(void ** dataPtr, const char * dataClass, const char * dataPathString)
-{
-	//extension->data = node->data;
-	void * data = *dataPtr; 
-	int c = 0;
-	int g = 0; //group count
-	const char * dataClassNew;
-	
-	kvec_t(DataPathNode) nodes;
-	kv_init(nodes);
-	
-	if (dataPathString)
-	{
-		//prep the buffer in which we will have pointers to different membernames
-		//necessary as we need to null-terminate each.
-		char dataPath[strlen(dataPathString)];
-		strcpy(dataPath, dataPathString);
-		
-		char * dataPathPtr = dataPath;
-		
-		DataPathNode node = {0};
-		bool inMemberName = true;
-		bool lastWasSep = true;
-
-		//we must first get the full list of symbols, only then can we operate on them
-		if (dataPathPtr[0] == '&')
-		{
-			LOGI("is address\n");
-			
-			node.symbol = 1;
-			kv_push(DataPathNode, nodes, node);
-			memset(&node, 0, sizeof(node));
-			lastWasSep = true;
-			dataPathPtr[0] = '\0';
-			++dataPathPtr;
-			
-		}
-		
-		while (dataPathPtr[0] != '\0') //seek char by char to end
-		{
-			if (dataPathPtr[0] == '.') //dot operator - offset to existing address
-			{
-				node.symbol = 2;
-				kv_push(DataPathNode, nodes, node);
-				memset(&node, 0, sizeof(node));
-				
-				inMemberName = false;
-				dataPathPtr[0] = '\0';
-			}
-			else
-			{
-				if (dataPathPtr[0] == '-' &&
-					dataPathPtr[1] == '>') //deref operator - dereference / reset existing address to new
-				{
-					node.symbol = 3;
-					kv_push(DataPathNode, nodes, node);
-					memset(&node, 0, sizeof(node));
-					
-					inMemberName = false;
-					dataPathPtr[0] = dataPathPtr[1] = '\0';
-					
-					++dataPathPtr; //get past the extra character
-				}
-			}
-		
-			if (!inMemberName) //we just had a separator
-			{
-				//kv_push(DataPathNode, nodes, node);
-				memset(&node, 0, sizeof(node));
-				inMemberName = true; //immediately assume next char begins a valid member name.
-				lastWasSep = true;
-			}
-			else //in member name
-			{
-				if (lastWasSep)
-				{
-					//memset(&node, 0, sizeof(node));
-					node.symbol = 0;
-					node.memberName = dataPathPtr;
-					lastWasSep = false;
-					LOGI("!\n");
-				}
-			}
-			
-			++dataPathPtr;
-		}
-		kv_push(DataPathNode, nodes, node); //push in the final node (should certainly be a member name)
-		
-		//void * address = data; //initial - start with the node itself
-		//TODO the above only if we don't have a member name before first sep
-		LOGI("-data=%p\n", data);
-		//we now have the full list of symbols - get final result
-		DataPathNode nodeLast;
-		bool reference = false;
-		for (int i = 0; i < kv_size(nodes); ++i)
-		{
-			node = kv_A(nodes, i);
-			LOGI("symbol=%d\n", node.symbol);
-			LOGI("class=%s member=%s\n", dataClass, node.memberName);
-
-			switch (node.symbol)
-			{
-				case Address:
-					reference = true;
-					break;
-				case Member:
-					LOGI("member: %s\n", node.memberName);
-					
-					if (nodeLast.symbol == Offset)
-					{
-						size_t offset = offsetofDynamic(dataClass, node.memberName);
-						LOGI("offset to member=%u\n", offset);
-						data += offset;
-					}
-					else if (nodeLast.symbol == Deref)
-					{
-						char * memberClass = typeofMemberDynamic(dataClass, node.memberName);
-						size_t size = sizeofDynamic(memberClass);
-						size_t offset = offsetofDynamic(dataClass, node.memberName);
-						
-						//work with individual bytes in the absence of compile-time types
-						char * ptr = (char*)data; 
-						ptr += offset;
-						LOGI("member size of=%u / offset to=%u\n", size, offset);
-						LOGI("deref to member of type %s\n", memberClass);
-						LOGI("ptr+offset=%p\n", ptr);
-						char buffer[size];
-						memcpy(buffer, ptr, size);
-						data = ptr;
-						//int b = *(int*)data;
-						//LOGI("result: %i\n", b);
-					}
-					break;
-				case Offset:
-					break;
-				case Deref:
-					break;
-				
-			}
-			
-			LOGI("data=%p\n", data);
-			nodeLast = node;
-		}
-		//if (!reference)
-		//	data = *data;
-	}
-	
-	*dataPtr = data;
-}
-
-//---------Updater-----------//
-void Updater_setDefaultCallbacks(Ctrl * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Updater_setDefaultCallbacks (id=%s)\n", this->id);
-	#endif
-	
-	Element_setDefaultCallbacks(this);
-	((Updater *)this)->stop 		= (void * const)&doNothing;
-	((Updater *)this)->update 		= (void * const)&doNothing;
-	((Updater *)this)->updatePost	= (void * const)&doNothing;
-}
-
-
 //--------- Pub/Sub ---------//
 
 /// Construct a Pub(lisher). This is usually called by Ctrl.initialise(), or possibly by Ctrl.update().
@@ -309,802 +73,837 @@ void Sub_scribe(Sub * subPtr, Pub * pubPtr)
 	kv_push(Sub, pubPtr->subsList, *subPtr);	
 }
 
-//--------- Hub ---------//
+//---------Extension-----------//
 
-void Hub_update(Hub * const this)
+void Extension_initialise(Extension * extension)
 {
-	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC]    Hub_update...\n");
-	#endif
 	
-	//update apps
-	for (int i = 0; i < this->appsCount; ++i)
+	//get parser if available
+	char * extensionClassName = ezxml_attr(extension->config, "class");
+	char parserFunctionName[STRLEN_MAX];
+	strcpy(parserFunctionName, extensionClassName);
+	strcat(parserFunctionName, "_fromConfig");
+	LOGI("[ARC]    Extension_initialise() (id=%s)\n", extensionClassName);
+	ParserFunction parser = addressofDynamic(parserFunctionName);
+	
+	Updater * element = extension->group->owner;
+	
+	if (parser) //if extension constructor is available
 	{
-		App * app = this->apps[i]; //read from map of values
-		if (app->updating)
-			App_update(app);
+		#ifdef ARC_DEBUG_ONEOFFS
+		LOGI("[ARC]    Parser function found: %s :: %s.\n", extensionClassName, parserFunctionName);
+		#endif// ARC_DEBUG_ONEOFFS
+		parser(extension);
+	}
+	else //cannot construct extension without function
+	{
+		#ifdef ARC_DEBUG_ONEOFFS
+		LOGI("[ARC]    Parser function  not found: %s :: %s.\n", extensionClassName, parserFunctionName);
+		#endif// ARC_DEBUG_ONEOFFS
+		exit(EXIT_FAILURE);
+	}
+}
+
+//---------Updater-----------//
+
+void Updater_resolveDataPath(void ** dataPtr, const char * dataClass, const char * dataPathString)
+{
+	void * data = *dataPtr; 
+	int c = 0;
+	int g = 0; //group count
+	const char * dataClassNew;
+	
+	kvec_t(DataPathElement) elements;
+	kv_init(elements);
+	
+	if (dataPathString)
+	{
+		//prep the buffer in which we will have pointers to different membernames
+		//necessary as we need to null-terminate each.
+		char dataPath[strlen(dataPathString)];
+		strcpy(dataPath, dataPathString);
+		
+		char * dataPathPtr = dataPath;
+		
+		DataPathElement element = {0};
+		bool inMemberName = true;
+		bool lastWasSep = true;
+
+		//we must first get the full list of symbols, only then can we operate on them
+		if (dataPathPtr[0] == '&')
+		{
+			LOGI("is address\n");
+			
+			element.symbol = 1;
+			kv_push(DataPathElement, elements, element);
+			memset(&element, 0, sizeof(element));
+			lastWasSep = true;
+			dataPathPtr[0] = '\0';
+			++dataPathPtr;
+			
+		}
+		
+		while (dataPathPtr[0] != '\0') //seek char by char to end
+		{
+			if (dataPathPtr[0] == '.') //dot operator - offset to existing address
+			{
+				element.symbol = 2;
+				kv_push(DataPathElement, elements, element);
+				memset(&element, 0, sizeof(element));
+				
+				inMemberName = false;
+				dataPathPtr[0] = '\0';
+			}
+			else
+			{
+				if (dataPathPtr[0] == '-' &&
+					dataPathPtr[1] == '>') //deref operator - dereference / reset existing address to new
+				{
+					element.symbol = 3;
+					kv_push(DataPathElement, elements, element);
+					memset(&element, 0, sizeof(element));
+					
+					inMemberName = false;
+					dataPathPtr[0] = dataPathPtr[1] = '\0';
+					
+					++dataPathPtr; //get past the extra character
+				}
+			}
+		
+			if (!inMemberName) //we just had a separator
+			{
+				//kv_push(DataPathElement, elements, element);
+				memset(&element, 0, sizeof(element));
+				inMemberName = true; //immediately assume next char begins a valid member name.
+				lastWasSep = true;
+			}
+			else //in member name
+			{
+				if (lastWasSep)
+				{
+					//memset(&element, 0, sizeof(element));
+					element.symbol = 0;
+					element.memberName = dataPathPtr;
+					lastWasSep = false;
+					LOGI("!\n");
+				}
+			}
+			
+			++dataPathPtr;
+		}
+		kv_push(DataPathElement, elements, element); //push in the final element (should certainly be a member name)
+		
+		//void * address = data; //initial - start with the element itself
+		//TODO the above only if we don't have a member name before first sep
+		LOGI("-data=%p\n", data);
+		//we now have the full list of symbols - get final result
+		DataPathElement elementLast;
+		bool reference = false;
+		for (int i = 0; i < kv_size(elements); ++i)
+		{
+			element = kv_A(elements, i);
+			LOGI("symbol=%d\n", element.symbol);
+			LOGI("class=%s member=%s\n", dataClass, element.memberName);
+
+			switch (element.symbol)
+			{
+				case Address:
+					reference = true;
+					break;
+				case Member:
+					LOGI("member: %s\n", element.memberName);
+					
+					if (elementLast.symbol == Offset)
+					{
+						size_t offset = offsetofDynamic(dataClass, element.memberName);
+						LOGI("offset to member=%u\n", offset);
+						data += offset;
+					}
+					else if (elementLast.symbol == Deref)
+					{
+						char * memberClass = typeofMemberDynamic(dataClass, element.memberName);
+						size_t size = sizeofDynamic(memberClass);
+						size_t offset = offsetofDynamic(dataClass, element.memberName);
+						
+						//work with individual bytes in the absence of compile-time types
+						char * ptr = (char*)data; 
+						ptr += offset;
+						LOGI("member size of=%u / offset to=%u\n", size, offset);
+						LOGI("deref to member of type %s\n", memberClass);
+						LOGI("ptr+offset=%p\n", ptr);
+						char buffer[size];
+						memcpy(buffer, ptr, size);
+						data = ptr;
+						//int b = *(int*)data;
+						//LOGI("result: %i\n", b);
+					}
+					break;
+				case Offset:
+					break;
+				case Deref:
+					break;
+				
+			}
+			
+			LOGI("data=%p\n", data);
+			elementLast = element;
+		}
+		//if (!reference)
+		//	data = *data;
 	}
 	
-	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC] ...Hub_update\n");
+	*dataPtr = data;
+}
+
+void Updater_construct(Updater * updater)
+{
+	updater->extensions.byId = kh_init(StrPtr);
+	kv_init(updater->extensions.ordered);
+}
+
+/// Uses the Extensions created by Builder, at initialise time.
+void Updater_initialise(Updater * const updater)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Updater_initialise...\n");
+	#endif
+	
+	Extensions * extensions = &updater->extensions;
+	extensions->owner = updater;
+	
+	//parse all extensions in order of declaration
+	for (int i = 0; i < kv_size(extensions->ordered); ++i)
+	{
+		Extension * extension = kv_A(extensions->ordered, i);
+		LOGI("[ARC]    Processing Extension during initialisation...\n");
+		Extension_initialise(extension);
+	}
+	LOGI("?=%p\n", updater->initialise);
+	//initialise element
+	updater->initialise(updater);
+	updater->initialised = true;
+	LOGI("!");
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Updater_initialise\n");
 	#endif
 }
 
-Hub * Hub_construct()
+// DEFUNCT - builder auto-populates where appropriately named attribute not found!
+void Updater_setDefaultCallbacks(Updater * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Hub_construct...\n");
+	LOGI("[ARC]    Updater_setDefaultCallbacks\n");
+	#endif
+	
+	((Updater *)this)->suspend 		= (void * const)&doNothing;
+	((Updater *)this)->resume 		= (void * const)&doNothing;
+	((Updater *)this)->initialise	= (void * const)&doNothing;
+	((Updater *)this)->dispose 		= (void * const)&doNothing;
+	((Updater *)this)->stop 		= (void * const)&doNothing;
+	((Updater *)this)->update 		= (void * const)&doNothing;
+	((Updater *)this)->updatePost	= (void * const)&doNothing;
+}
+
+
+void Updater_start(Updater * const this)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Updater_start... \n");
+	#endif
+	
+	if (!this->updating)
+	{
+		this->start(this);
+		this->updating = true;
+	}
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Updater_start    \n");
+	#endif
+}
+
+void Updater_stop(Updater * const this)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Updater_stop... \n");
+	#endif
+	
+	if (this->updating)
+	{
+		this->stop(this);
+		this->updating = false;
+	}
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Updater_stop    \n");
+	#endif
+}
+
+void Updater_update(Updater * const this)
+{
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC]    Ctrl_update... \n");
+	#endif
+	
+	if (this->updating && !this->suspended)
+		this->update(this);//deltaSec
+	
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC] ...Ctrl_update    \n");
+	#endif
+}
+
+void Updater_updatePost(Updater * const this)
+{
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC]    Ctrl_updatePost... \n");
+	#endif
+	
+	if (this->updating && !this->suspended)
+		this->updatePost(this);//deltaSec
+	
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC] ...Ctrl_updatePost    \n");
+	#endif
+}
+
+void Updater_suspend(Updater * const this)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Updater_suspend... \n");
+	#endif
+	
+	if (!this->suspended)
+	{
+		this->suspend(this);
+		this->suspended = true;
+	}
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Updater_suspend    \n");
+	#endif
+}
+
+void Updater_resume(Updater * const this)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Ctrl_resume... \n");
+	#endif
+	
+	if (this->suspended)
+	{
+		this->resume(this);
+		this->suspended = false;
+	}
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Ctrl_resume    \n");
+	#endif
+}
+
+void Updater_destruct(Updater * const this)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Ctrl_destruct... \n");
+	#endif
+	
+	if (this->initialised)
+	{
+		this->dispose(this);
+		this->initialised = false;
+	}
+	free(this);
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Ctrl_destruct    \n");
+	#endif
+}
+
+//--------- Node ---------//
+
+Node * Node_construct(const char * id)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Node_construct...(id=%s)\n", id);
 	#endif
 	
 	//TODO ifdef GCC, link destruct() via attr cleanup 
 	//#ifdef __GNUC__
-	//App * app __attribute__((cleanup (App_destruct))) = malloc(sizeof(App));
+	//Node * node __attribute__((cleanup (Node_destruct))) = malloc(sizeof(Node));
 	//#else //no auto destructor!
-	Hub * hub = calloc(1, sizeof(Hub));
+	Node * node = calloc(1, sizeof(Node));
 	//#endif//__GNUC__
-	Element_construct(hub);
-	//Element_setDefaultCallbacks(hub);
+	strcpy(node->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
+	node->childrenById = kh_init(StrPtr);
+	kv_init(node->children);
+	//kv_init(node->active);
+	//kv_init(node->stopped);
+	//kv_init(node->suspended);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Hub_construct\n");
+	LOGI("[ARC] ...Node_construct   (id=%s)\n", id);
 	#endif
 	
-	return hub;
+	return node;
 }
 
-void Hub_destruct(Hub * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Hub_destruct...\n"); 
-	#endif// ARC_DEBUG_ONEOFFS
+void Node_initialise(Node * const this, UpdaterTypes types, bool recurse)
+{	
+	//init more senior nodes/updaters first (on way down tree)
+	if (this->ctrl)
+		Updater_initialise(this->ctrl);
+	if (this->view)
+		Updater_initialise(this->view); //initialises all descendants too
 	
-	for (int i = 0; i < this->appsCount; ++i)
+	if (recurse)
 	{
-		App * app = this->apps[i];
-		if (app)
-			App_destruct(app);
-	}
-	
-	this->base.dispose((void *)this);
-	
-	//this->base.initialised = false;
-	free(this); //hub object must always be dynamically allocated!
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Hub_destruct\n"); 
-	#endif// ARC_DEBUG_ONEOFFS
-}
-
-void Hub_suspend(Hub * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Hub_suspend...");
-	#endif// ARC_DEBUG_ONEOFFS
-	for (int i = 0; i < this->appsCount; ++i)
-	{
-		App * app = this->apps[i];
-		if (app)
-			App_suspend(app);
-	}
-
-	this->base.suspend((void *)this);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Hub_suspend");
-	#endif// ARC_DEBUG_ONEOFFS
-}
-
-void Hub_resume(Hub * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Hub_resume...");
-	#endif// ARC_DEBUG_ONEOFFS
-	for (int i = 0; i < this->appsCount; ++i)
-	{
-		App * app = this->apps[i];
-		if (app)
-			App_resume(app);
-	}
-	
-	this->base.resume((void *)this);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Hub_resume");
-	#endif// ARC_DEBUG_ONEOFFS
-}
-
-App * const Hub_addApp(Hub * const this, App * const app)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Hub_addApp... (id=%s)\n", app->id);
-	#endif
-	if (this->appsCount < APPS_MAX)
-	{
-		this->apps[this->appsCount++] = app;
-		app->hub = this;
-		//#ifdef ARC_DEBUG_ONEOFFS
-		//LOGI("[ARC] App added with ID %s\n", app->id);
-		//#endif// ARC_DEBUG_ONEOFFS
-		
-		#ifdef ARC_DEBUG_ONEOFFS
-		LOGI("[ARC] ...Hub_addApp    (id=%s)\n", app->id);
-		#endif
-		
-		return app;
-	}
-	return NULL;
-}
-
-App * const Hub_getApp(Hub * const this, const char * const id)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Hub_getApp... (app id=%s)\n", id);
-	#endif
-	
-	for (int i = 0; i < this->appsCount; ++i)
-	{
-		App * app = this->apps[i];
-		if (strcmp(id, app->id) == 0)
+		for (int i = 0; i < kv_size(this->children); ++i)
 		{
-			#ifdef ARC_DEBUG_ONEOFFS
-			LOGI("[ARC] ...Hub_getApp (app id=%s)\n", id);
-			#endif
-			
-			return app;
+			Node * nodeChild = kv_A(this->children, i);
+			Node_initialise(nodeChild, types, recurse);
+		}
+	}
+}
+
+void Node_destruct(Node * const this, UpdaterTypes types, bool recurse)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	char id[64]; strcpy(id, this->id);
+	LOGI("[ARC]    Node_destruct... (id=%s)\n", id);
+	#endif//ARC_DEBUG_ONEOFFS
+	
+	Ctrl * ctrl = this->ctrl;
+	View * view = this->view;
+		
+	//DFS destruct...
+	if (recurse)
+	{
+		for (int i = 0; i < kv_size(this->children); ++i)
+		{
+			Node * nodeChild = kv_A(this->children, i);
+			Node_destruct(nodeChild, types, recurse);
+		}
+	}
+	
+	//kill more senior nodes/updaters last (on way back up tree)
+	if (((uint8_t)types) & CTRL)
+	{
+		if (this->ctrl)
+			Updater_destruct(this->ctrl);
+	}
+	if (((uint8_t)types) & VIEW)
+	{
+		if (this->view)
+			Updater_destruct(this->view); //initialises all descendants too
+	}
+	
+	free(this);
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Node_destruct    (id=%s)\n", id);
+	#endif//ARC_DEBUG_ONEOFFS
+}
+
+
+void Node_setCtrl(Node * node, Ctrl * ctrl)
+{
+	node->ctrl = ctrl;
+	ctrl->node = node;
+}
+
+void Node_setView(Node * node, View * view)
+{
+	node->view = view;
+	view->node = node;
+}
+
+bool Node_isRoot(Node * const this)
+{
+	return this->parent == NULL;
+}
+
+void Node_start(Node * const this, UpdaterTypes types, bool recurse)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Node_start... (id=%s)\n", this->id);
+	#endif
+
+	if (((uint8_t)types) & CTRL)
+	{
+		if (this->ctrl)
+		{
+			Ctrl * ctrl = this->ctrl;
+			Updater_start(ctrl); //it is left to Ctrls to start Views
+			LOGI("...CTRL....");
+		}
+	}
+	if (((uint8_t)types) & VIEW)
+	{
+		if (this->view)
+		{
+			View * view = this->view;
+			Updater_start(view); //it is left to Ctrls to start Views
+			LOGI("...VIEW....");
+		}
+	}
+	if (recurse)
+	{
+		for (int i = 0; i < kv_size(this->children); ++i)
+		{
+			Node * nodeChild = kv_A(this->children, i);
+			Node_start(nodeChild, types, recurse);
+		}
+	}
+
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Node_start    (id=%s)\n", this->id);
+	#endif
+}
+
+void Node_stop(Node * const this, UpdaterTypes types, bool recurse)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Node_stop... (id=%s)\n", this->id);
+	#endif
+
+	if (((uint8_t)types) & CTRL)
+	{
+		if (this->ctrl)
+		{
+			Ctrl * ctrl = this->ctrl;
+			Updater_stop(ctrl);
+		}
+	}
+	if (((uint8_t)types) & VIEW)
+	{
+		if (this->view)
+		{
+			View * view = this->view;
+			Updater_stop(view);
+		}
+	}
+	if (recurse)
+	{
+		for (int i = 0; i < kv_size(this->children); ++i)
+		{
+			Node * nodeChild = kv_A(this->children, i);
+			Node_stop(nodeChild, types, recurse);
+		}
+	}
+
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Node_stop    (id=%s)\n", this->id);
+	#endif
+}
+
+void Node_suspend(Node * const this, UpdaterTypes types, bool recurse)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Node_stop... (id=%s)\n", this->id);
+	#endif
+	
+	if (recurse)
+	{
+		for (int i = 0; i < kv_size(this->children); ++i)
+		{
+			Node * nodeChild = kv_A(this->children, i);
+			Node_suspend(nodeChild, types, recurse);
+		}
+	}
+	
+	if (((uint8_t)types) & CTRL)
+	{
+		if (this->ctrl)
+		{
+			Updater_suspend(this->ctrl);
+		}
+	}
+	if (((uint8_t)types) & VIEW)
+	{
+		if (this->view)
+		{
+			Updater_suspend(this->view);
+		}
+	}
+
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Node_stop    (id=%s)\n", this->id);
+	#endif
+}
+
+void Node_resume(Node * const this, UpdaterTypes types, bool recurse)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Node_stop... (id=%s)\n", this->id);
+	#endif
+
+	if (recurse)
+	{
+		for (int i = 0; i < kv_size(this->children); ++i)
+		{
+			Node * nodeChild = kv_A(this->children, i);
+			Node_suspend(nodeChild, types, recurse);
+		}
+	}
+	
+	if (((uint8_t)types) & CTRL)
+	{
+		if (this->ctrl)
+		{
+			Updater_resume(this->ctrl);
+		}
+	}
+	if (((uint8_t)types) & VIEW)
+	{
+		if (this->view)
+		{
+			Updater_resume(this->view);
 		}
 	}
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Hub_getApp (app id=%s)\n", id);
+	LOGI("[ARC] ...Node_stop    (id=%s)\n", this->id);
 	#endif
-	
-	return NULL;
 }
 
-//--------- App ---------//
-
-App * App_construct(const char * id)//App ** app)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    App_construct...(id=%s)\n", id);
-	#endif
-	
-	//TODO ifdef GCC, link destruct() via attr cleanup 
-	//#ifdef __GNUC__
-	//App * app __attribute__((cleanup (App_destruct))) = malloc(sizeof(App));
-	//#else //no auto destructor!
-	App * app = calloc(1, sizeof(App));
-	//#endif//__GNUC__
-	strcpy(app->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
-	Element_construct(app);
-	app->pubsByName = kh_init(StrPtr);
-	//Element_setDefaultCallbacks(app);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...App_construct    (id=%s)\n", id);
-	#endif
-	
-	return app;
-}
-
-void App_update(App * const this)
+void Node_update(Node * node)//, UpdaterTypes type, bool recurse)
 {
 	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC]    App_update... (id=%s)\n", this->id);
+	LOGI("[ARC]    Node_update... (id=%s)\n", node->id);
 	#endif
 	
+	Updater * const updater;
+
+	//pre
+	//if (type & CTRL)
+	//{
+		if (node->ctrl)
+			Updater_update(node->ctrl);
+	//}
+	//if (type & VIEW)
+	//{
+		if (node->view)
+			Updater_update(node->view);
+	//}
+	
+	//children
+	//if (recurse)
+	//{
+		for (int i = 0; i < kv_size(node->children); ++i)
+		{
+			Node * nodeChild = kv_A(node->children, i);
+			Node_update(nodeChild);//, type, recurse);
+		}
+	//}
+	
+	//post
+	//if (type & CTRL)
+	//{
+		if (node->ctrl)
+			Updater_updatePost(node->ctrl);
+	//}
+	//if (type & VIEW)
+	//{
+		if (node->view)
+			Updater_updatePost(node->view);
+	//}
+	
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC] ...Node_update    (id=%s)\n", node->id);
+	#endif
+}
+
+/*
+void Node_update(Node * const this)
+{
 	Ctrl * ctrl = this->ctrl;
 	View * view = this->view;
+	
+	View * vRoot = this->view;
+	View * vRootChild = vRoot->children.a[0]; //DEV - get by name
+	
+	if (vRootChild->type == WIDGET)
+	{
+		View * view = &vRootChild->children.a[0];
+		if (widget->updateInput)
+		{
+			widget->updateInput(widget);
+		}
+		else
+			LOGI("NO UPDATE.\n");
+		
+		// if (vRootUncast)
+		// {
+			// for (int i = 0; i < kv_size(vRootUncast); ++i)
+			// {
+				// kv_A(vRootUncast);
+
+				
+			// }
+		// }
+		
+	}
 	
 	Ctrl_update(ctrl); //abstract
 	//if (view != NULL) //JIC user turns off the root view by removing it (since this is the enable/disable mechanism)
 	//really, we should just exit if either View or Ctrl are null, at App_start()
 	if (((Updater *)view)->updating)
-		View_update(view);
+		View_update(view); //update whether group or widget
 	Ctrl_updatePost(ctrl); //abstract
-	
-	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC] ...App_update    (id=%s)\n", this->id);
-	#endif
 }
+*/
 
-void App_initialise(App * const this)
+void Node_claimAncestry(Node * const this, Node * const child)
 {
-	Element_initialise(this);
-	
-	Ctrl_initialise(this->ctrl);
-	View_initialise(this->view); //initialises all descendants too
+	LOGI("@@@@this=%p child=%p\n", this, child);
+	child->parent = this;
+	if (this->root)
+		child->root = this->root;
+	else
+		child->root = this;
+	/*
+	//recurse
+	for (int i = 0; i < kv_size(child->children); ++i)
+	{
+		Node * grandchild = kv_A(child->children, i); //NB! dispose in draw order
+		Node_claimAncestry(child, grandchild);
+	}
+	*/
 }
 
-void App_start(App * const this)
+Node * Node_add(Node * const this, Node * const child)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    App_start... (id=%s)\n", this->id);
+	LOGI("[ARC]    Node_add... (id=%s) (child id=%s)\n", this->id, child->id);
 	#endif
-	if (!this->updating)
+	
+	kv_push(Node *, this->children, child);
+	LOGI("num children?=%d\n", kv_size(this->children));
+	Node_claimAncestry(this, child);
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Node_add    (id=%s) (child id=%s)\n", this->id, child->id);
+	#endif
+	
+	return child;
+}
+
+Node * Node_find(Node * const this, const char * id)
+{
+	LOGI("----");
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Node_find... (id=%s) (descendant id=%s)\n", this->id, id);
+	#endif
+	
+	kvec_t(Node *) candidatesAtNextDepth;
+	kv_init(candidatesAtNextDepth);
+	LOGI("child count=%d\n", kv_size(this->children));
+	//search first only amongst children - do not DFS
+	for (int i = 0; i < kv_size(this->children); ++i)
 	{
-		if (this->base.initialised)
+		Node * child = kv_A(this->children, i); //NB! dispose in draw order
+		LOGI("child id=%s\n", child->id);
+		if (strcmp(id, child->id) == 0)
 		{
-			Ctrl * ctrl = this->ctrl;
-			Ctrl_start(ctrl); //it is left to Ctrls to start Views
-			this->updating = true;
+			#ifdef ARC_DEBUG_ONEOFFS
+			LOGI("[ARC] ...Node_find    (id=%s) (descendant id=%s)\n", this->id, id);
+			#endif
+			
+			return child;
 		}
 		else
-		{
-			//TODO make all LOGE, not LOGI!
-			LOGI("[ARC] App_start - Error: App has not been initialised.\n"); 
-		}
+			kv_push(Node *, candidatesAtNextDepth, child);
 	}
+	
+	//BFS deeper if not found in children of this
+	for (int i = 0; i < kv_size(candidatesAtNextDepth); ++i)
+	{
+		Node * child = kv_A(candidatesAtNextDepth, i);
+		Node_find(child, id);
+	}
+	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...App_start    (id=%s)\n", this->id);
+	LOGI("-[ARC] ...Node_find    (id=%s) (descendant id=%s)\n", this->id, id);
 	#endif
+	
+	return NULL;
 }
 
-void App_stop(App * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    App_stop... (id=%s)\n", this->id);
-	#endif
-	
-	Ctrl * ctrl = this->ctrl;
-	View * view = this->view;
-	
-	Ctrl_stop(ctrl);
-	View_stop(view);
-	
-	this->updating = false;
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...App_stop (id=%s)\n", this->id);
-	#endif
-}
-
-void App_destruct(App * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	char id[64]; strcpy(id, this->id);
-	LOGI("[ARC]    App_destruct... (id=%s)\n", id);
-	#endif//ARC_DEBUG_ONEOFFS
-	
-	Ctrl * ctrl = this->ctrl;
-	View * view = this->view;
-
-	Ctrl_destruct(ctrl);
-	View_destruct(view);
-	
-	//this->services.dispose();
-	
-	this->base.dispose((void *)this);
-	this->base.initialised = false;
-	free(this);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...App_destruct    (id=%s)\n", id);
-	#endif//ARC_DEBUG_ONEOFFS
-}
-
-void App_suspend(App * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    App_suspend... (id=%s)\n", this->id);
-	#endif//ARC_DEBUG_ONEOFFS
-	
-	View_suspend(this->view);
-	
-	((Element *)this->ctrl)->suspend((void *)this);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...App_suspend    (id=%s)\n", this->id);
-	#endif//ARC_DEBUG_ONEOFFS
-}
-
-void App_resume(App * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    App_resume... (id=%s)\n", this->id);
-	#endif//ARC_DEBUG_ONEOFFS
-	
-	View_resume(this->view);
-
-	((Element *)this->ctrl)->resume((void *)this);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...App_resume    (id=%s)\n", this->id);
-	#endif//ARC_DEBUG_ONEOFFS
-}
-
-void App_setCtrl(App * app, Ctrl * ctrl)
-{
-	app->ctrl = ctrl;
-	ctrl->app = app;
-	ctrl->hub = app->hub;
-}
-
-void App_setView(App * app, View * view)
-{
-	app->view = view;
-	view->app = app;
-	view->hub = app->hub;
-}
 
 //--------- Ctrl ---------//
 
-Ctrl * Ctrl_construct(const char * id, size_t sizeofSubclass)
+Ctrl * Ctrl_construct(size_t sizeofSubclass)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Ctrl_construct... (id=%s)\n", id);
+	LOGI("[ARC]    Ctrl_construct... \n");
 	#endif
-	//since we can't pass in a type,
-	//allocate full size of the "subclass" - this is fine as "base"
-	//struct is situated from zero in this allocated space
+	
+	//as we can't pass in a type, allocate size of the "subclass" - this is fine as "base"
 	Ctrl * ctrl = calloc(1, sizeofSubclass);
-	strcpy(ctrl->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
 	//Updater_setDefaultCallbacks(ctrl);
-	//this->mustStart = (void * const)&doNothing;
-	//this->mustStop 	= (void * const)&doNothing;
-	kv_init(ctrl->children);
-	//kv_init(ctrl->configs);
-	Element_construct(ctrl);
-	//ctrl->construct(ctrl);
+	Updater_construct(ctrl);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_construct    (id=%s)\n", id);
+	LOGI("[ARC] ...Ctrl_construct    \n");
 	#endif
 	
 	return ctrl;
 }
 
-void Ctrl_start(Ctrl * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Ctrl_start... (id=%s)\n", this->id);
-	#endif
-	
-	((Updater *)this)->start((void *)this);
-	((Updater *)this)->updating = true;
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_start    (id=%s)\n", this->id);
-	#endif
-}
-
-void Ctrl_stop(Ctrl * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Ctrl_stop... (id=%s)\n", this->id);
-	#endif
-	
-	((Updater *)this)->stop((void *)this);
-	((Updater *)this)->updating = false;
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_stop    (id=%s)\n", this->id);
-	#endif
-}
-
-void Ctrl_suspend(Ctrl * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Ctrl_suspend... (id=%s)\n", this->id);
-	#endif
-	
-	((Element *)this)->suspend(this);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_suspend    (id=%s)\n", this->id);
-	#endif
-}
-
-void Ctrl_resume(Ctrl * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Ctrl_resume... (id=%s)\n", this->id);
-	#endif
-	
-	((Element *)this)->resume(this);	
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_resume    (id=%s)\n", this->id);
-	#endif
-}
-
-void Ctrl_initialise(Ctrl * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Ctrl_initialise... (id=%s)\n", this->id);
-	#endif
-	
-	Element_initialise(this);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_initialise    (id=%s)\n", this->id);
-	#endif
-}
-
-void Ctrl_update(Ctrl * const this)
-{
-	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC]    Ctrl_update... (id=%s)\n", this->id);
-	#endif
-	
-	((Updater *)this)->update(this);//deltaSec
-	
-	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC] ...Ctrl_update    (id=%s)\n", this->id);
-	#endif
-}
-
-void Ctrl_updatePost(Ctrl * const this)
-{
-	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC]    Ctrl_updatePost... (id=%s)\n", this->id);
-	#endif
-	
-	((Updater *)this)->updatePost(this);//deltaSec
-	
-	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC] ...Ctrl_updatePost    (id=%s)\n", this->id);
-	#endif
-}
-
-void Ctrl_destruct(Ctrl * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	char id[64]; strcpy(id, this->id);
-	LOGI("[ARC]    Ctrl_destruct... (id=%s)\n", id);
-	#endif
-	
-	((Element *)this)->dispose(this);
-	((Element *)this)->initialised = false;
-	free(this);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_destruct    (id=%s)\n", id);
-	#endif
-}
-
-Ctrl * Ctrl_getChild(Ctrl * const this, char * id)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Ctrl_getChild... (id=%s) (child id=%s)\n", this->id, id);
-	#endif
-	
-	for (int i = 0; i < kv_size(this->children); ++i)
-	{
-		Ctrl * child = kv_A(this->children, i); //NB! dispose in draw order
-		if (strcmp(id, child->id) == 0)
-		{
-			#ifdef ARC_DEBUG_ONEOFFS
-			LOGI("[ARC] ...Ctrl_getChild    (id=%s) (child id=%s)\n", this->id, id);
-			#endif
-			
-			return child;
-		}
-	}
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_getChild    (id=%s) (child id=%s)\n", this->id, id);
-	#endif
-	
-	return NULL;
-}
-
-void Ctrl_claimAncestry(Ctrl * const this, Ctrl * const child)
-{
-	child->parent = this;
-	if (this->root)
-		child->root = this->root;
-	else
-		child->root = this;
-	child->app = this->app;
-	child->hub = this->hub;
-	
-	//recurse
-	for (int i = 0; i < kv_size(child->children); ++i)
-	{
-		Ctrl * grandchild = kv_A(this->children, i); //NB! dispose in draw order
-		Ctrl_claimAncestry(child, grandchild);
-	}
-}
-
-Ctrl * Ctrl_addChild(Ctrl * const this, Ctrl * const child)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Ctrl_addChild... (id=%s) (child id=%s)\n", this->id, child->id);
-	#endif
-	
-	Ctrl_claimAncestry(this, child);
-
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_addChild    (id=%s) (child id=%s)\n", this->id, child->id);
-	#endif
-	
-	kv_push(Ctrl *, this->children, child); //NB! dispose in draw order
-	//this->children[this->childrenCount++] = child;
-	return child;
-}
-
 void Ctrl_createPub(Ctrl * this, const char * name)
 {
-	App * appPtr = this->app;
 	Pub * pubPtr = Pub_construct(name);
-	kh_set(StrPtr, appPtr->pubsByName, name, pubPtr);
+	kh_set(StrPtr, this->pubsByName, name, pubPtr);
 }
 
 //--------- View ---------//
 
-View * View_construct(const char * id, size_t sizeofSubclass)
+View * View_construct(size_t sizeofSubclass)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    View_construct... (id=%s)\n", id);
+	LOGI("[ARC]    View_construct... \n");
 	#endif
 	
-	//since we can't pass in a type,
-	//allocate full size of the "subclass" - this is fine as "base"
-	//struct is situated from zero in this allocated space
+	//as we can't pass in a type, allocate size of the "subclass" - this is fine as "base"
 	View * view = calloc(1, sizeofSubclass);
-	strcpy(view->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
-	//Updater_setDefaultCallbacks(view);
 	view->onParentResize 	= (void * const)&doNothing;
-	kv_init(view->children);
-	
-	Element_construct(view);
+	//Updater_setDefaultCallbacks(view);
+	Updater_construct(view);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_construct    (id=%s)\n", id);
+	LOGI("[ARC] ...View_construct    \n");
 	#endif
 	
 	return view;
 }
 
-void View_start(View * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    View_start... (id=%s)\n", this->id);
-	#endif
-	
-	((Updater *)this)->start((void *)this);
-	((Updater *)this)->updating = true;
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_start    (id=%s)\n", this->id);
-	#endif
-}
-
-void View_stop(View * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    View_stop... (id=%s)\n", this->id);
-	#endif
-	
-	((Updater *)this)->stop((void *)this);
-	((Updater *)this)->updating = false;
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_stop    (id=%s)\n", this->id);
-	#endif
-}
-
-void View_suspend(View * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    View_suspend... (id=%s)\n", this->id);
-	#endif
-	
-	for (int i = 0; i < kv_size(this->children); ++i)
-	{
-		View * child = kv_A(this->children, i); //NB! dispose in draw order
-		View_suspend(child);
-	}
-	
-	((Element *)this)->suspend(this);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_suspend    (id=%s)\n", this->id);
-	#endif
-}
-
-void View_resume(View * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    View_resume... (id=%s)\n", this->id);
-	#endif
-	
-	for (int i = 0; i < kv_size(this->children); ++i)
-	{
-		View * child = kv_A(this->children, i); //NB! dispose in draw order
-		View_resume(child);
-	}
-	
-	((Element *)this)->resume(this);	
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_resume    (id=%s)\n", this->id);
-	#endif
-}
-
-
-void View_initialise(View * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    View_initialise... (id=%s)\n", this->id);
-	#endif
-	
-	Element_initialise(this);
-
-	for (int i = 0; i < kv_size(this->children); ++i)
-	{
-		View * child = kv_A(this->children, i); //NB! dispose in draw order
-		View_initialise(child);//deltaSec //only works if enabled
-	}
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_initialise    (id=%s)\n", this->id);
-	#endif
-}
-
-void View_update(View * const this)
-{
-	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC]    View_update... (id=%s)\n", this->id);
-	#endif
-	
-	((Updater *)this)->update(this);//deltaSec
-
-	for (int i = 0; i < kv_size(this->children); ++i)
-	{
-		View * child = kv_A(this->children, i); //NB! dispose in draw order
-		if (((Updater *)child)->updating)
-			View_update(child);//deltaSec
-	}
-	
-	((Updater *)this)->updatePost(this);//deltaSec
-	
-	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC] ...View_update    (id=%s)\n", this->id);
-	#endif
-}
-
-void View_destruct(View * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	char id[64]; strcpy(id, this->id);
-	LOGI("[ARC]    View_destruct... (id=%s)\n", id);
-	#endif
-	
-	for (int i = 0; i < kv_size(this->children); ++i)
-	{
-		View * child = kv_A(this->children, i); //NB! dispose in draw order
-		View_destruct(child);
-	}
-	
-	kv_destroy(this->children);
-	((Element *)this)->dispose(this);
-	((Element *)this)->initialised = false;
-	free(this);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_destruct    (id=%s)\n", id);
-	#endif
-}
-
-View * View_getChild(View * const this, char * id)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    View_getChild... (id=%s) (child id=%s)\n", this->id, id);
-	#endif
-	
-	for (int i = 0; i < kv_size(this->children); ++i)
-	{
-		View * child = kv_A(this->children, i); //NB! dispose in draw order
-		if (strcmp(id, child->id) == 0)
-		{
-			#ifdef ARC_DEBUG_ONEOFFS
-			LOGI("[ARC] ...View_getChild    (id=%s) (child id=%s)\n", this->id, id);
-			#endif
-			
-			return child;
-		}
-	}
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_getChild    (id=%s) (child id=%s)\n", this->id, id);
-	#endif
-	
-	return NULL;
-}
-
-void View_claimAncestry(View * const this, View * const child)
-{
-	child->parent = this;
-	if (this->root)
-		child->root = this->root;
-	else
-		child->root = this;
-	child->app = this->app;
-	child->hub = this->hub;
-	
-	//recurse
-	for (int i = 0; i < kv_size(child->children); ++i)
-	{
-		View * grandchild = kv_A(this->children, i); //NB! dispose in draw order
-		View_claimAncestry(child, grandchild);
-	}
-}
-
-View * View_addChild(View * const this, View * const child)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    View_addChild... (id=%s) (child id=%s)\n", this->id, child->id);
-	#endif
-	
-	View_claimAncestry(this, child);
-
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_addChild    (id=%s) (child id=%s)\n", this->id, child->id);
-	#endif
-	
-	kv_push(View *, this->children, child); //NB! dispose in draw order
-	//this->children[this->childrenCount++] = child;
-	return child;
-}
-
-/*
-View *
-View_removeChild(View * const this, View * const child)
-{
-	child->parent = NULL;
-
-	if (kv_size(this->children) == 0)
-		return ARRAY_EMPTY;
-	else
-	{
-		//TODO find child index
-		
-		//TODO shift all back
-		
-		kv_size(this->children)--;
-		return child;
-	}
-}
-*/
-/*
-ArrayResult
-View_swapChildren(View * const this, int indexFrom, int indexTo)
-{
-	
-}
-*/
-
-bool View_isRoot(View * const this)
-{
-	return this->parent == NULL;
-}
-
 void View_onParentResize(View * const this)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    View_onParentResize... (id=%s)\n", this->id);
+	LOGI("[ARC]    View_onParentResize... (id=%s)\n", this->node->id);
 	#endif
 	
 	this->onParentResize(this);
 	
-	for (int i = 0; i < kv_size(this->children); ++i)
+	for (int i = 0; i < kv_size(this->node->children); ++i)
 	{
-		View * child = kv_A(this->children, i); //NB! dispose in draw order
+		Node * node = kv_A(this->node->children, i);
+		View * child = node->view; //NB! dispose in draw order
 		
 		//depth first - update child and then recurse to its children
-		
-		View_onParentResize(child);
+		if (child)
+			View_onParentResize(child);
 	}
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_onParentResize    (id=%s)\n", this->id);
+	LOGI("[ARC] ...View_onParentResize    (id=%s)\n", this->node->id);
 	#endif
 }
 
 void View_subscribe(View * this, const char * pubname, SubHandler handler)
 {
+	//TODO to reimplement, we'll need to pass the Ctrl in question in - don't rely on app
+	/*
 	App * app = this->app;
 	
 	//get the publisher in question off the app
@@ -1116,13 +915,36 @@ void View_subscribe(View * this, const char * pubname, SubHandler handler)
 	sub.instance = this;
 	sub.handler = handler;
 	Sub_scribe(&sub, pubPtr);
+	*/
 }
 
 void View_listen(View * const this)
-{
-	
-	
+{	
 }
+
+
+//-------- Widget/Part -------//
+
+void Widget_update(Widget * this)
+{
+	if (this->update)
+		this->update(this);
+	
+	for (int i = 0; i < kv_size(this->parts); ++i)
+	{
+		WidgetPart * part = &kv_A(this->parts, i);
+		
+		if (part->update)
+			part->update(part);
+	}
+	
+	if (this->updatePost)
+		this->updatePost(this);
+	
+	if (this->updateRender)
+		this->updateRender(this);
+}
+
 
 //-------- Builder -------//
 
@@ -1132,9 +954,7 @@ typedef void * (*BuildFunction) (ezxml_t xml);
 	HANDLER(instance, name, start) \
 	HANDLER(instance, name, stop) \
 	HANDLER(instance, name, update) \
-	HANDLER(instance, name, updatePost)
-	
-#define FOREACH_ELEMENT_FUNCTION(instance, name, HANDLER) \
+	HANDLER(instance, name, updatePost) \
 	HANDLER(instance, name, initialise) \
 	HANDLER(instance, name, dispose) \
 	HANDLER(instance, name, suspend) \
@@ -1143,7 +963,8 @@ typedef void * (*BuildFunction) (ezxml_t xml);
 #define FOREACH_VIEW_FUNCTION(instance, name, HANDLER) \
 	HANDLER(instance, name, onParentResize) \
 
-#define GENERATE_ASSIGN_METHOD(instance, instancename, member) name = ezxml_attr(instancename##Xml, #member); \
+#define GENERATE_ASSIGN_METHOD(instance, instancename, member) \
+	name = ezxml_attr(instancename##Xml, #member); \
 	if (name) instance member = addressofDynamic(name); \
 	else \
 	{ \
@@ -1157,135 +978,13 @@ typedef void * (*BuildFunction) (ezxml_t xml);
 		instance member = &doNothing; \
 		LOGI("[ARC]    Using default function: doNothing.\n"); \
 	}
-	
-View * Builder_buildView(App * app, View * view, ezxml_t viewXml, void * model, const char * modelClass)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Builder_buildView...\n");
-	#endif// ARC_DEBUG_ONEOFFS
-	
-	char nameAssembled[STRLEN_MAX];
-	const char * name;
-	const char * viewClass = ezxml_attr(viewXml, "class");
-	
-	view = View_construct(ezxml_attr(viewXml, "id"), sizeofDynamic(viewClass));
-	((Element *)view)->model = model;
-	((Element *)view)->config = viewXml;
-	Element * viewAsElement = &view->base.base;
 
-	//function members
-	FOREACH_ELEMENT_FUNCTION(((Element *)view)->,view, GENERATE_ASSIGN_METHOD)
-	FOREACH_UPDATER_FUNCTION(((Updater *)view)->,view, GENERATE_ASSIGN_METHOD)
-	FOREACH_VIEW_FUNCTION	(view->, 		view, GENERATE_ASSIGN_METHOD)
-	
-	//parent-child chain
-	if (app) //subviews don't get access to app, see below
-		App_setView(app, view); //must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
-	
-	View * subview;
-	for (ezxml_t subviewXml = ezxml_child(viewXml, "view"); subviewXml; subviewXml = subviewXml->next)
-	{
-		subview = Builder_buildView(NULL, subview, subviewXml, model, modelClass);
-
-		View_addChild(view, subview);
-	}
-	
-	LOGI("modelClass=%s\n", modelClass);
-	//get type names used for reflection in Extension data path drilldown, then build Extensions
-	viewAsElement->modelClassName = modelClass;
-	viewAsElement->ownClassName = viewClass;
-	Builder_buildExtensions(viewXml, &((Element *)view)->extensions, modelClass);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Builder_buildView   \n");
-	#endif// ARC_DEBUG_ONEOFFS
-	
-	return view;
-}
-
-Ctrl * Builder_buildCtrl(App * app, Ctrl * ctrl, ezxml_t ctrlXml, void * model, const char * modelClass)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Builder_buildCtrl...\n");
-	#endif// ARC_DEBUG_ONEOFFS
-	
-	char nameAssembled[STRLEN_MAX];
-	const char * name;
-	const char * ctrlClass = ezxml_attr(ctrlXml, "class");
-	LOGI("ctrlClass=%s\n", ctrlClass);
-	ctrl = Ctrl_construct(ezxml_attr(ctrlXml, "id"), sizeofDynamic(ctrlClass));
-	((Element *)ctrl)->model = model;
-	((Element *)ctrl)->config = ctrlXml;
-	Element * ctrlAsElement = &ctrl->base.base;
-	
-	//drilldown to Ctrl's specific model, if any
-	//TODO factor out into a function that may be used by extensions to do member drilldown
-	
-	const char * modelPathString = ezxml_attr(ctrlXml, "model");
-	int c = 0;
-	const char * modelClassNew;
-	if (modelPathString)
-	{
-		//memberName++; //hack to skip .
-		char * memberName = strtok(modelPathString, "."); //get leftmost token
-		int totaloffset = 0;
-		//LOGI("[%d] memberName=%s on type=%s @ offset=%u\n", c, memberName, modelClass, offset);
-		while (memberName != NULL)
-		{
-			LOGI("size of MWorld       =%u\n", sizeofDynamic("MWorld"));
-			LOGI("size of MWorldOptions=%u\n", sizeofDynamic("MWorldOptions"));
-			LOGI("size of MThing       =%u\n", sizeofDynamic("MThing"));
-			int offset = offsetofDynamic(modelClass, memberName);
-			totaloffset += offset;
-			LOGI("[%d] %s.%s @ offset=%u totaloffset=%u\n", c, modelClass, memberName, offset, totaloffset);
-			
-			//modelClass = typeofMemberDynamic(modelClass, memberName);
-			
-			((Element *)ctrl)->model += offset;
-			
-			
-			//finally, prep for next cycle
-			memberName = strtok(NULL, ".");
-			
-			c++;
-		}
-		//TODO test what happens with multiple .'s, or strip these beforehand
-		//if (c==0) 
-		*((int*)((Element *)ctrl)->model) = atoi(ezxml_attr(ctrlXml, "value"));
-	}
-	
-	FOREACH_ELEMENT_FUNCTION(((Element *)ctrl)->, ctrl, GENERATE_ASSIGN_METHOD)
-	FOREACH_UPDATER_FUNCTION(((Updater *)ctrl)->, ctrl, GENERATE_ASSIGN_METHOD)
-	
-	if (app) //subctrls don't get access to app, see below
-		App_setCtrl(app, ctrl);
-	
-	Ctrl * subctrl;
-	for (ezxml_t subctrlXml = ezxml_child(ctrlXml, "ctrl"); subctrlXml; subctrlXml = subctrlXml->next)
-	{
-		subctrl = Builder_buildCtrl(NULL, subctrl, subctrlXml, model, modelClass);
-
-		Ctrl_addChild(ctrl, subctrl);
-	}
-	
-	//get type names used for reflection in Extension data path drilldown, then build Extensions
-	ctrlAsElement->modelClassName = modelClass;
-	ctrlAsElement->ownClassName = ctrlClass;
-	Builder_buildExtensions(ctrlXml, &((Element *)ctrl)->extensions, modelClass);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Builder_buildCtrl   \n");
-	#endif// ARC_DEBUG_ONEOFFS
-	
-	return ctrl;
-}
-
-void Builder_buildExtension(ezxml_t extensionXml, Extensions * extensions)
+void Builder_extension(ezxml_t extensionXml, Extensions * extensions)
 {
 	char * extensionId = ezxml_attr(extensionXml, "id");
 	char * extensionClassName = ezxml_attr(extensionXml, "class");
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Builder_buildExtension... (id=%s class=%s)\n", extensionId, extensionClassName);
+	LOGI("[ARC]    Builder_extension... (id=%s class=%s)\n", extensionId, extensionClassName);
 	#endif// ARC_DEBUG_ONEOFFS
 	
 	Extension * extension = calloc(1, sizeofDynamic(extensionClassName));
@@ -1306,18 +1005,17 @@ void Builder_buildExtension(ezxml_t extensionXml, Extensions * extensions)
 	
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Builder_buildExtension    (id=%s class=%s)\n", extensionId, extensionClassName);
+	LOGI("[ARC] ...Builder_extension    (id=%s class=%s)\n", extensionId, extensionClassName);
 	#endif// ARC_DEBUG_ONEOFFS
 }
 
-void Builder_buildExtensions(ezxml_t xml, Extensions * extensions, const char * modelClass)
+void Builder_extensions(ezxml_t xml, Extensions * extensions)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Builder_buildExtensions...\n");
+	LOGI("[ARC]    Builder_extensions...\n");
 	#endif// ARC_DEBUG_ONEOFFS
 	
 	ezxml_t elementXml, elementXmlCopy;
-	
 	//first count the elements and resize the vec once-off - this prevents issues
 	//with using the kvec's elements as keys into extensions.byId (due to realloc)
 	size_t count = 0;
@@ -1335,7 +1033,6 @@ void Builder_buildExtensions(ezxml_t xml, Extensions * extensions, const char * 
 				++count;
 		}
 	}
-	
 	kv_resize(Extension *, 	extensions->ordered, 	count);
 	kh_resize(StrPtr,   	extensions->byId, 		count);
 	
@@ -1355,7 +1052,7 @@ void Builder_buildExtensions(ezxml_t xml, Extensions * extensions, const char * 
 				elementXmlCopy = elementXml;
 				while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
 				{
-					Builder_buildExtension(elementXmlCopy, extensions);
+					Builder_extension(elementXmlCopy, extensions);
 
 					elementXmlCopy = elementXmlCopy->next;
 				}
@@ -1363,100 +1060,153 @@ void Builder_buildExtensions(ezxml_t xml, Extensions * extensions, const char * 
 		}
 	}
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Builder_buildExtensions   \n");
+	LOGI("[ARC] ...Builder_extensions   \n");
 	#endif// ARC_DEBUG_ONEOFFS
 }
 
-App * Builder_buildApp(ezxml_t appXml)
+View * Builder_view(Node * node, ezxml_t viewXml)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Builder_buildApp...\n");
+	LOGI("[ARC]    Builder_view...\n");
 	#endif// ARC_DEBUG_ONEOFFS
 	
-	ezxml_t modelXml, viewXml, subviewXml, rootctrlXml, ctrlXml;
-	char nameAssembled[STRLEN_MAX];
+	const char * viewClass = ezxml_attr(viewXml, "class");
+	
+	View * view = View_construct(sizeofDynamic(viewClass));
+	view->config = viewXml;
+
+	//function members
 	const char * name;
-	const char * modelClass;
-	const char * ctrlClass;
-	const char * appClass;
+	char nameAssembled[STRLEN_MAX];
+	FOREACH_UPDATER_FUNCTION(view->,view, GENERATE_ASSIGN_METHOD)
+	FOREACH_VIEW_FUNCTION	(view->,view, GENERATE_ASSIGN_METHOD)
 	
-	void * model;
-	View * view;
-	Ctrl * ctrl;
+	//parent-child chain
+	Node_setView(node, view); //must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
 	
-	//app (create)
-	appClass = ezxml_attr(appXml, "class");
-	App * app = App_construct(ezxml_attr(appXml, "id"));
-	Element * appAsElement = &app->base;
+	//get type names used for reflection in Extension data path drilldown, then build Extensions
+	view->ownClassName = viewClass;
+	Builder_extensions(viewXml, &view->extensions);
 	
-	FOREACH_ELEMENT_FUNCTION(app->base., app, GENERATE_ASSIGN_METHOD)
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Builder_view   \n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
+	return view;
+}
+
+Ctrl * Builder_ctrl(Node * node, ezxml_t ctrlXml)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Builder_ctrl...\n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
+	const char * ctrlClass = ezxml_attr(ctrlXml, "class");
+	
+	Ctrl * ctrl = Ctrl_construct(sizeofDynamic(ctrlClass));
+	ctrl->config = ctrlXml;
+	
+	//drilldown to Ctrl's specific model, if any
+	const char * name;
+	char nameAssembled[STRLEN_MAX];
+	FOREACH_UPDATER_FUNCTION(ctrl->, ctrl, GENERATE_ASSIGN_METHOD)
+	
+	//parent-child chain
+	Node_setCtrl(node, ctrl); //must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
+	
+	//get type names used for reflection in Extension data path drilldown, then build Extensions
+	ctrl->ownClassName = ctrlClass;
+	Builder_extensions(ctrlXml, &ctrl->extensions);
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Builder_ctrl   \n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
+	return ctrl;
+}
+
+/// Build the config-specified contents into an already-constructed node.
+Node * Builder_nodeContents(Node * const node, Node * const parentNode, ezxml_t nodeXml)
+{
+	const char * id = ezxml_attr(nodeXml, "id");
+	if (id)
+		strcpy(node->id, id);
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Builder_nodeContents... (id=%s)\n", id);
+	#endif// ARC_DEBUG_ONEOFFS
+	
+	node->config 		= nodeXml;
 
 	//model
-	modelXml = ezxml_child(appXml, "model");
-	modelClass = ezxml_attr(modelXml, "class");
-	model = calloc(1, sizeofDynamic(modelClass));
-	((Element *)app)->model 		= model;
-	((Element *)app)->config 		= appXml;
-	
-	//views
-	viewXml = ezxml_child(appXml, "view");
-	view = Builder_buildView(app, view, viewXml, model, modelClass);
-	
-	//ctrl
-	ctrlXml = ezxml_child(appXml, "ctrl");
-	ctrl = Builder_buildCtrl(app, ctrl, ctrlXml, model, modelClass);
-	
-	//extensions
-	//get type names used for reflection in Extension data path drilldown, then build Extensions
-	appAsElement->modelClassName = modelClass;
-	appAsElement->ownClassName = appClass;
-	Builder_buildExtensions(appXml, &app->base.extensions, modelClass);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Builder_buildApp   \n");
-	#endif// ARC_DEBUG_ONEOFFS
-	
-	return app;
-}
-
-void Builder_buildHub(Hub * hub, ezxml_t hubXml)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Builder_buildHub...\n");
-	#endif// ARC_DEBUG_ONEOFFS
-	
-	char nameAssembled[STRLEN_MAX];
-	const char * name;
-	const char * hubClass = "Hub";
-	
-	//TODO set global model
-	((Element *)hub)->config 		= hubXml;
-	
-	FOREACH_ELEMENT_FUNCTION(hub->base., hub, GENERATE_ASSIGN_METHOD)
-	LOGI("[ARC]    Builder_buildHub...\n");
-
-	ezxml_t appsXml = ezxml_child(hubXml, "apps");	
-	for (ezxml_t appXml = ezxml_child(appsXml, "app"); appXml; appXml = appXml->next)
+	ezxml_t modelXml = ezxml_child(nodeXml, "model");
+	if (modelXml)
 	{
-		App * app = Builder_buildApp(appXml);
-		Hub_addApp(hub, app);
+		LOGI("A modelXml=%p\n", modelXml);
+		const char * modelClass = ezxml_attr(modelXml, "class");
+		LOGI("A modelClass=%s\n", modelClass);
+		node->model = calloc(1, sizeofDynamic(modelClass));
+		node->modelClassName = modelClass;
+	}
+	if (!node->model && parentNode)
+	{
+		node->model = parentNode->model;
+		node->modelClassName = parentNode->modelClassName;
+	}
+	//view
+	ezxml_t viewXml = ezxml_child(nodeXml, "view");
+	if (viewXml)
+	{
+		View * view = Builder_view(node, viewXml);
+		//Node_setView(node, view);
+	}
+
+	//ctrl
+	ezxml_t ctrlXml = ezxml_child(nodeXml, "ctrl");
+	if (ctrlXml)
+	{
+		Ctrl * ctrl = Builder_ctrl(node, ctrlXml);
+		//Node_setCtrl(node, ctrl);
+	}
+
+	ezxml_t nodesXml = ezxml_child(nodeXml, "nodes");
+	for (ezxml_t childNodeXml = ezxml_child(nodesXml, "node"); childNodeXml; childNodeXml = childNodeXml->next)
+	{
+		const char * childId = ezxml_attr(childNodeXml, "id");
+		Node * childNode = Node_construct(childId);
+		childNode = Builder_nodeContents(childNode, node, childNodeXml);
+		
+		Node_add(node, childNode);
+		
+		//TODO - to prevent having to pass (parent) node into this function
+		//(read initial node from config - to be contained therein)
+		//childNode = Builder_nodeContents(childNodeXml)
+		//if (!childNode->model)
+		//	childNode->model = node->model;
+		//Builder_extensions(ctrlXml, &childNode->ctrl->extensions);
+		//Builder_extensions(viewXml, &childNode->view->extensions);
 	}
 	
-	Builder_buildExtensions(hubXml, &hub->base.extensions, NULL);
-	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Builder_buildHub   \n");
+	LOGI("[ARC] ...Builder_nodeContents   (id=%s)\n", id);
 	#endif// ARC_DEBUG_ONEOFFS
+	
+	return node;
 }
 
-void Builder_buildFromConfig(Hub * const hub, const char * configFilename)
+void Builder_nodesByFilename(Node * const rootNode, const char * configFilename)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC]    Builder_buildFromConfig...\n");
 	#endif// ARC_DEBUG_ONEOFFS
 	
-	ezxml_t hubXml = ezxml_parse_file(configFilename);
-	Builder_buildHub(hub, hubXml);
+	ezxml_t nodesXml = ezxml_parse_file(configFilename);
+	for (ezxml_t nodeXml = ezxml_child(nodesXml, "node"); nodeXml; nodeXml = nodeXml->next)
+	{
+		const char * id = ezxml_attr(nodeXml, "id");
+		Node * node = Node_construct(id);
+		Node_add(rootNode, Builder_nodeContents(node, NULL, nodeXml));
+	}
 	//ezxml_free(hubXml);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
