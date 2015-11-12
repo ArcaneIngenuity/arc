@@ -65,79 +65,6 @@ struct Extensions;
 struct Updater;
 struct Node;
 
-typedef struct Widget;
-
-/// Represents a piece of a control - either moving/changing or static
-typedef struct WidgetPart
-{
-	//texture details
-	//handle/origin/centre
-	
-	
-	float handle[3]; ///< The point from which this object is handled - offset for position and scale centre -  in user-defined units.
-	float dimensions[3]; ///< Dimensions of this View in user-defined units.
-	float position[3]; ///< Position of this View in user-defined units.
-	float orientation[3]; ///< Orientation of this View in user-defined units.
-	float scale[3]; ///< Scale of this View in user-defined units.
-	
-	//TODO should be an enum - visible, grayed, invisible (but for now we use view visibility to control widget visibility)
-	bool locked; ///"grayed out" / unusable part
-	
-	//restrict motion L/R/U/D relative to start
-	
-	//motion increment x / y if applicable
-	
-	//click action (visual) - read position of click and act accordingly
-	//drag action (visual) - read positions of down, drag, and up
-	//bool dragging;
-	void (*update)(struct View * const this); ///< \brief Update this part.
-	
-	//use this to retrieve the resource (texture, vector, whatever) that is associated with this part
-	const char * resourceId;
-	
-	//struct Widget * owner;
-	void * owner;
-} WidgetPart;
-
-//static const int Str_WidgetPart = 1001;
-//KHASH_DECLARE(Str_WidgetPart, kh_cstr_t, WidgetPart)
-//typedef khash_t(Str_WidgetPart) WidgetPartMap;
-
-/// A Widget is a control used within a View. It renders all WidgetParts in the correct order, and according to locked status.
-
-typedef struct Widget
-{
-	//VOrb base;
-	
-	//WidgetPartMap partsById; ///this allows this to render all subparts without knowing anything specific about them - even when disabled
-	kvec_t(struct WidgetPart) parts;
-	
-	float handle[3]; ///< The point from which this object is handled - offset for position and scale centre -  in user-defined units.
-	float dimensions[3]; ///< Dimensions of this View in user-defined units.
-	float position[3]; ///< Position of this View in user-defined units.
-	
-	//TODO turn this into enum on View: enabled/disabled/invisible?
-	bool locked; ///"grayed out" / unusable whole
-	
-	void (*updateInput)(struct Widget * const this); ///< \brief Updates to this widget during Ctrl phase to see if it consumes input.
-	void (*update)(struct Widget * const this); ///< \brief Updates to this widget to be performed before its parts are updated.
-	void (*updatePost)(struct Widget * const this); ///< \brief Updates to this widget to be performed after its parts are updated.
-	void (*updateRender)(struct Widget * const this); ///< Render this widget.
-	
-} Widget;
-
-/// Updates all parts of a control - final.
-void Widget_update(Widget * this);
-
-/// (abstract) Update a given control part.
-void WidgetPart_update(WidgetPart * this);
-
-typedef enum ViewType
-{
-	GROUP,
-	WIDGET
-	
-} ViewType;
 
 /// Describes a method on some object instance (usually a View) that handles a published event. 
 typedef void (*SubHandler)(void * this, void * event);
@@ -216,14 +143,14 @@ typedef struct Updater
 	
 	struct Node * node; ///< Node associated with this Updater (could be up the chain of this type, Ctrl or View).
 	
-	void (*initialise)(struct Updater * const this); ///< \brief Do this when owner Node initialise()s.
-	void (*dispose)(struct Updater * const this); ///< \brief Do this when owner Node dispose()s of its resources.
-	void (*suspend)(struct Updater * const this); ///< \brief Do this when owner Node must suspend() due to a loss of rendering context.
-	void (*resume)(struct Updater * const this); ///< \brief Do this when owner Node must resume() due to regaining rendering context.
-	void (*start)(struct Updater * const this); ///< \brief Do this when owner Node start()s.
-	void (*stop)(struct Updater * const this); ///< \brief Do this when owner Node stop()s.
-	void (*update)(struct Updater * const this); ///< \brief Do this when owner Node update()s, updates this before its children (on way down the tree).
-	void (*updatePost)(struct Updater * const this); ///< \brief Do this when owner Node updatePost()s, updates this after its children (on way up the tree).
+	void (*initialise)	(struct Updater * const this); ///< \brief Do this when owner Node initialise()s.
+	void (*dispose)		(struct Updater * const this); ///< \brief Do this when owner Node dispose()s of its resources.
+	void (*suspend)		(struct Updater * const this); ///< \brief Do this when owner Node must suspend() due to a loss of rendering context.
+	void (*resume)		(struct Updater * const this); ///< \brief Do this when owner Node must resume() due to regaining rendering context.
+	void (*start)		(struct Updater * const this); ///< \brief Do this when owner Node start()s.
+	void (*stop)		(struct Updater * const this); ///< \brief Do this when owner Node stop()s.
+	void (*update)		(struct Updater * const this); ///< \brief Do this when owner Node update()s, updates this before its children (on way down the tree).
+	void (*updatePost)	(struct Updater * const this); ///< \brief Do this when owner Node updatePost()s, updates this after its children (on way up the tree).
 } Updater;
 
 typedef enum UpdaterTypes
@@ -236,14 +163,6 @@ typedef enum UpdaterTypes
 
 typedef void (*UpdaterFunction)(struct Updater * const this);
 
-/// Abstract class, extend to handle specific game / business / simulation logic within the containing Node by reading/rendering model.
-typedef struct View
-{
-	struct Updater;
-
-	void (*onParentResize)(struct View * const this); ///< \brief User-supplied callback for when this View's parent is resized. Root View resize is handled by some external (platform-specific) callback.
-} View;
-
 /// Abstract class, extend to handle specific game / business / simulation logic within the containing Node by reading/writing part of the model.
 typedef struct Ctrl
 {
@@ -251,6 +170,47 @@ typedef struct Ctrl
 	
 	khash_t(StrPtr) * pubsByName;
 } Ctrl;
+
+struct WidgetPart;
+//static const int Str_WidgetPart = 1001;
+//KHASH_DECLARE(Str_WidgetPart, kh_cstr_t, WidgetPart)
+//typedef khash_t(Str_WidgetPart) WidgetPartMap;
+
+/// Abstract class, extend to handle specific game / business / simulation logic within the containing Node by reading/rendering model.
+typedef struct View
+{
+	struct Updater;
+
+	void (*onParentResize)(struct View * const this); ///< \brief User-supplied callback for when this View's parent is resized. Root View resize is handled by some external (platform-specific) callback.
+	
+	void * spatial; ///> contains any spatial information specified by the user.
+	
+} View;
+
+struct WidgetPart;
+
+typedef struct Widget
+{
+	struct View;
+	
+	kvec_t(struct WidgetPart) parts; ///< WidgetPart %s in order of display.
+	
+	bool locked; ///> "grayed out" / unusable whole
+	
+} Widget;
+
+typedef struct WidgetPart
+{
+	void * spatial; ///> contains any spatial information specified by the user.
+	
+	char * resourceId; ///> ID used to retrieve the resource (texture, vector, whatever) that is associated with this part
+
+	bool locked; ///> "grayed out" / unusable part
+	
+} WidgetPart;
+
+/// (abstract) Update a given control part.
+void WidgetPart_update(WidgetPart * this);
 
 
 /// The basis for an App's structure; nodes create a tree.

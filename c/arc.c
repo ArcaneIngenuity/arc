@@ -195,15 +195,15 @@ void Updater_resolveDataPath(void ** dataPtr, const char * dataClass, const char
 		
 		//void * address = data; //initial - start with the element itself
 		//TODO the above only if we don't have a member name before first sep
-		LOGI("-data=%p\n", data);
+		//LOGI("-data=%p\n", data);
 		//we now have the full list of symbols - get final result
 		DataPathElement elementLast;
 		bool reference = false;
 		for (int i = 0; i < kv_size(elements); ++i)
 		{
 			element = kv_A(elements, i);
-			LOGI("symbol=%d\n", element.symbol);
-			LOGI("class=%s member=%s\n", dataClass, element.memberName);
+			//LOGI("symbol=%d\n", element.symbol);
+			//LOGI("class=%s member=%s\n", dataClass, element.memberName);
 
 			switch (element.symbol)
 			{
@@ -211,12 +211,12 @@ void Updater_resolveDataPath(void ** dataPtr, const char * dataClass, const char
 					reference = true;
 					break;
 				case Member:
-					LOGI("member: %s\n", element.memberName);
+					//LOGI("member: %s\n", element.memberName);
 					
 					if (elementLast.symbol == Offset)
 					{
 						size_t offset = offsetofDynamic(dataClass, element.memberName);
-						LOGI("offset to member=%u\n", offset);
+						//LOGI("offset to member=%u\n", offset);
 						data += offset;
 					}
 					else if (elementLast.symbol == Deref)
@@ -228,9 +228,9 @@ void Updater_resolveDataPath(void ** dataPtr, const char * dataClass, const char
 						//work with individual bytes in the absence of compile-time types
 						char * ptr = (char*)data; 
 						ptr += offset;
-						LOGI("member size of=%u / offset to=%u\n", size, offset);
-						LOGI("deref to member of type %s\n", memberClass);
-						LOGI("ptr+offset=%p\n", ptr);
+						//LOGI("member size of=%u / offset to=%u\n", size, offset);
+						//LOGI("deref to member of type %s\n", memberClass);
+						//LOGI("ptr+offset=%p\n", ptr);
 						char buffer[size];
 						memcpy(buffer, ptr, size);
 						data = ptr;
@@ -278,7 +278,7 @@ void Updater_initialise(Updater * const updater)
 		LOGI("[ARC]    Processing Extension during initialisation...\n");
 		Extension_initialise(extension);
 	}
-	LOGI("?=%p\n", updater->initialise);
+	
 	//initialise element
 	updater->initialise(updater);
 	updater->initialised = true;
@@ -683,7 +683,18 @@ void Node_update(Node * node)//, UpdaterTypes type, bool recurse)
 	//if (type & VIEW)
 	//{
 		if (node->view)
+		{
+			/*
+			for (int i = 0; i < kv_size(node->view->children); ++i)
+			{
+				WidgetPart * part = node->view->parts.a[0];
+				part->update(part);
+			}
+			*/
+			
 			Updater_update(node->view);
+			
+		}
 	//}
 	
 	//children
@@ -778,7 +789,6 @@ Node * Node_add(Node * const this, Node * const child)
 	#endif
 	
 	kv_push(Node *, this->children, child);
-	LOGI("num children?=%d\n", kv_size(this->children));
 	Node_claimAncestry(this, child);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -923,29 +933,6 @@ void View_listen(View * const this)
 }
 
 
-//-------- Widget/Part -------//
-
-void Widget_update(Widget * this)
-{
-	if (this->update)
-		this->update(this);
-	
-	for (int i = 0; i < kv_size(this->parts); ++i)
-	{
-		WidgetPart * part = &kv_A(this->parts, i);
-		
-		if (part->update)
-			part->update(part);
-	}
-	
-	if (this->updatePost)
-		this->updatePost(this);
-	
-	if (this->updateRender)
-		this->updateRender(this);
-}
-
-
 //-------- Builder -------//
 
 typedef void * (*BuildFunction) (ezxml_t xml);
@@ -1021,41 +1008,23 @@ void Builder_extensions(ezxml_t xml, Extensions * extensions)
 	size_t count = 0;
 	for (elementXml = ezxml_child_any(xml); elementXml; elementXml = elementXml->ordered) //run through distinct child element names
 	{
-		bool allowCustomElementsAsExtensions = false; //DEV -get from <hub> as an arg (or pass hub as arg)
-		
-		if (allowCustomElementsAsExtensions)
-		{
-			//TODO similar to below block, but using a custom element name as extension class name
-		}
-		else //do not allow custom elements - fallback to seeking standard <extension> elements
-		{
-			if (strcmp(ezxml_name(elementXml), "extension") == 0) 
-				++count;
-		}
+		if (strcmp(ezxml_name(elementXml), "extension") == 0) 
+			++count;
 	}
 	kv_resize(Extension *, 	extensions->ordered, 	count);
 	kh_resize(StrPtr,   	extensions->byId, 		count);
-	
+
 	//TODO find custom elements and build them using their name as a key into a map provided for each element type
 	for (elementXml = ezxml_child_any(xml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
 	{
-		bool allowCustomElementsAsExtensions = false; //DEV -get from <hub> as an arg (or pass hub as arg)
-		
-		if (allowCustomElementsAsExtensions)
+		if (strcmp(ezxml_name(elementXml), "extension") == 0) 
 		{
-			//TODO similar to below block, but using a custom element name as extension class name
-		}
-		else //do not allow custom elements - fallback to seeking standard <extension> elements
-		{
-			if (strcmp(ezxml_name(elementXml), "extension") == 0) 
+			elementXmlCopy = elementXml;
+			while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
 			{
-				elementXmlCopy = elementXml;
-				while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
-				{
-					Builder_extension(elementXmlCopy, extensions);
+				Builder_extension(elementXmlCopy, extensions);
 
-					elementXmlCopy = elementXmlCopy->next;
-				}
+				elementXmlCopy = elementXmlCopy->next;
 			}
 		}
 	}
@@ -1072,7 +1041,10 @@ View * Builder_view(Node * node, ezxml_t viewXml)
 	
 	const char * viewClass = ezxml_attr(viewXml, "class");
 	
-	View * view = View_construct(sizeofDynamic(viewClass));
+	size_t size = sizeofDynamic(viewClass);
+	if (!size)
+		exit(EXIT_FAILURE); //error message already output via sizeofDynamic()
+	View * view = View_construct(size);
 	view->config = viewXml;
 
 	//function members
@@ -1103,7 +1075,10 @@ Ctrl * Builder_ctrl(Node * node, ezxml_t ctrlXml)
 	
 	const char * ctrlClass = ezxml_attr(ctrlXml, "class");
 	
-	Ctrl * ctrl = Ctrl_construct(sizeofDynamic(ctrlClass));
+	size_t size = sizeofDynamic(ctrlClass);
+	if (!size)
+		exit(EXIT_FAILURE); //error message already output via sizeofDynamic()
+	Ctrl * ctrl = Ctrl_construct(size);
 	ctrl->config = ctrlXml;
 	
 	//drilldown to Ctrl's specific model, if any
