@@ -1058,7 +1058,7 @@ View * Builder_view(Node * node, ezxml_t viewXml)
 	
 	//get type names used for reflection in UpdaterComponent data path drilldown, then build UpdaterComponents
 	view->ownClassName = viewClass;
-	Builder_components(viewXml, &view->components);
+	Builder_components(ezxml_child(viewXml, "components"), &view->components);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_view   \n");
@@ -1091,7 +1091,7 @@ Ctrl * Builder_ctrl(Node * node, ezxml_t ctrlXml)
 	
 	//get type names used for reflection in UpdaterComponent data path drilldown, then build UpdaterComponents
 	ctrl->ownClassName = ctrlClass;
-	Builder_components(ctrlXml, &ctrl->components);
+	Builder_components(ezxml_child(ctrlXml, "components"), &ctrl->components);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_ctrl   \n");
