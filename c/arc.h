@@ -171,11 +171,6 @@ typedef struct Ctrl
 	khash_t(StrPtr) * pubsByName;
 } Ctrl;
 
-struct WidgetPart;
-//static const int Str_WidgetPart = 1001;
-//KHASH_DECLARE(Str_WidgetPart, kh_cstr_t, WidgetPart)
-//typedef khash_t(Str_WidgetPart) WidgetPartMap;
-
 /// Abstract class, extend to handle specific game / business / simulation logic within the containing Node by reading/rendering model.
 typedef struct View
 {
@@ -183,35 +178,9 @@ typedef struct View
 
 	void (*onParentResize)(struct View * const this); ///< \brief User-supplied callback for when this View's parent is resized. Root View resize is handled by some external (platform-specific) callback.
 	
-	void * spatial; ///> contains any spatial information specified by the user.
+	//void * spatial; ///> contains any spatial information specified by the user.
 	
 } View;
-
-struct WidgetPart;
-
-typedef struct Widget
-{
-	struct View;
-	
-	kvec_t(struct WidgetPart) parts; ///< WidgetPart %s in order of display.
-	
-	bool locked; ///> "grayed out" / unusable whole
-	
-} Widget;
-
-typedef struct WidgetPart
-{
-	void * spatial; ///> contains any spatial information specified by the user.
-	
-	char * resourceId; ///> ID used to retrieve the resource (texture, vector, whatever) that is associated with this part
-
-	bool locked; ///> "grayed out" / unusable part
-	
-} WidgetPart;
-
-/// (abstract) Update a given control part.
-void WidgetPart_update(WidgetPart * this);
-
 
 /// The basis for an App's structure; nodes create a tree.
 typedef struct Node
