@@ -2,6 +2,8 @@
 
 **Clone this repository** rather than "Download ZIP" or else you will lack submodule dependencies!
 
+Arc must be compiled using gcc with `-std=c11 -fms-extensions`.
+
 Refer to the [API documentation](http://arcaneingenuity.github.io/arc/).
 
 Arc is a lightweight application framework for realtime apps, games, simulations, and rich user experiences, based on a powerful configuration / [data-driven](https://en.wikipedia.org/wiki/Data-driven_programming), [SOC](https://en.wikipedia.org/wiki/Separation_of_concerns) architecture.
