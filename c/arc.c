@@ -73,32 +73,32 @@ void Sub_scribe(Sub * subPtr, Pub * pubPtr)
 	kv_push(Sub, pubPtr->subsList, *subPtr);	
 }
 
-//---------Extension-----------//
+//---------UpdaterComponent-----------//
 
-void Extension_initialise(Extension * extension)
+void UpdaterComponent_initialise(UpdaterComponent * component)
 {
 	
 	//get parser if available
-	char * extensionClassName = ezxml_attr(extension->config, "class");
+	char * componentClassName = ezxml_attr(component->config, "class");
 	char parserFunctionName[STRLEN_MAX];
-	strcpy(parserFunctionName, extensionClassName);
+	strcpy(parserFunctionName, componentClassName);
 	strcat(parserFunctionName, "_fromConfig");
-	LOGI("[ARC]    Extension_initialise() (id=%s)\n", extensionClassName);
+	LOGI("[ARC]    UpdaterComponent_initialise() (id=%s)\n", componentClassName);
 	ParserFunction parser = addressofDynamic(parserFunctionName);
 	
-	Updater * element = extension->group->owner;
+	Updater * element = component->group->owner;
 	
-	if (parser) //if extension constructor is available
+	if (parser) //if component constructor is available
 	{
 		#ifdef ARC_DEBUG_ONEOFFS
-		LOGI("[ARC]    Parser function found: %s :: %s.\n", extensionClassName, parserFunctionName);
+		LOGI("[ARC]    Parser function found: %s :: %s.\n", componentClassName, parserFunctionName);
 		#endif// ARC_DEBUG_ONEOFFS
-		parser(extension);
+		parser(component);
 	}
-	else //cannot construct extension without function
+	else //cannot construct component without function
 	{
 		#ifdef ARC_DEBUG_ONEOFFS
-		LOGI("[ARC]    Parser function  not found: %s :: %s.\n", extensionClassName, parserFunctionName);
+		LOGI("[ARC]    Parser function  not found: %s :: %s.\n", componentClassName, parserFunctionName);
 		#endif// ARC_DEBUG_ONEOFFS
 		exit(EXIT_FAILURE);
 	}
@@ -257,26 +257,26 @@ void Updater_resolveDataPath(void ** dataPtr, const char * dataClass, const char
 
 void Updater_construct(Updater * updater)
 {
-	updater->extensions.byId = kh_init(StrPtr);
-	kv_init(updater->extensions.ordered);
+	updater->components.byId = kh_init(StrPtr);
+	kv_init(updater->components.ordered);
 }
 
-/// Uses the Extensions created by Builder, at initialise time.
+/// Uses the UpdaterComponents created by Builder, at initialise time.
 void Updater_initialise(Updater * const updater)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC]    Updater_initialise...\n");
 	#endif
 	
-	Extensions * extensions = &updater->extensions;
-	extensions->owner = updater;
+	UpdaterComponents * components = &updater->components;
+	components->owner = updater;
 	
-	//parse all extensions in order of declaration
-	for (int i = 0; i < kv_size(extensions->ordered); ++i)
+	//parse all components in order of declaration
+	for (int i = 0; i < kv_size(components->ordered); ++i)
 	{
-		Extension * extension = kv_A(extensions->ordered, i);
-		LOGI("[ARC]    Processing Extension during initialisation...\n");
-		Extension_initialise(extension);
+		UpdaterComponent * component = kv_A(components->ordered, i);
+		LOGI("[ARC]    Processing UpdaterComponent during initialisation...\n");
+		UpdaterComponent_initialise(component);
 	}
 	
 	//initialise element
@@ -966,70 +966,70 @@ typedef void * (*BuildFunction) (ezxml_t xml);
 		LOGI("[ARC]    Using default function: doNothing.\n"); \
 	}
 
-void Builder_extension(ezxml_t extensionXml, Extensions * extensions)
+void Builder_component(ezxml_t componentXml, UpdaterComponents * components)
 {
-	char * extensionId = ezxml_attr(extensionXml, "id");
-	char * extensionClassName = ezxml_attr(extensionXml, "class");
+	char * componentId = ezxml_attr(componentXml, "id");
+	char * componentClassName = ezxml_attr(componentXml, "class");
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Builder_extension... (id=%s class=%s)\n", extensionId, extensionClassName);
+	LOGI("[ARC]    Builder_component... (id=%s class=%s)\n", componentId, componentClassName);
 	#endif// ARC_DEBUG_ONEOFFS
 	
-	Extension * extension = calloc(1, sizeofDynamic(extensionClassName));
-	strncpy(extension->id, extensionId, STRLEN_MAX);
-	extension->config = extensionXml;
-	extension->group = extensions;
-	//TODO this part (attachment) should happen after buildExtension returns a valid Extension *
-	kv_push(Extension, extensions->ordered, extension);
-	kh_set(StrPtr, extensions->byId, extension->id, extension);
+	UpdaterComponent * component = calloc(1, sizeofDynamic(componentClassName));
+	strncpy(component->id, componentId, STRLEN_MAX);
+	component->config = componentXml;
+	component->group = components;
+	//TODO this part (attachment) should happen after buildUpdaterComponent returns a valid UpdaterComponent *
+	kv_push(UpdaterComponent, components->ordered, component);
+	kh_set(StrPtr, components->byId, component->id, component);
 	
-	bool runOnBuild = ezxml_attr(extensionXml, "runOnBuild"); //don't need ="something", just need "runOnBuild"
+	bool runOnBuild = ezxml_attr(componentXml, "runOnBuild"); //don't need ="something", just need "runOnBuild"
 	
 	if (runOnBuild)
 	{
-		LOGI("[ARC]    Processing Extension during build...\n");
-		Extension_initialise(extension);
+		LOGI("[ARC]    Processing UpdaterComponent during build...\n");
+		UpdaterComponent_initialise(component);
 	}
 	
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Builder_extension    (id=%s class=%s)\n", extensionId, extensionClassName);
+	LOGI("[ARC] ...Builder_component    (id=%s class=%s)\n", componentId, componentClassName);
 	#endif// ARC_DEBUG_ONEOFFS
 }
 
-void Builder_extensions(ezxml_t xml, Extensions * extensions)
+void Builder_components(ezxml_t xml, UpdaterComponents * components)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Builder_extensions...\n");
+	LOGI("[ARC]    Builder_components...\n");
 	#endif// ARC_DEBUG_ONEOFFS
 	
 	ezxml_t elementXml, elementXmlCopy;
 	//first count the elements and resize the vec once-off - this prevents issues
-	//with using the kvec's elements as keys into extensions.byId (due to realloc)
+	//with using the kvec's elements as keys into components.byId (due to realloc)
 	size_t count = 0;
 	for (elementXml = ezxml_child_any(xml); elementXml; elementXml = elementXml->ordered) //run through distinct child element names
 	{
-		if (strcmp(ezxml_name(elementXml), "extension") == 0) 
+		if (strcmp(ezxml_name(elementXml), "component") == 0) 
 			++count;
 	}
-	kv_resize(Extension *, 	extensions->ordered, 	count);
-	kh_resize(StrPtr,   	extensions->byId, 		count);
+	kv_resize(UpdaterComponent *, 	components->ordered, 	count);
+	kh_resize(StrPtr,   	components->byId, 		count);
 
 	//TODO find custom elements and build them using their name as a key into a map provided for each element type
 	for (elementXml = ezxml_child_any(xml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
 	{
-		if (strcmp(ezxml_name(elementXml), "extension") == 0) 
+		if (strcmp(ezxml_name(elementXml), "component") == 0) 
 		{
 			elementXmlCopy = elementXml;
 			while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
 			{
-				Builder_extension(elementXmlCopy, extensions);
+				Builder_component(elementXmlCopy, components);
 
 				elementXmlCopy = elementXmlCopy->next;
 			}
 		}
 	}
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Builder_extensions   \n");
+	LOGI("[ARC] ...Builder_components   \n");
 	#endif// ARC_DEBUG_ONEOFFS
 }
 
@@ -1056,9 +1056,9 @@ View * Builder_view(Node * node, ezxml_t viewXml)
 	//parent-child chain
 	Node_setView(node, view); //must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
 	
-	//get type names used for reflection in Extension data path drilldown, then build Extensions
+	//get type names used for reflection in UpdaterComponent data path drilldown, then build UpdaterComponents
 	view->ownClassName = viewClass;
-	Builder_extensions(viewXml, &view->extensions);
+	Builder_components(viewXml, &view->components);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_view   \n");
@@ -1089,9 +1089,9 @@ Ctrl * Builder_ctrl(Node * node, ezxml_t ctrlXml)
 	//parent-child chain
 	Node_setCtrl(node, ctrl); //must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
 	
-	//get type names used for reflection in Extension data path drilldown, then build Extensions
+	//get type names used for reflection in UpdaterComponent data path drilldown, then build UpdaterComponents
 	ctrl->ownClassName = ctrlClass;
-	Builder_extensions(ctrlXml, &ctrl->extensions);
+	Builder_components(ctrlXml, &ctrl->components);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_ctrl   \n");
@@ -1158,8 +1158,8 @@ Node * Builder_nodeContents(Node * const node, Node * const parentNode, ezxml_t 
 		//childNode = Builder_nodeContents(childNodeXml)
 		//if (!childNode->model)
 		//	childNode->model = node->model;
-		//Builder_extensions(ctrlXml, &childNode->ctrl->extensions);
-		//Builder_extensions(viewXml, &childNode->view->extensions);
+		//Builder_components(ctrlXml, &childNode->ctrl->components);
+		//Builder_components(viewXml, &childNode->view->components);
 	}
 	
 	#ifdef ARC_DEBUG_ONEOFFS

@@ -61,7 +61,7 @@ static const int StrPtr = 36;
 KHASH_DECLARE(StrPtr, kh_cstr_t, uintptr_t)
 #endif//KH_DECL_STRPTR
 
-struct Extensions;
+struct UpdaterComponents;
 struct Updater;
 struct Node;
 
@@ -111,22 +111,22 @@ typedef struct DataPathElement
 	struct DataPathElement * next;
 } DataPathElement;
 
-/// Base class for a user-defined extension created from config.
-typedef struct Extension
+/// Base class for a user-defined component created from config.
+typedef struct UpdaterComponent
 {
-	char id[STRLEN_MAX]; ///< ID by which a user extension is retrieved from its owning View, Ctrl, App or Hub's ->extensions.byId.
+	char id[STRLEN_MAX]; ///< ID by which a user component is retrieved from its owning View, Ctrl, App or Hub's ->components.byId.
 	ezxml_t config;
-	struct Extensions * group;
-} Extension;
+	struct UpdaterComponents * group;
+} UpdaterComponent;
 
-/// Collection of Extension-related information.
-typedef struct Extensions
+/// Collection of UpdaterComponent-related information.
+typedef struct UpdaterComponents
 {
-	kvec_t(Extension *) ordered; ///< Extensions included on this instance, in order of declaration in config. (must be list of pointers - each is allocated as a wider user type, see Builder_extension() - so lost of Extension would truncate these).
-	khash_t(StrPtr) * byId; ///< Extensions included on this instance, if using config.
-	//kvec_t(ArcString) ids; ///< Array of fixed-length cstrings used as keys to extensions.byId (required once XML and its source strings are freed).
-	struct Updater * owner; ///< \internal Used to get a reference to the owning element when doing data path drilldown for Extensions. \endinternal
-} Extensions;
+	kvec_t(UpdaterComponent *) ordered; ///< UpdaterComponents included on this instance, in order of declaration in config. (must be list of pointers - each is allocated as a wider user type, see Builder_component() - so lost of UpdaterComponent would truncate these).
+	khash_t(StrPtr) * byId; ///< UpdaterComponents included on this instance, if using config.
+	//kvec_t(ArcString) ids; ///< Array of fixed-length cstrings used as keys to components.byId (required once XML and its source strings are freed).
+	struct Updater * owner; ///< \internal Used to get a reference to the owning element when doing data path drilldown for UpdaterComponents. \endinternal
+} UpdaterComponents;
 
 /// Base class for framework elements with custom update-related functions, i.e. Views and Ctrls.
 typedef struct Updater
@@ -138,8 +138,8 @@ typedef struct Updater
 
 	void * config; ///< Attachment point for config specific to this element, for possible implementation-specific parsing in Element subclasses.
 	
-	Extensions extensions; ///< Extensions owned by this instance, if any.
-	char * ownClassName; ///< \internal String class name of the owning Element's model; accesible to extensions in case of model datapath drilldown. \endinternal
+	UpdaterComponents components; ///< UpdaterComponents owned by this instance, if any.
+	char * ownClassName; ///< \internal String class name of the owning Element's model; accesible to components in case of model datapath drilldown. \endinternal
 	
 	struct Node * node; ///< Node associated with this Updater (could be up the chain of this type, Ctrl or View).
 	
@@ -197,7 +197,7 @@ typedef struct Node
 	//kvec_t(Node *) stopped;
 	//kvec_t(Node *) suspended;
 	
-	char * modelClassName; ///< \internal String class name of the model; accesible to extensions in case of model datapath drilldown. \endinternal
+	char * modelClassName; ///< \internal String class name of the model; accesible to components in case of model datapath drilldown. \endinternal
 	void * model; ///< The model associated with this instance; may depend on \link Configuration \endlink.
 	struct View * view;
 	struct Ctrl * ctrl;
@@ -240,7 +240,7 @@ void 		View_subscribe		(View * this, const char * pubname, SubHandler handler); 
 
 
 void 		Builder_nodesByFilename(Node * const rootNode, const char * configFilename); ///< Build the Hub contents from a config file; path should be relative to executable.
-typedef void * (*ParserFunction)(Extension * extension);
+typedef void * (*ParserFunction)(UpdaterComponent * component);
 void doNothing(void * const this); ///< A null-pattern callback which is the default when no user-defined callback has yet been supplied (prevents null pointer crashes).
 
 #endif //ARC_H
