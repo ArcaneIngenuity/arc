@@ -83,7 +83,7 @@ void UpdaterComponent_initialise(UpdaterComponent * component)
 	char parserFunctionName[STRLEN_MAX];
 	strcpy(parserFunctionName, componentClassName);
 	strcat(parserFunctionName, "_fromConfig");
-	LOGI("[ARC]    UpdaterComponent_initialise() (id=%s)\n", componentClassName);
+	LOGI("[ARC]    UpdaterComponent_initialise() (id=%s class=%s)\n", component->id, componentClassName);
 	ParserFunction parser = addressofDynamic(parserFunctionName);
 	
 	Updater * element = component->group->owner;
@@ -766,20 +766,9 @@ void Node_update(Node * const this)
 
 void Node_claimAncestry(Node * const this, Node * const child)
 {
-	LOGI("@@@@this=%p child=%p\n", this, child);
+	//LOGI("@@@@this=%s child=%s root=%s\n", this->id, child->id, this->root->id);
 	child->parent = this;
-	if (this->root)
-		child->root = this->root;
-	else
-		child->root = this;
-	/*
-	//recurse
-	for (int i = 0; i < kv_size(child->children); ++i)
-	{
-		Node * grandchild = kv_A(child->children, i); //NB! dispose in draw order
-		Node_claimAncestry(child, grandchild);
-	}
-	*/
+	child->root = this->root;
 }
 
 Node * Node_add(Node * const this, Node * const child)
@@ -800,25 +789,24 @@ Node * Node_add(Node * const this, Node * const child)
 
 Node * Node_find(Node * const this, const char * id)
 {
-	LOGI("----");
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC]    Node_find... (id=%s) (descendant id=%s)\n", this->id, id);
 	#endif
 	
 	kvec_t(Node *) candidatesAtNextDepth;
 	kv_init(candidatesAtNextDepth);
-	LOGI("child count=%d\n", kv_size(this->children));
+	//LOGI("child count=%d\n", kv_size(this->children));
 	//search first only amongst children - do not DFS
 	for (int i = 0; i < kv_size(this->children); ++i)
 	{
 		Node * child = kv_A(this->children, i); //NB! dispose in draw order
-		LOGI("child id=%s\n", child->id);
+		//LOGI("child id=%s\n", child->id);
 		if (strcmp(id, child->id) == 0)
 		{
 			#ifdef ARC_DEBUG_ONEOFFS
 			LOGI("[ARC] ...Node_find    (id=%s) (descendant id=%s)\n", this->id, id);
 			#endif
-			
+			//LOGI("HIT!\n");
 			return child;
 		}
 		else
@@ -829,7 +817,8 @@ Node * Node_find(Node * const this, const char * id)
 	for (int i = 0; i < kv_size(candidatesAtNextDepth); ++i)
 	{
 		Node * child = kv_A(candidatesAtNextDepth, i);
-		Node_find(child, id);
+		Node * result = Node_find(child, id);
+		if (result) return result;
 	}
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -1111,6 +1100,7 @@ Node * Builder_nodeContents(Node * const node, Node * const parentNode, ezxml_t 
 	LOGI("[ARC]    Builder_nodeContents... (id=%s)\n", id);
 	#endif// ARC_DEBUG_ONEOFFS
 	
+	node->root = parentNode->root;
 	node->config 		= nodeXml;
 
 	//model
@@ -1169,18 +1159,20 @@ Node * Builder_nodeContents(Node * const node, Node * const parentNode, ezxml_t 
 	return node;
 }
 
-void Builder_nodesByFilename(Node * const rootNode, const char * configFilename)
+void Builder_nodesByFilename(Node * rootNode, const char * configFilename)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC]    Builder_buildFromConfig...\n");
 	#endif// ARC_DEBUG_ONEOFFS
+	
+	rootNode->root = rootNode;
 	
 	ezxml_t nodesXml = ezxml_parse_file(configFilename);
 	for (ezxml_t nodeXml = ezxml_child(nodesXml, "node"); nodeXml; nodeXml = nodeXml->next)
 	{
 		const char * id = ezxml_attr(nodeXml, "id");
 		Node * node = Node_construct(id);
-		Node_add(rootNode, Builder_nodeContents(node, NULL, nodeXml));
+		Node_add(rootNode, Builder_nodeContents(node, rootNode, nodeXml));
 	}
 	//ezxml_free(hubXml);
 	
