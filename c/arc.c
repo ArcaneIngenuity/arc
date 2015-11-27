@@ -275,8 +275,12 @@ void Updater_initialise(Updater * const updater)
 	for (int i = 0; i < kv_size(components->ordered); ++i)
 	{
 		UpdaterComponent * component = kv_A(components->ordered, i);
-		LOGI("[ARC]    Processing UpdaterComponent during initialisation...\n");
-		UpdaterComponent_initialise(component);
+		
+		if (!component->runOnBuild)
+		{
+			LOGI("[ARC]    Processing UpdaterComponent during initialisation...\n");
+			UpdaterComponent_initialise(component);
+		}
 	}
 	
 	//initialise element
@@ -971,9 +975,8 @@ void Builder_component(ezxml_t componentXml, UpdaterComponents * components)
 	kv_push(UpdaterComponent, components->ordered, component);
 	kh_set(StrPtr, components->byId, component->id, component);
 	
-	bool runOnBuild = ezxml_attr(componentXml, "runOnBuild"); //don't need ="something", just need "runOnBuild"
-	
-	if (runOnBuild)
+	component->runOnBuild = ezxml_attr(componentXml, "runOnBuild"); //don't need ="something", just need "runOnBuild"
+	if (component->runOnBuild)
 	{
 		LOGI("[ARC]    Processing UpdaterComponent during build...\n");
 		UpdaterComponent_initialise(component);

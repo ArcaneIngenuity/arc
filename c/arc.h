@@ -117,6 +117,7 @@ typedef struct UpdaterComponent
 	char id[STRLEN_MAX]; ///< ID by which a user component is retrieved from its owning View, Ctrl, App or Hub's ->components.byId.
 	ezxml_t config;
 	struct UpdaterComponents * group;
+	bool runOnBuild;
 } UpdaterComponent;
 
 /// Collection of UpdaterComponent-related information.
@@ -206,6 +207,14 @@ typedef struct Node
 	
 	void * external;
 } Node;
+
+/// Used as the context object when we need to run a Node_*, Updater-related function as a single-arg callback.
+typedef struct NodeUpdaterArgs //can't really contain the names of all six functions that use it!
+{
+	struct Node * this;
+	enum UpdaterTypes types;
+	bool recurse;
+} NodeUpdaterArgs;
 
 //FINAL/BASE METHODS
 Node *		Node_construct		(const char * id);
