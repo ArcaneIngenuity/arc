@@ -538,7 +538,6 @@ void Node_start(Node * const this, UpdaterTypes types, bool recurse)
 		{
 			Ctrl * ctrl = this->ctrl;
 			Updater_start(ctrl); //it is left to Ctrls to start Views
-			LOGI("...CTRL....");
 		}
 	}
 	if (((uint8_t)types) & VIEW)
@@ -547,7 +546,6 @@ void Node_start(Node * const this, UpdaterTypes types, bool recurse)
 		{
 			View * view = this->view;
 			Updater_start(view); //it is left to Ctrls to start Views
-			LOGI("...VIEW....");
 		}
 	}
 	if (recurse)
@@ -832,7 +830,6 @@ Node * Node_find(Node * const this, const char * id)
 	return NULL;
 }
 
-
 //--------- Ctrl ---------//
 
 Ctrl * Ctrl_construct(size_t sizeofSubclass)
@@ -870,6 +867,7 @@ View * View_construct(size_t sizeofSubclass)
 	//as we can't pass in a type, allocate size of the "subclass" - this is fine as "base"
 	View * view = calloc(1, sizeofSubclass);
 	view->onParentResize 	= (void * const)&doNothing;
+	view->hasFocus 			= (void * const)&doNothing;
 	//Updater_setDefaultCallbacks(view);
 	Updater_construct(view);
 	
@@ -925,6 +923,10 @@ void View_listen(View * const this)
 {	
 }
 
+bool View_hasFocus(View * view)
+{
+	return view->hasFocus(view);
+}
 
 //-------- Builder -------//
 
@@ -942,6 +944,7 @@ typedef void * (*BuildFunction) (ezxml_t xml);
 
 #define FOREACH_VIEW_FUNCTION(instance, name, HANDLER) \
 	HANDLER(instance, name, onParentResize) \
+	HANDLER(instance, name, hasFocus)
 
 #define GENERATE_ASSIGN_METHOD(instance, instancename, member) \
 	name = ezxml_attr(instancename##Xml, #member); \
@@ -1186,3 +1189,5 @@ void Builder_nodesByFilename(Node * rootNode, const char * configFilename)
 
 //--------- misc ---------//
 void doNothing(void * const this){/*LOGI("[ARC] doNothing\n");*/}
+bool True(){return true;}
+bool False(){return false;}

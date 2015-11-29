@@ -177,7 +177,8 @@ typedef struct View
 {
 	struct Updater;
 
-	void (*onParentResize)(struct View * const this); ///< \brief User-supplied callback for when this View's parent is resized. Root View resize is handled by some external (platform-specific) callback.
+	void (*onParentResize)	(struct View * const this); ///< \brief User-supplied callback for when this View's parent is resized. Root View resize is handled by some external (platform-specific) callback.
+	bool (*hasFocus)		(struct View * const this); ///< Determine whether or not this View currently has focus.
 	
 	//void * spatial; ///> contains any spatial information specified by the user.
 	
@@ -250,6 +251,10 @@ void 		View_subscribe		(View * this, const char * pubname, SubHandler handler); 
 
 void 		Builder_nodesByFilename(Node * const rootNode, const char * configFilename); ///< Build the Hub contents from a config file; path should be relative to executable.
 typedef void * (*ParserFunction)(UpdaterComponent * component);
+
+//misc
 void doNothing(void * const this); ///< A null-pattern callback which is the default when no user-defined callback has yet been supplied (prevents null pointer crashes).
+bool True();
+bool False();
 
 #endif //ARC_H
