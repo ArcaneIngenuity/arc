@@ -561,6 +561,16 @@ void Node_start(Node * const this, UpdaterTypes types, bool recurse)
 	LOGI("[ARC] ...Node_start    (id=%s)\n", this->id);
 	#endif
 }
+void Node_startCallback(NodeUpdaterArgs * args)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Node_startCallback... (id=%s)\n", args->this->id);
+	#endif
+	Node_start(args->this, args->types, args->recurse);
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Node_startCallback    (id=%s)\n", args->this->id);
+	#endif
+}
 
 void Node_stop(Node * const this, UpdaterTypes types, bool recurse)
 {
@@ -595,6 +605,16 @@ void Node_stop(Node * const this, UpdaterTypes types, bool recurse)
 
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Node_stop    (id=%s)\n", this->id);
+	#endif
+}
+void Node_stopCallback(NodeUpdaterArgs * args)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Node_stopCallback... (id=%s)\n", args->this->id);
+	#endif
+	Node_stop(args->this, args->types, args->recurse);
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Node_stopCallback    (id=%s)\n", args->this->id);
 	#endif
 }
 
@@ -1113,12 +1133,25 @@ Node * Builder_nodeContents(Node * const node, Node * const parentNode, ezxml_t 
 	ezxml_t modelXml = ezxml_child(nodeXml, "model");
 	if (modelXml)
 	{
-		LOGI("A modelXml=%p\n", modelXml);
 		const char * modelClass = ezxml_attr(modelXml, "class");
-		LOGI("A modelClass=%s\n", modelClass);
-		node->model = calloc(1, sizeofDynamic(modelClass));
-		node->modelClassName = modelClass;
+		const char * modelPath = ezxml_attr(modelXml, "path");
+		if (modelClass)
+		{
+			node->model = calloc(1, sizeofDynamic(modelClass));
+			node->modelClassName = modelClass;
+			//TODO - there is no node->modelClassName supplied for path, so children cannot drill down further.
+			//TODO - ok, they can, but they need to assemble the whole string path from all ancestors to model class (root)
+		}
+		else if (modelPath)
+		{
+			if (parentNode)
+			{
+				node->model = parentNode->model;
+				Updater_resolveDataPath(&node->model, parentNode->modelClassName, modelPath);
+			}
+		}
 	}
+	//don't use else here - there are un-elsed statements above so this acts as catchall
 	if (!node->model && parentNode)
 	{
 		node->model = parentNode->model;

@@ -229,6 +229,8 @@ void		Node_initialise		(Node * const node, UpdaterTypes type, bool recurse);
 bool 		Node_isRoot  		(Node * const this); ///< \memberof View Is this the root View? (i.e. attached directly to \link App \endlink)
 Node * 		Node_find			(Node * const this, const char * id); ///< \memberof View Gets a child of this View by its \link id \endlink.
 Node *		Node_add			(Node * const this, Node * const child); ///< \memberof View Adds a child to this View, using its \link id \endlink.
+void 		Node_startCallback	(NodeUpdaterArgs * args);
+void 		Node_stopCallback	(NodeUpdaterArgs * args);
 
 void 		Updater_start		(Updater * const this); ///< \memberof Updater Starts the instance using \link start \endlink.
 void 		Updater_stop		(Updater * const this); ///< \memberof Updater Stops the instance using \link stop \endlink.
