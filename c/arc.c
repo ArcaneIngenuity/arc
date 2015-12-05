@@ -1125,17 +1125,25 @@ Node * Builder_nodeContents(Node * const node, Node * const parentNode, ezxml_t 
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC]    Builder_nodeContents... (id=%s)\n", id);
 	#endif// ARC_DEBUG_ONEOFFS
-	
-	node->root = parentNode->root;
-	node->config 		= nodeXml;
 
+	if (parentNode)
+	{
+		node->root = parentNode->root;
+	}
+	else //this is root
+	{
+		node->root = node;
+	}
+	node->config 		= nodeXml;
+		
 	//model
 	ezxml_t modelXml = ezxml_child(nodeXml, "model");
 	if (modelXml)
 	{
 		const char * modelClass = ezxml_attr(modelXml, "class");
 		const char * modelPath = ezxml_attr(modelXml, "path");
-		if (modelClass)
+		if (modelClass
+			&& !modelPath) //DEV until we can forego specifying class on a sub-<model>
 		{
 			node->model = calloc(1, sizeofDynamic(modelClass));
 			node->modelClassName = modelClass;
@@ -1157,6 +1165,7 @@ Node * Builder_nodeContents(Node * const node, Node * const parentNode, ezxml_t 
 		node->model = parentNode->model;
 		node->modelClassName = parentNode->modelClassName;
 	}
+	
 	//view
 	ezxml_t viewXml = ezxml_child(nodeXml, "view");
 	if (viewXml)
@@ -1164,7 +1173,7 @@ Node * Builder_nodeContents(Node * const node, Node * const parentNode, ezxml_t 
 		View * view = Builder_view(node, viewXml);
 		//Node_setView(node, view);
 	}
-
+	
 	//ctrl
 	ezxml_t ctrlXml = ezxml_child(nodeXml, "ctrl");
 	if (ctrlXml)
@@ -1172,7 +1181,7 @@ Node * Builder_nodeContents(Node * const node, Node * const parentNode, ezxml_t 
 		Ctrl * ctrl = Builder_ctrl(node, ctrlXml);
 		//Node_setCtrl(node, ctrl);
 	}
-
+	
 	ezxml_t nodesXml = ezxml_child(nodeXml, "nodes");
 	for (ezxml_t childNodeXml = ezxml_child(nodesXml, "node"); childNodeXml; childNodeXml = childNodeXml->next)
 	{
@@ -1198,26 +1207,25 @@ Node * Builder_nodeContents(Node * const node, Node * const parentNode, ezxml_t 
 	return node;
 }
 
-void Builder_nodesByFilename(Node * rootNode, const char * configFilename)
+Node * Builder_nodeFromFilename(const char * configFilename)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC]    Builder_buildFromConfig...\n");
 	#endif// ARC_DEBUG_ONEOFFS
 	
-	rootNode->root = rootNode;
+	ezxml_t rootNodeXml = ezxml_parse_file(configFilename);
 	
-	ezxml_t nodesXml = ezxml_parse_file(configFilename);
-	for (ezxml_t nodeXml = ezxml_child(nodesXml, "node"); nodeXml; nodeXml = nodeXml->next)
-	{
-		const char * id = ezxml_attr(nodeXml, "id");
-		Node * node = Node_construct(id);
-		Node_add(rootNode, Builder_nodeContents(node, rootNode, nodeXml));
-	}
+	const char * id = ezxml_attr(rootNodeXml, "id");
+	Node * rootNode = Node_construct(id);
+	Builder_nodeContents(rootNode, NULL, rootNodeXml);
+
 	//ezxml_free(hubXml);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_buildFromConfig   \n");
 	#endif// ARC_DEBUG_ONEOFFS
+	
+	return rootNode;
 }
 
 //--------- misc ---------//

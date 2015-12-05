@@ -251,7 +251,7 @@ void 		View_onParentResize	(View * const this); ///< \memberof View What to do w
 void 		View_subscribe		(View * this, const char * pubname, SubHandler handler); ///< \memberof View Convenience method for subscribing to a Pub(lisher) on this View's associated App.
 
 
-void 		Builder_nodesByFilename(Node * const rootNode, const char * configFilename); ///< Build the Hub contents from a config file; path should be relative to executable.
+Node * 		Builder_nodeFromFilename(const char * configFilename); ///< Build the Hub contents from a config file; path should be relative to executable.
 typedef void * (*ParserFunction)(UpdaterComponent * component);
 
 //misc

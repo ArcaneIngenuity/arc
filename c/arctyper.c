@@ -154,13 +154,11 @@ void seekBaseMembers(ArcType * basetype, khash_t(StrPtr) * memberNames)
 	{
 		for (int h = 0; h < kh_size(basetype->members); ++h)
 		{
+			char * keyMember = basetype->membersAlphabetical[h];
+			ArcMember * member = kh_get_val(StrPtr, basetype->members, keyMember, NULL);
+			kh_set(StrPtr, memberNames, member->name, "a"); //just use it as a set!
 
-			
-	char * keyMember = basetype->membersAlphabetical[h];
-	ArcMember * member = kh_get_val(StrPtr, basetype->members, keyMember, NULL);
-	kh_set(StrPtr, memberNames, member->name, "a"); //just use it as a set!
-
-	printf("??? push member name=%s of type=%s\n", member->name, member->typename);
+			//printf("??? push member name=%s of type=%s\n", member->name, member->typename);
 	
 			//run through base names for this type, and for each base type, add its member names
 			for (int g = 0; g < kv_size(basetype->bases); ++g)
@@ -711,7 +709,7 @@ void extractFunctionsFromHeaders(ArcType * type)
 void readTypeFromXml(ezxml_t xml, ArcType * type)
 {
 	strncpy(type->name, ezxml_attr(xml, "class"), STRLEN_MAX);
-	strncpy(type->filename,  ezxml_attr(xml, "path") ? ezxml_attr(xml, "path") : type->name, STRLEN_MAX);
+	strncpy(type->filename,  ezxml_attr(xml, "filepath") ? ezxml_attr(xml, "filepath") : type->name, STRLEN_MAX);
 	//printf("classname=%s\n", type->name);
 	//printf("filename=%s\n",  type->filename);
 }
@@ -1054,6 +1052,7 @@ void extractMembersFromHeaders(ArcType * type)
 				printf("[ARC] Type %s added.\n", subtype->name);
 				kh_set(StrPtr, types, subtype->name, subtype);
 			
+				extractFunctionsFromHeaders(subtype);
 				extractMembersFromHeaders(subtype);
 			}
 			else
@@ -1078,58 +1077,62 @@ void extractMembersFromHeaders(ArcType * type)
 	//printf("[ARC] Type %s added.\n", type->name);
 }
 
-void extractTypesAndFunctionsFromConfigXML(ezxml_t nodesXml)
+void extractTypesAndFunctionsFromNodeXML(ezxml_t nodeXml)
 {
-	//printf("extractTypesAndFunctionsFromConfigXML\n");
+	printf("extractTypesAndFunctionsFromNodeXML id=%s\n", ezxml_attr(nodeXml, "id"));
 
 	ArcType * type;
-	for (ezxml_t nodeXml = ezxml_child(nodesXml, "node"); nodeXml; nodeXml = nodeXml->next)
-	{	
-		//model
-		ezxml_t modelXml = ezxml_child(nodeXml, "model");
-		if (modelXml)
-		{
-			type = createType();
-			readTypeFromXml(modelXml, type);
-			kh_set(StrPtr, types, type->name, type);
-			printf("[ARC] Type %s added.\n", type->name);
-			extractMembersFromHeaders(type);
-		}
-		
-		//views
-		ezxml_t viewXml = ezxml_child(nodeXml, "view");
-		if (viewXml)
-		{
-			type = createType();
-			readTypeFromXml(viewXml, type);
-			kh_set(StrPtr, types, type->name, type);
-			printf("[ARC] Type %s added.\n", type->name);
-			extractFunctionsFromHeaders(type);
-			extractMembersFromHeaders(type);
-			ezxml_t nodeComponentsXml = ezxml_child(viewXml, "components");
-			if (nodeComponentsXml)
-				extractTypesAndFunctionsFromUpdaterComponentsXML(nodeComponentsXml);
-		}
-		//ctrls
-		ezxml_t ctrlXml = ezxml_child(nodeXml, "ctrl");
-		if (ctrlXml)
-		{
-			type = createType();
-			readTypeFromXml(ctrlXml, type);
-			kh_set(StrPtr, types, type->name, type);
-			printf("[ARC] Type %s added.\n", type->name);
-			extractFunctionsFromHeaders(type);
-			extractMembersFromHeaders(type);
-			ezxml_t nodeComponentsXml = ezxml_child(ctrlXml, "components");
-			if (nodeComponentsXml)
-				extractTypesAndFunctionsFromUpdaterComponentsXML(nodeComponentsXml);
-		}
-		
-		//recurse
-		ezxml_t nodeNodesXml = ezxml_child(nodeXml, "nodes");
-		if (nodeNodesXml)
-			extractTypesAndFunctionsFromConfigXML(nodeNodesXml);
+
+	//model
+	ezxml_t modelXml = ezxml_child(nodeXml, "model");
+	if (modelXml)
+	{
+		//printf("[ARC] Type? %s\n", type->name);
+		type = createType();
+		readTypeFromXml(modelXml, type);
+		kh_set(StrPtr, types, type->name, type);
+		printf("[ARC] Type %s added.\n", type->name);
+		extractFunctionsFromHeaders(type); //sometimes models have functions.
+		extractMembersFromHeaders(type);
 	}
+	
+	//view
+	ezxml_t viewXml = ezxml_child(nodeXml, "view");
+	if (viewXml)
+	{
+		type = createType();
+		readTypeFromXml(viewXml, type);
+		kh_set(StrPtr, types, type->name, type);
+		printf("[ARC] Type %s added.\n", type->name);
+		extractFunctionsFromHeaders(type);
+		extractMembersFromHeaders(type);
+		ezxml_t nodeComponentsXml = ezxml_child(viewXml, "components");
+		if (nodeComponentsXml)
+			extractTypesAndFunctionsFromUpdaterComponentsXML(nodeComponentsXml);
+	}
+	//ctrl
+	ezxml_t ctrlXml = ezxml_child(nodeXml, "ctrl");
+	if (ctrlXml)
+	{
+		type = createType();
+		readTypeFromXml(ctrlXml, type);
+		kh_set(StrPtr, types, type->name, type);
+		printf("[ARC] Type %s added.\n", type->name);
+		extractFunctionsFromHeaders(type);
+		extractMembersFromHeaders(type);
+		ezxml_t nodeComponentsXml = ezxml_child(ctrlXml, "components");
+		if (nodeComponentsXml)
+			extractTypesAndFunctionsFromUpdaterComponentsXML(nodeComponentsXml);
+	}
+		
+	
+	//recurse
+	ezxml_t nodesXml = ezxml_child(nodeXml, "nodes");
+	if (nodesXml)
+		for (ezxml_t nodeXml = ezxml_child(nodesXml, "node"); nodeXml; nodeXml = nodeXml->next)
+		{	
+			extractTypesAndFunctionsFromNodeXML(nodeXml);
+		}
 }
 
 static int cmp(const void *p1, const void *p2){
@@ -1216,7 +1219,7 @@ void main(int argc, char *argv[])
 	types 			= kh_init(StrPtr); //types found in the project (data path resolution needed for these, possibly)
 	typesExternal 	= kh_init(StrPtr); //types found externally  (no data path resolution needed for these)
 	//ArcType * type = createType();
-	extractTypesAndFunctionsFromConfigXML(xml);
+	extractTypesAndFunctionsFromNodeXML(xml);
 	
 	//write the file
 	sortAlphabetical();
