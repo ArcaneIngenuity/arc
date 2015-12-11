@@ -346,28 +346,28 @@ void Updater_stop(Updater * const this)
 void Updater_update(Updater * const this)
 {
 	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC]    Ctrl_update... \n");
+	LOGI("[ARC]    Updater_update... \n");
 	#endif
 	
 	if (this->updating && !this->suspended)
 		this->update(this);//deltaSec
 	
 	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC] ...Ctrl_update    \n");
+	LOGI("[ARC] ...Updater_update    \n");
 	#endif
 }
 
 void Updater_updatePost(Updater * const this)
 {
 	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC]    Ctrl_updatePost... \n");
+	LOGI("[ARC]    Updater_updatePost... \n");
 	#endif
 	
 	if (this->updating && !this->suspended)
 		this->updatePost(this);//deltaSec
 	
 	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC] ...Ctrl_updatePost    \n");
+	LOGI("[ARC] ...Updater_updatePost    \n");
 	#endif
 }
 
@@ -695,7 +695,11 @@ void Node_update(Node * node)//, UpdaterTypes type, bool recurse)
 	#endif
 	
 	Updater * const updater;
-
+	
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC]    Updating Ctrl... \n");
+	#endif
+	
 	//pre
 	//if (type & CTRL)
 	//{
@@ -704,6 +708,9 @@ void Node_update(Node * node)//, UpdaterTypes type, bool recurse)
 	//}
 	//if (type & VIEW)
 	//{
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC]    Updating View... \n");
+	#endif
 		if (node->view)
 		{
 			/*
@@ -719,6 +726,9 @@ void Node_update(Node * node)//, UpdaterTypes type, bool recurse)
 		}
 	//}
 	
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC]    Updating child Nodes of %s... \n", node->id);
+	#endif
 	//children
 	//if (recurse)
 	//{
@@ -732,15 +742,21 @@ void Node_update(Node * node)//, UpdaterTypes type, bool recurse)
 	//post
 	//if (type & CTRL)
 	//{
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC]    Post-Updating Ctrl... \n");
+	#endif
 		if (node->ctrl)
 			Updater_updatePost(node->ctrl);
+
 	//}
 	//if (type & VIEW)
 	//{
+	#ifdef ARC_DEBUG_UPDATES
+	LOGI("[ARC]    PostUpdating View... \n");
+	#endif
 		if (node->view)
 			Updater_updatePost(node->view);
 	//}
-	
 	#ifdef ARC_DEBUG_UPDATES
 	LOGI("[ARC] ...Node_update    (id=%s)\n", node->id);
 	#endif
