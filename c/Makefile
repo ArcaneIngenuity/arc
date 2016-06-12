@@ -63,13 +63,13 @@ endif
 
 #file lists to operate on
 SRCS	 = \
-		 ./arctyper.c \
-		 ./ezxml/ezxml.c
+		 arctyper.c \
+		 ../../ezxml/ezxml.c
 OBJS 	 = $(SRCS:%.c=%.o)
 DEPS     = $(OBJS:%.o=%.d)
 
 #Define flags for compile & link
-CFLAGS = -I. -Wall -Werror -Wmissing-prototypes -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wlogical-op -Wcast-align -Wconversion -Wpedantic -Wfloat-equal -w -O0 -MMD -DEZXML_NOMMAP 
+CFLAGS = -I. -std=c11 -Wall -Werror -Wmissing-prototypes -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wlogical-op -Wcast-align -Wconversion -Wpedantic -Wfloat-equal -w -O0 -MMD -DEZXML_NOMMAP 
 LFLAGS = 
 #-Wl,--verbose
 

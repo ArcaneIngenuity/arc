@@ -24,6 +24,7 @@
 /// \brief arc - a realtime applications framework for native & web
 
 #include "arc.h"
+#include "arctypes.h"
 
 #define ARC_DEBUG_ONEOFFS 1
 //#define ARC_DEBUG_UPDATES 1
@@ -79,14 +80,14 @@ void UpdaterComponent_initialise(UpdaterComponent * component)
 {
 	
 	//get parser if available
-	char * componentClassName = ezxml_attr(component->config, "class");
+	const char * componentClassName = ezxml_attr(component->config, "class");
 	char parserFunctionName[STRLEN_MAX];
 	strcpy(parserFunctionName, componentClassName);
 	strcat(parserFunctionName, "_fromConfig");
 	LOGI("[ARC]    UpdaterComponent_initialise() (id=%s class=%s)\n", component->id, componentClassName);
 	ParserFunction parser = addressofDynamic(parserFunctionName);
 	
-	Updater * element = component->group->owner;
+	//Updater * element = component->group->owner;
 	
 	if (parser) //if component constructor is available
 	{
@@ -109,9 +110,9 @@ void UpdaterComponent_initialise(UpdaterComponent * component)
 void Updater_resolveDataPath(void ** dataPtr, const char * dataClass, const char * dataPathString)
 {
 	void * data = *dataPtr; 
-	int c = 0;
-	int g = 0; //group count
-	const char * dataClassNew;
+	//int c = 0;
+	//int g = 0; //group count
+	//const char * dataClassNew;
 	
 	kvec_t(DataPathElement) elements;
 	kv_init(elements);
@@ -221,7 +222,7 @@ void Updater_resolveDataPath(void ** dataPtr, const char * dataClass, const char
 					}
 					else if (elementLast.symbol == Deref)
 					{
-						char * memberClass = typeofMemberDynamic(dataClass, element.memberName);
+						const char * memberClass = typeofMemberDynamic(dataClass, element.memberName);
 						size_t size = sizeofDynamic(memberClass);
 						size_t offset = offsetofDynamic(dataClass, element.memberName);
 						
@@ -262,7 +263,7 @@ void Updater_construct(Updater * updater)
 }
 
 /// Uses the UpdaterComponents created by Builder, at initialise time.
-void Updater_initialise(Updater * const updater)
+void Updater_initialise(struct Updater * const updater)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC]    Updater_initialise...\n");
@@ -299,13 +300,13 @@ void Updater_setDefaultCallbacks(Updater * const this)
 	LOGI("[ARC]    Updater_setDefaultCallbacks\n");
 	#endif
 	
-	((Updater *)this)->suspend 		= (void * const)&doNothing;
-	((Updater *)this)->resume 		= (void * const)&doNothing;
-	((Updater *)this)->initialise	= (void * const)&doNothing;
-	((Updater *)this)->dispose 		= (void * const)&doNothing;
-	((Updater *)this)->stop 		= (void * const)&doNothing;
-	((Updater *)this)->update 		= (void * const)&doNothing;
-	((Updater *)this)->updatePost	= (void * const)&doNothing;
+	((Updater * const)this)->suspend 	= &Updater_doNothing;
+	((Updater * const)this)->resume 	= &Updater_doNothing;
+	((Updater * const)this)->initialise	= &Updater_doNothing;
+	((Updater * const)this)->dispose 	= &Updater_doNothing;
+	((Updater * const)this)->stop 		= &Updater_doNothing;
+	((Updater * const)this)->update 	= &Updater_doNothing;
+	((Updater * const)this)->updatePost	= &Updater_doNothing;
 }
 
 
@@ -455,9 +456,9 @@ void Node_initialise(Node * const this, UpdaterTypes types, bool recurse)
 {	
 	//init more senior nodes/updaters first (on way down tree)
 	if (this->ctrl)
-		Updater_initialise(this->ctrl);
+		Updater_initialise((Updater *) this->ctrl);
 	if (this->view)
-		Updater_initialise(this->view); //initialises all descendants too
+		Updater_initialise((Updater *) this->view); //initialises all descendants too
 	
 	if (recurse)
 	{
@@ -476,8 +477,8 @@ void Node_destruct(Node * const this, UpdaterTypes types, bool recurse)
 	LOGI("[ARC]    Node_destruct... (id=%s)\n", id);
 	#endif//ARC_DEBUG_ONEOFFS
 	
-	Ctrl * ctrl = this->ctrl;
-	View * view = this->view;
+	//Ctrl * ctrl = this->ctrl;
+	//View * view = this->view;
 		
 	//DFS destruct...
 	if (recurse)
@@ -493,12 +494,12 @@ void Node_destruct(Node * const this, UpdaterTypes types, bool recurse)
 	if (((uint8_t)types) & CTRL)
 	{
 		if (this->ctrl)
-			Updater_destruct(this->ctrl);
+			Updater_destruct((Updater *) this->ctrl);
 	}
 	if (((uint8_t)types) & VIEW)
 	{
 		if (this->view)
-			Updater_destruct(this->view); //initialises all descendants too
+			Updater_destruct((Updater *) this->view); //initialises all descendants too
 	}
 	
 	free(this);
@@ -537,7 +538,7 @@ void Node_start(Node * const this, UpdaterTypes types, bool recurse)
 		if (this->ctrl)
 		{
 			Ctrl * ctrl = this->ctrl;
-			Updater_start(ctrl); //it is left to Ctrls to start Views
+			Updater_start((Updater *) ctrl); //it is left to Ctrls to start Views
 		}
 	}
 	if (((uint8_t)types) & VIEW)
@@ -545,7 +546,7 @@ void Node_start(Node * const this, UpdaterTypes types, bool recurse)
 		if (this->view)
 		{
 			View * view = this->view;
-			Updater_start(view); //it is left to Ctrls to start Views
+			Updater_start((Updater *) view); //it is left to Ctrls to start Views
 		}
 	}
 	if (recurse)
@@ -561,16 +562,7 @@ void Node_start(Node * const this, UpdaterTypes types, bool recurse)
 	LOGI("[ARC] ...Node_start    (id=%s)\n", this->id);
 	#endif
 }
-void Node_startCallback(NodeUpdaterArgs * args)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Node_startCallback... (id=%s)\n", args->this->id);
-	#endif
-	Node_start(args->this, args->types, args->recurse);
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Node_startCallback    (id=%s)\n", args->this->id);
-	#endif
-}
+
 
 void Node_stop(Node * const this, UpdaterTypes types, bool recurse)
 {
@@ -583,7 +575,7 @@ void Node_stop(Node * const this, UpdaterTypes types, bool recurse)
 		if (this->ctrl)
 		{
 			Ctrl * ctrl = this->ctrl;
-			Updater_stop(ctrl);
+			Updater_stop((Updater *) ctrl);
 		}
 	}
 	if (((uint8_t)types) & VIEW)
@@ -591,7 +583,7 @@ void Node_stop(Node * const this, UpdaterTypes types, bool recurse)
 		if (this->view)
 		{
 			View * view = this->view;
-			Updater_stop(view);
+			Updater_stop((Updater *) view);
 		}
 	}
 	if (recurse)
@@ -605,16 +597,6 @@ void Node_stop(Node * const this, UpdaterTypes types, bool recurse)
 
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Node_stop    (id=%s)\n", this->id);
-	#endif
-}
-void Node_stopCallback(NodeUpdaterArgs * args)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Node_stopCallback... (id=%s)\n", args->this->id);
-	#endif
-	Node_stop(args->this, args->types, args->recurse);
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Node_stopCallback    (id=%s)\n", args->this->id);
 	#endif
 }
 
@@ -637,14 +619,14 @@ void Node_suspend(Node * const this, UpdaterTypes types, bool recurse)
 	{
 		if (this->ctrl)
 		{
-			Updater_suspend(this->ctrl);
+			Updater_suspend((Updater *) this->ctrl);
 		}
 	}
 	if (((uint8_t)types) & VIEW)
 	{
 		if (this->view)
 		{
-			Updater_suspend(this->view);
+			Updater_suspend((Updater *) this->view);
 		}
 	}
 
@@ -672,14 +654,14 @@ void Node_resume(Node * const this, UpdaterTypes types, bool recurse)
 	{
 		if (this->ctrl)
 		{
-			Updater_resume(this->ctrl);
+			Updater_resume((Updater *) this->ctrl);
 		}
 	}
 	if (((uint8_t)types) & VIEW)
 	{
 		if (this->view)
 		{
-			Updater_resume(this->view);
+			Updater_resume((Updater *) this->view);
 		}
 	}
 	
@@ -694,7 +676,7 @@ void Node_update(Node * node)//, UpdaterTypes type, bool recurse)
 	LOGI("[ARC]    Node_update... (id=%s)\n", node->id);
 	#endif
 	
-	Updater * const updater;
+	//Updater * const updater;
 	
 	#ifdef ARC_DEBUG_UPDATES
 	LOGI("[ARC]    Updating Ctrl... \n");
@@ -704,7 +686,7 @@ void Node_update(Node * node)//, UpdaterTypes type, bool recurse)
 	//if (type & CTRL)
 	//{
 		if (node->ctrl)
-			Updater_update(node->ctrl);
+			Updater_update((Updater *) node->ctrl);
 	//}
 	//if (type & VIEW)
 	//{
@@ -721,7 +703,7 @@ void Node_update(Node * node)//, UpdaterTypes type, bool recurse)
 			}
 			*/
 			
-			Updater_update(node->view);
+			Updater_update((Updater *) node->view);
 			
 		}
 	//}
@@ -746,7 +728,7 @@ void Node_update(Node * node)//, UpdaterTypes type, bool recurse)
 	LOGI("[ARC]    Post-Updating Ctrl... \n");
 	#endif
 		if (node->ctrl)
-			Updater_updatePost(node->ctrl);
+			Updater_updatePost((Updater *) node->ctrl);
 
 	//}
 	//if (type & VIEW)
@@ -755,7 +737,7 @@ void Node_update(Node * node)//, UpdaterTypes type, bool recurse)
 	LOGI("[ARC]    PostUpdating View... \n");
 	#endif
 		if (node->view)
-			Updater_updatePost(node->view);
+			Updater_updatePost((Updater *) node->view);
 	//}
 	#ifdef ARC_DEBUG_UPDATES
 	LOGI("[ARC] ...Node_update    (id=%s)\n", node->id);
@@ -877,7 +859,7 @@ Ctrl * Ctrl_construct(size_t sizeofSubclass)
 	//as we can't pass in a type, allocate size of the "subclass" - this is fine as "base"
 	Ctrl * ctrl = calloc(1, sizeofSubclass);
 	//Updater_setDefaultCallbacks(ctrl);
-	Updater_construct(ctrl);
+	Updater_construct((Updater *) ctrl);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Ctrl_construct    \n");
@@ -889,7 +871,7 @@ Ctrl * Ctrl_construct(size_t sizeofSubclass)
 void Ctrl_createPub(Ctrl * this, const char * name)
 {
 	Pub * pubPtr = Pub_construct(name);
-	kh_set(StrPtr, this->pubsByName, name, pubPtr);
+	kh_set(StrPtr, this->pubsByName, name, (uintptr_t)pubPtr);
 }
 
 //--------- View ---------//
@@ -902,10 +884,10 @@ View * View_construct(size_t sizeofSubclass)
 	
 	//as we can't pass in a type, allocate size of the "subclass" - this is fine as "base"
 	View * view = calloc(1, sizeofSubclass);
-	view->onParentResize 	= (void * const)&doNothing;
-	view->hasFocus 			= (void * const)&doNothing;
+	view->onParentResize 	= &View_doNothing;
+	view->hasFocus 			= &View_doNothing_return_bool;
 	//Updater_setDefaultCallbacks(view);
-	Updater_construct(view);
+	Updater_construct((Updater *) view);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...View_construct    \n");
@@ -969,20 +951,20 @@ bool View_hasFocus(View * view)
 typedef void * (*BuildFunction) (ezxml_t xml);
 
 #define FOREACH_UPDATER_FUNCTION(instance, name, HANDLER) \
-	HANDLER(instance, name, start) \
-	HANDLER(instance, name, stop) \
-	HANDLER(instance, name, update) \
-	HANDLER(instance, name, updatePost) \
-	HANDLER(instance, name, initialise) \
-	HANDLER(instance, name, dispose) \
-	HANDLER(instance, name, suspend) \
-	HANDLER(instance, name, resume)
+	HANDLER(instance, name, Updater_, start,) \
+	HANDLER(instance, name, Updater_, stop,) \
+	HANDLER(instance, name, Updater_, update,) \
+	HANDLER(instance, name, Updater_, updatePost,) \
+	HANDLER(instance, name, Updater_, initialise,) \
+	HANDLER(instance, name, Updater_, dispose,) \
+	HANDLER(instance, name, Updater_, suspend,) \
+	HANDLER(instance, name, Updater_, resume,)
 
 #define FOREACH_VIEW_FUNCTION(instance, name, HANDLER) \
-	HANDLER(instance, name, onParentResize) \
-	HANDLER(instance, name, hasFocus)
+	HANDLER(instance, name, View_, onParentResize,) \
+	HANDLER(instance, name, View_, hasFocus, _return_bool)
 
-#define GENERATE_ASSIGN_METHOD(instance, instancename, member) \
+#define GENERATE_ASSIGN_METHOD(instance, instancename, type, member, suffix) \
 	name = ezxml_attr(instancename##Xml, #member); \
 	if (name) instance member = addressofDynamic(name); \
 	else \
@@ -994,14 +976,14 @@ typedef void * (*BuildFunction) (ezxml_t xml);
 	} \
 	if (!instance member) \
 	{ \
-		instance member = &doNothing; \
-		LOGI("[ARC]    Using default function: doNothing.\n"); \
+		instance member = & type##doNothing##suffix; \
+		LOGI("[ARC]    Using default function: type##doNothing##suffix.\n"); \
 	}
 
 void Builder_component(ezxml_t componentXml, UpdaterComponents * components)
 {
-	char * componentId = ezxml_attr(componentXml, "id");
-	char * componentClassName = ezxml_attr(componentXml, "class");
+	const char * componentId = ezxml_attr(componentXml, "id");
+	const char * componentClassName = ezxml_attr(componentXml, "class");
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC]    Builder_component... (id=%s class=%s)\n", componentId, componentClassName);
 	#endif// ARC_DEBUG_ONEOFFS
@@ -1011,8 +993,8 @@ void Builder_component(ezxml_t componentXml, UpdaterComponents * components)
 	component->config = componentXml;
 	component->group = components;
 	//TODO this part (attachment) should happen after buildUpdaterComponent returns a valid UpdaterComponent *
-	kv_push(UpdaterComponent, components->ordered, component);
-	kh_set(StrPtr, components->byId, component->id, component);
+	kv_push(UpdaterComponent *, components->ordered, component);
+	kh_set(StrPtr, components->byId, component->id, (uintptr_t)component);
 	
 	component->runOnBuild = ezxml_attr(componentXml, "runOnBuild"); //don't need ="something", just need "runOnBuild"
 	if (component->runOnBuild)
@@ -1081,14 +1063,15 @@ View * Builder_view(Node * node, ezxml_t viewXml)
 	//function members
 	const char * name;
 	char nameAssembled[STRLEN_MAX];
-	FOREACH_UPDATER_FUNCTION(view->,view, GENERATE_ASSIGN_METHOD)
-	FOREACH_VIEW_FUNCTION	(view->,view, GENERATE_ASSIGN_METHOD)
+	
+	FOREACH_UPDATER_FUNCTION(view->,view,GENERATE_ASSIGN_METHOD)
+	FOREACH_VIEW_FUNCTION	(view->,view,GENERATE_ASSIGN_METHOD)
 	
 	//parent-child chain
 	Node_setView(node, view); //must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
 	
 	//get type names used for reflection in UpdaterComponent data path drilldown, then build UpdaterComponents
-	view->ownClassName = viewClass;
+	view->ownClassName = (char *) viewClass;
 	Builder_components(ezxml_child(viewXml, "components"), &view->components);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -1121,7 +1104,7 @@ Ctrl * Builder_ctrl(Node * node, ezxml_t ctrlXml)
 	Node_setCtrl(node, ctrl); //must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
 	
 	//get type names used for reflection in UpdaterComponent data path drilldown, then build UpdaterComponents
-	ctrl->ownClassName = ctrlClass;
+	ctrl->ownClassName = (char *) ctrlClass;
 	Builder_components(ezxml_child(ctrlXml, "components"), &ctrl->components);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -1162,7 +1145,7 @@ Node * Builder_nodeContents(Node * const node, Node * const parentNode, ezxml_t 
 			&& !modelPath) //DEV until we can forego specifying class on a sub-<model>
 		{
 			node->model = calloc(1, sizeofDynamic(modelClass));
-			node->modelClassName = modelClass;
+			node->modelClassName =(char *) modelClass;
 			//TODO - there is no node->modelClassName supplied for path, so children cannot drill down further.
 			//TODO - ok, they can, but they need to assemble the whole string path from all ancestors to model class (root)
 		}
@@ -1186,7 +1169,8 @@ Node * Builder_nodeContents(Node * const node, Node * const parentNode, ezxml_t 
 	ezxml_t viewXml = ezxml_child(nodeXml, "view");
 	if (viewXml)
 	{
-		View * view = Builder_view(node, viewXml);
+		//View * view = 
+			Builder_view(node, viewXml);
 		//Node_setView(node, view);
 	}
 	
@@ -1194,7 +1178,8 @@ Node * Builder_nodeContents(Node * const node, Node * const parentNode, ezxml_t 
 	ezxml_t ctrlXml = ezxml_child(nodeXml, "ctrl");
 	if (ctrlXml)
 	{
-		Ctrl * ctrl = Builder_ctrl(node, ctrlXml);
+		//Ctrl * ctrl = 
+			Builder_ctrl(node, ctrlXml);
 		//Node_setCtrl(node, ctrl);
 	}
 	
@@ -1245,6 +1230,8 @@ Node * Builder_nodeFromFilename(const char * configFilename)
 }
 
 //--------- misc ---------//
-void doNothing(void * const this){/*LOGI("[ARC] doNothing\n");*/}
+void Updater_doNothing(Updater * const this){/*LOGI("[ARC] Updater_doNothing\n");*/}
+void View_doNothing(View * const this){/*LOGI("[ARC] View_doNothing\n");*/}
+bool View_doNothing_return_bool(View * const this){return false;/*LOGI("[ARC] View_doNothing\n");*/}
 bool True(){return true;}
 bool False(){return false;}

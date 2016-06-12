@@ -39,10 +39,10 @@ Source is available [here](https://github.com/ArcaneIngenuity/arc "arc").
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
-#include "klib/kvec.h"
-#include "klib/khash.h"
-#include "ezxml/ezxml.h"
-#include "../log/log.h"
+#include "../../klib/kvec.h"
+#include "../../klib/khash.h"
+#include "../../ezxml/ezxml.h"
+#include "../../log/log.h"
 #include "arctypes.h"
 
 #define STRLEN_MAX 64
@@ -229,8 +229,6 @@ void		Node_initialise		(Node * const node, UpdaterTypes type, bool recurse);
 bool 		Node_isRoot  		(Node * const this); ///< \memberof View Is this the root View? (i.e. attached directly to \link App \endlink)
 Node * 		Node_find			(Node * const this, const char * id); ///< \memberof View Gets a child of this View by its \link id \endlink.
 Node *		Node_add			(Node * const this, Node * const child); ///< \memberof View Adds a child to this View, using its \link id \endlink.
-void 		Node_startCallback	(NodeUpdaterArgs * args);
-void 		Node_stopCallback	(NodeUpdaterArgs * args);
 
 void 		Updater_start		(Updater * const this); ///< \memberof Updater Starts the instance using \link start \endlink.
 void 		Updater_stop		(Updater * const this); ///< \memberof Updater Stops the instance using \link stop \endlink.
@@ -240,6 +238,7 @@ void 		Updater_update		(Updater * const this); ///< \memberof Updater Updates th
 void 		Updater_updatePost	(Updater * const this); ///< \memberof Updater Post-updates the instance using \link updatePost \endlink.
 void 		Updater_suspend		(Updater * const this); ///< \memberof Updater \link suspend \endlink operations due to a loss of rendering context.
 void 		Updater_resume		(Updater * const this); ///< \memberof Updater \link resume \endlink operations due to regaining rendering context.
+void Updater_resolveDataPath(void ** dataPtr, const char * dataClass, const char * dataPathString);
 
 Ctrl * 		Ctrl_construct		(size_t sizeofSubclass); ///< \memberof Ctrl Constructs the Ctrl and sets all callbacks to do nothing.
 void 		Ctrl_destruct		(Ctrl * const this); ///< \memberof Ctrl Disposes of the Ctrl using \link dispose \endlink.
@@ -249,12 +248,15 @@ View * 		View_construct		(size_t sizeofSubclass); ///< \memberof View Constructs
 void 		View_destruct		(View * const this); ///< \memberof View Disposes of the View and its children, depth-first, using \link dispose \endlink.
 void 		View_onParentResize	(View * const this); ///< \memberof View What to do when parent resizes, using \link onParentResize \endlink.
 void 		View_subscribe		(View * this, const char * pubname, SubHandler handler); ///< \memberof View Convenience method for subscribing to a Pub(lisher) on this View's associated App.
-
+bool 		View_hasFocus(View * view);
 
 Node * 		Builder_nodeFromFilename(const char * configFilename); ///< Build the Hub contents from a config file; path should be relative to executable.
 typedef void * (*ParserFunction)(UpdaterComponent * component);
 
 //misc
+void Updater_doNothing(Updater * const this);
+void View_doNothing(View * const this);
+bool View_doNothing_return_bool(View * const this);
 void doNothing(void * const this); ///< A null-pattern callback which is the default when no user-defined callback has yet been supplied (prevents null pointer crashes).
 bool True();
 bool False();

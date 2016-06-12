@@ -28,9 +28,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ezxml/ezxml.h"
-#include "klib/khash.h"
-#include "klib/kvec.h"
+#include "../../ezxml/ezxml.h"
+#include "../../klib/khash.h"
+#include "../../klib/kvec.h"
 // setup khash for key/value types
 // shorthand way to get the key from hashtable or defVal if not found
 #define kh_get_val(kname, hash, key, defVal) ({k=kh_get(kname, hash, key);(k!=kh_end(hash)?kh_val(hash,k):defVal);})
@@ -230,7 +230,7 @@ void implementTypesAndFunctions(FILE * hFile)
 	
 	fprintf(hFile, "\t}\n");
 	fprintf(hFile, "\tprintf(\"[ARC]    Class not found: %%s.\\n\", name);\n");
-	fprintf(hFile, "\treturn NULL;\n");
+	fprintf(hFile, "\treturn 0;\n");
 	fprintf(hFile, "}\n");
 	
 	//addressofDynamic
@@ -342,7 +342,7 @@ void implementTypesAndFunctions(FILE * hFile)
 	fprintf(hFile, "\n");
 	
 	fprintf(hFile, "\tprintf(\"[ARC]    Class / member not found: %%s :: %%s.\\n\", typename, membername);\n");
-	fprintf(hFile, "\treturn NULL;\n");
+	fprintf(hFile, "\treturn 0;\n");
 	fprintf(hFile, "}\n");
 	
 	//typeofMember
@@ -380,7 +380,7 @@ void implementTypesAndFunctions(FILE * hFile)
 			//if (strlen(type->basetypename) > 0)
 				
 				if (j == 0)
-					fprintf(hFile, "\t\t\tchar * result =\t\t\ttypeofMemberDynamic(\"%s\", membername);\n", basetypename);
+					fprintf(hFile, "\t\t\tconst char * result =\t\t\ttypeofMemberDynamic(\"%s\", membername);\n", basetypename);
 				else
 					fprintf(hFile, "\t\t\tif (!result) result =\ttypeofMemberDynamic(\"%s\", membername);\n", basetypename);
 			}
