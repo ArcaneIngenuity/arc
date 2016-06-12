@@ -29,6 +29,8 @@
 #define ARC_DEBUG_ONEOFFS 1
 //#define ARC_DEBUG_UPDATES 1
 //#define ARC_DEBUG_PUBSUB 1
+
+//allow existing khash string key / pointer value defs to be used, else define here
 #ifndef ARC_KHASH_TYPES_OFF
 KHASH_DEFINE(StrPtr, 	kh_cstr_t, uintptr_t, kh_str_hash_func, kh_str_hash_equal, 1)
 #endif//ARC_KHASH_TYPES_OFF
