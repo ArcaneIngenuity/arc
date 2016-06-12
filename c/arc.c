@@ -58,7 +58,7 @@ void Pub_lish(Pub * pubPtr, void * info)
 	#ifdef ARC_DEBUG_PUBSUB
 	LOGI("[ARC]    Pub_lish\n");
 	#endif
-	for (int i = 0; i < kv_size(pubPtr->subsList); ++i)
+	for (uint32_t i = 0; i < kv_size(pubPtr->subsList); ++i)
 	{
 		Sub * subPtr = &kv_A(pubPtr->subsList, i);
 		subPtr->handler(subPtr->instance, info);
@@ -202,7 +202,7 @@ void Updater_resolveDataPath(void ** dataPtr, const char * dataClass, const char
 		//we now have the full list of symbols - get final result
 		DataPathElement elementLast;
 		bool reference = false;
-		for (int i = 0; i < kv_size(elements); ++i)
+		for (uint32_t i = 0; i < kv_size(elements); ++i)
 		{
 			element = kv_A(elements, i);
 			//LOGI("symbol=%d\n", element.symbol);
@@ -275,7 +275,7 @@ void Updater_initialise(struct Updater * const updater)
 	components->owner = updater;
 	
 	//parse all components in order of declaration
-	for (int i = 0; i < kv_size(components->ordered); ++i)
+	for (uint32_t i = 0; i < kv_size(components->ordered); ++i)
 	{
 		UpdaterComponent * component = kv_A(components->ordered, i);
 		
@@ -464,7 +464,7 @@ void Node_initialise(Node * const this, UpdaterTypes types, bool recurse)
 	
 	if (recurse)
 	{
-		for (int i = 0; i < kv_size(this->children); ++i)
+		for (uint32_t i = 0; i < kv_size(this->children); ++i)
 		{
 			Node * nodeChild = kv_A(this->children, i);
 			Node_initialise(nodeChild, types, recurse);
@@ -485,7 +485,7 @@ void Node_destruct(Node * const this, UpdaterTypes types, bool recurse)
 	//DFS destruct...
 	if (recurse)
 	{
-		for (int i = 0; i < kv_size(this->children); ++i)
+		for (uint32_t i = 0; i < kv_size(this->children); ++i)
 		{
 			Node * nodeChild = kv_A(this->children, i);
 			Node_destruct(nodeChild, types, recurse);
@@ -553,7 +553,7 @@ void Node_start(Node * const this, UpdaterTypes types, bool recurse)
 	}
 	if (recurse)
 	{
-		for (int i = 0; i < kv_size(this->children); ++i)
+		for (uint32_t i = 0; i < kv_size(this->children); ++i)
 		{
 			Node * nodeChild = kv_A(this->children, i);
 			Node_start(nodeChild, types, recurse);
@@ -590,7 +590,7 @@ void Node_stop(Node * const this, UpdaterTypes types, bool recurse)
 	}
 	if (recurse)
 	{
-		for (int i = 0; i < kv_size(this->children); ++i)
+		for (uint32_t i = 0; i < kv_size(this->children); ++i)
 		{
 			Node * nodeChild = kv_A(this->children, i);
 			Node_stop(nodeChild, types, recurse);
@@ -610,7 +610,7 @@ void Node_suspend(Node * const this, UpdaterTypes types, bool recurse)
 	
 	if (recurse)
 	{
-		for (int i = 0; i < kv_size(this->children); ++i)
+		for (uint32_t i = 0; i < kv_size(this->children); ++i)
 		{
 			Node * nodeChild = kv_A(this->children, i);
 			Node_suspend(nodeChild, types, recurse);
@@ -645,7 +645,7 @@ void Node_resume(Node * const this, UpdaterTypes types, bool recurse)
 
 	if (recurse)
 	{
-		for (int i = 0; i < kv_size(this->children); ++i)
+		for (uint32_t i = 0; i < kv_size(this->children); ++i)
 		{
 			Node * nodeChild = kv_A(this->children, i);
 			Node_suspend(nodeChild, types, recurse);
@@ -716,7 +716,7 @@ void Node_update(Node * node)//, UpdaterTypes type, bool recurse)
 	//children
 	//if (recurse)
 	//{
-		for (int i = 0; i < kv_size(node->children); ++i)
+		for (uint32_t i = 0; i < kv_size(node->children); ++i)
 		{
 			Node * nodeChild = kv_A(node->children, i);
 			Node_update(nodeChild);//, type, recurse);
@@ -819,7 +819,7 @@ Node * Node_find(Node * const this, const char * id)
 	kv_init(candidatesAtNextDepth);
 	//LOGI("child count=%d\n", kv_size(this->children));
 	//search first only amongst children - do not DFS
-	for (int i = 0; i < kv_size(this->children); ++i)
+	for (uint32_t i = 0; i < kv_size(this->children); ++i)
 	{
 		Node * child = kv_A(this->children, i); //NB! dispose in draw order
 		//LOGI("child id=%s\n", child->id);
@@ -836,7 +836,7 @@ Node * Node_find(Node * const this, const char * id)
 	}
 	
 	//BFS deeper if not found in children of this
-	for (int i = 0; i < kv_size(candidatesAtNextDepth); ++i)
+	for (uint32_t i = 0; i < kv_size(candidatesAtNextDepth); ++i)
 	{
 		Node * child = kv_A(candidatesAtNextDepth, i);
 		Node * result = Node_find(child, id);
@@ -906,7 +906,7 @@ void View_onParentResize(View * const this)
 	
 	this->onParentResize(this);
 	
-	for (int i = 0; i < kv_size(this->node->children); ++i)
+	for (uint32_t i = 0; i < kv_size(this->node->children); ++i)
 	{
 		Node * node = kv_A(this->node->children, i);
 		View * child = node->view; //NB! dispose in draw order
