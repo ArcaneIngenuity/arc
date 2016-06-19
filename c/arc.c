@@ -85,9 +85,9 @@ void UpdaterComponent_initialise(UpdaterComponent * component)
 	const char * componentClassName = ezxml_attr(component->config, "class");
 	char parserFunctionName[STRLEN_MAX];
 	strcpy(parserFunctionName, componentClassName);
-	strcat(parserFunctionName, "_fromConfig");
+	strcat(parserFunctionName, "_configure");
 	LOGI("[ARC]    UpdaterComponent_initialise() (id=%s class=%s)\n", component->id, componentClassName);
-	ParserFunction parser = addressofDynamic(parserFunctionName);
+	ConfigureFunction parser = addressofDynamic(parserFunctionName);
 	
 	//Updater * element = component->group->owner;
 	
@@ -115,7 +115,7 @@ void UpdaterComponent_dispose(UpdaterComponent * component)
 	strcpy(parserFunctionName, componentClassName);
 	strcat(parserFunctionName, "_dispose");
 	LOGI("[ARC]    UpdaterComponent_initialise() (id=%s class=%s)\n", component->id, componentClassName);
-	ParserFunction dispose = addressofDynamic(parserFunctionName);
+	ConfigureFunction dispose = addressofDynamic(parserFunctionName);
 	
 	if (dispose)
 		dispose(component);

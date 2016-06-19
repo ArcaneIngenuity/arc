@@ -243,7 +243,7 @@ void 		Updater_resume		(Updater * const this); ///< \memberof Updater \link resu
 void 		Updater_resolveDataPath(void ** dataPtr, const char * dataClass, const char * dataPathString);
 
 void			UpdaterComponent_dispose(UpdaterComponent * component);
-typedef void * (*ParserFunction)(UpdaterComponent * component);
+typedef void * (*ConfigureFunction)(UpdaterComponent * component);
 
 Ctrl * 		Ctrl_construct		(size_t sizeofSubclass); ///< \memberof Ctrl Constructs the Ctrl and sets all callbacks to do nothing.
 void 		Ctrl_destruct		(Ctrl * const this); ///< \memberof Ctrl Disposes of the Ctrl using \link dispose \endlink.
