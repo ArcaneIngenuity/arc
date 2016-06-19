@@ -128,7 +128,7 @@ typedef struct UpdaterComponents
 	kvec_t(UpdaterComponent *) ordered; ///< UpdaterComponents included on this instance, in order of declaration in config. (must be list of pointers - each is allocated as a wider user type, see Builder_component() - so lost of UpdaterComponent would truncate these).
 	khash_t(StrPtr) * byId; ///< UpdaterComponents included on this instance, if using config.
 	//kvec_t(ArcString) ids; ///< Array of fixed-length cstrings used as keys to components.byId (required once XML and its source strings are freed).
-	struct Updater * owner; ///< \internal Used to get a reference to the owning element when doing data path drilldown for UpdaterComponents. \endinternal
+	struct Updater * updater; ///< \internal Used to get a reference to the owning element when doing data path drilldown for UpdaterComponents. \endinternal
 } UpdaterComponents;
 
 /// Base class for framework elements with custom update-related functions, i.e. Views and Ctrls.

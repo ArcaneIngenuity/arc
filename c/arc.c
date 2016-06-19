@@ -286,7 +286,7 @@ void Updater_initialise(struct Updater * const updater)
 	#endif
 	
 	UpdaterComponents * components = &updater->components;
-	components->owner = updater;
+	components->updater = updater;
 	
 	//parse all components in order of declaration
 	for (uint32_t i = 0; i < kv_size(components->ordered); ++i)
