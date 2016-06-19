@@ -515,6 +515,7 @@ void Node_destruct(Node * const this, UpdaterTypes types, bool recurse)
 		{
 			Node * nodeChild = kv_A(this->children, i);
 			Node_destruct(nodeChild, types, recurse);
+			kv_A(this->children, i) = NULL; //prevent dangling pointer
 		}
 	}
 	
@@ -522,17 +523,23 @@ void Node_destruct(Node * const this, UpdaterTypes types, bool recurse)
 	if (((uint8_t)types) & CTRL)
 	{
 		if (this->ctrl)
+		{
 			Updater_destruct((Updater *) this->ctrl);
+			this->ctrl = NULL; //prevent dangling pointer
+		}
 	}
 	if (((uint8_t)types) & VIEW)
 	{
 		if (this->view)
+		{
 			Updater_destruct((Updater *) this->view); //initialises all descendants too
+			this->view = NULL; //prevent dangling pointer
+		}
 	}
 	
 	kh_destroy(StrPtr, this->childrenById);
 	
-	free(this);
+	free(this); //dangling pointers handled by parent, in recurse loop above.
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Node_destruct    (id=%s)\n", id);
