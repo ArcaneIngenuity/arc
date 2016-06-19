@@ -118,6 +118,8 @@ typedef struct UpdaterComponent
 	ezxml_t config;
 	struct UpdaterComponents * group;
 	bool runOnBuild;
+	
+	void (*dispose)		(struct Updater * const this);
 } UpdaterComponent;
 
 /// Collection of UpdaterComponent-related information.
@@ -218,40 +220,43 @@ typedef struct NodeUpdaterArgs //can't really contain the names of all six funct
 } NodeUpdaterArgs;
 
 //FINAL/BASE METHODS
-Node *		Node_construct		(const char * id);
-void		Node_destruct		(Node * const node, UpdaterTypes type, bool recurse); //TODO should always recurse?
-void		Node_start			(Node * const node, UpdaterTypes type, bool recurse);
-void		Node_stop			(Node * const node, UpdaterTypes type, bool recurse);
-void		Node_update			(Node * const node);//, UpdaterTypes type, bool recurse);
-void		Node_suspend		(Node * const node, UpdaterTypes type, bool recurse); //TODO should always recurse
-void		Node_resume			(Node * const node, UpdaterTypes type, bool recurse); //TODO "
-void		Node_initialise		(Node * const node, UpdaterTypes type, bool recurse);
+Node *	Node_construct		(const char * id);
+void			Node_destruct		(Node * const node, UpdaterTypes type, bool recurse); //TODO should always recurse?
+void			Node_start			(Node * const node, UpdaterTypes type, bool recurse);
+void			Node_stop			(Node * const node, UpdaterTypes type, bool recurse);
+void			Node_update			(Node * const node);//, UpdaterTypes type, bool recurse);
+void			Node_suspend		(Node * const node, UpdaterTypes type, bool recurse); //TODO should always recurse
+void			Node_resume			(Node * const node, UpdaterTypes type, bool recurse); //TODO "
+void			Node_initialise		(Node * const node, UpdaterTypes type, bool recurse);
 bool 		Node_isRoot  		(Node * const this); ///< \memberof View Is this the root View? (i.e. attached directly to \link App \endlink)
-Node * 		Node_find			(Node * const this, const char * id); ///< \memberof View Gets a child of this View by its \link id \endlink.
-Node *		Node_add			(Node * const this, Node * const child); ///< \memberof View Adds a child to this View, using its \link id \endlink.
+Node * 	Node_find			(Node * const this, const char * id); ///< \memberof View Gets a child of this View by its \link id \endlink.
+Node *	Node_add			(Node * const this, Node * const child); ///< \memberof View Adds a child to this View, using its \link id \endlink.
 
 void 		Updater_start		(Updater * const this); ///< \memberof Updater Starts the instance using \link start \endlink.
 void 		Updater_stop		(Updater * const this); ///< \memberof Updater Stops the instance using \link stop \endlink.
-void		Updater_initialise	(Updater * const this); ///< \memberof Updater Initialises the instance using \link initialise \endlink.
-void		Updater_dispose		(Updater * const this); ///< \memberof Updater Disposes of the instance using \link dispose \endlink.
+void			Updater_initialise	(Updater * const this); ///< \memberof Updater Initialises the instance using \link initialise \endlink.
+void			Updater_dispose		(Updater * const this); ///< \memberof Updater Disposes of the instance using \link dispose \endlink.
 void 		Updater_update		(Updater * const this); ///< \memberof Updater Updates the instance using \link update \endlink.
 void 		Updater_updatePost	(Updater * const this); ///< \memberof Updater Post-updates the instance using \link updatePost \endlink.
 void 		Updater_suspend		(Updater * const this); ///< \memberof Updater \link suspend \endlink operations due to a loss of rendering context.
 void 		Updater_resume		(Updater * const this); ///< \memberof Updater \link resume \endlink operations due to regaining rendering context.
-void Updater_resolveDataPath(void ** dataPtr, const char * dataClass, const char * dataPathString);
+void 		Updater_resolveDataPath(void ** dataPtr, const char * dataClass, const char * dataPathString);
+
+void			UpdaterComponent_dispose(UpdaterComponent * component);
+typedef void * (*ParserFunction)(UpdaterComponent * component);
 
 Ctrl * 		Ctrl_construct		(size_t sizeofSubclass); ///< \memberof Ctrl Constructs the Ctrl and sets all callbacks to do nothing.
 void 		Ctrl_destruct		(Ctrl * const this); ///< \memberof Ctrl Disposes of the Ctrl using \link dispose \endlink.
 void 		Ctrl_createPub		(Ctrl * this, const char * name); ///< \memberof Ctrl Convenience method for creating a Pub(lisher) on this Ctrl's associated App.
 
-View * 		View_construct		(size_t sizeofSubclass); ///< \memberof View Constructs the View and sets all callbacks to do nothing.
+View * 	View_construct		(size_t sizeofSubclass); ///< \memberof View Constructs the View and sets all callbacks to do nothing.
 void 		View_destruct		(View * const this); ///< \memberof View Disposes of the View and its children, depth-first, using \link dispose \endlink.
 void 		View_onParentResize	(View * const this); ///< \memberof View What to do when parent resizes, using \link onParentResize \endlink.
 void 		View_subscribe		(View * this, const char * pubname, SubHandler handler); ///< \memberof View Convenience method for subscribing to a Pub(lisher) on this View's associated App.
 bool 		View_hasFocus(View * view);
 
-Node * 		Builder_nodeFromFilename(const char * configFilename); ///< Build the Hub contents from a config file; path should be relative to executable.
-typedef void * (*ParserFunction)(UpdaterComponent * component);
+Node * 	Builder_nodeFromFilename(const char * configFilename); ///< Build the Hub contents from a config file; path should be relative to executable.
+void 		Builder_dispose();
 
 //misc
 void Updater_doNothing(Updater * const this);

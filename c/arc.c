@@ -107,6 +107,20 @@ void UpdaterComponent_initialise(UpdaterComponent * component)
 	}
 }
 
+void UpdaterComponent_dispose(UpdaterComponent * component)
+{
+	//get parser if available
+	const char * componentClassName = ezxml_attr(component->config, "class");
+	char parserFunctionName[STRLEN_MAX];
+	strcpy(parserFunctionName, componentClassName);
+	strcat(parserFunctionName, "_dispose");
+	LOGI("[ARC]    UpdaterComponent_initialise() (id=%s class=%s)\n", component->id, componentClassName);
+	ParserFunction dispose = addressofDynamic(parserFunctionName);
+	
+	if (dispose)
+		dispose(component);
+}
+
 //---------Updater-----------//
 
 void Updater_resolveDataPath(void ** dataPtr, const char * dataClass, const char * dataPathString)
@@ -201,7 +215,7 @@ void Updater_resolveDataPath(void ** dataPtr, const char * dataClass, const char
 		//LOGI("-data=%p\n", data);
 		//we now have the full list of symbols - get final result
 		DataPathElement elementLast;
-		bool reference = false;
+		//bool reference = false;
 		for (uint32_t i = 0; i < kv_size(elements); ++i)
 		{
 			element = kv_A(elements, i);
@@ -211,7 +225,7 @@ void Updater_resolveDataPath(void ** dataPtr, const char * dataClass, const char
 			switch (element.symbol)
 			{
 				case Address:
-					reference = true;
+					//reference = true;
 					break;
 				case Member:
 					//LOGI("member: %s\n", element.memberName);
@@ -254,7 +268,7 @@ void Updater_resolveDataPath(void ** dataPtr, const char * dataClass, const char
 		//if (!reference)
 		//	data = *data;
 	}
-	
+	kv_destroy(elements);
 	*dataPtr = data;
 }
 
@@ -292,6 +306,36 @@ void Updater_initialise(struct Updater * const updater)
 	LOGI("!");
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Updater_initialise\n");
+	#endif
+}
+
+void Updater_destruct(Updater * const this)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Ctrl_destruct... \n");
+	#endif
+	
+	if (this->initialised)
+	{
+		UpdaterComponents * components = &this->components;
+		
+		//delete all components in order of declaration
+		for (uint32_t i = 0; i < kv_size(components->ordered); ++i)
+		{
+			UpdaterComponent * component = kv_A(components->ordered, i);
+			UpdaterComponent_dispose(component);
+		}
+		
+		this->dispose(this);
+		this->initialised = false;
+	}
+	
+	kh_destroy(StrPtr, this->components.byId);
+	
+	free(this);
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Updater_destruct    \n");
 	#endif
 }
 
@@ -408,24 +452,6 @@ void Updater_resume(Updater * const this)
 	#endif
 }
 
-void Updater_destruct(Updater * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Ctrl_destruct... \n");
-	#endif
-	
-	if (this->initialised)
-	{
-		this->dispose(this);
-		this->initialised = false;
-	}
-	free(this);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_destruct    \n");
-	#endif
-}
-
 //--------- Node ---------//
 
 Node * Node_construct(const char * id)
@@ -503,6 +529,8 @@ void Node_destruct(Node * const this, UpdaterTypes types, bool recurse)
 		if (this->view)
 			Updater_destruct((Updater *) this->view); //initialises all descendants too
 	}
+	
+	kh_destroy(StrPtr, this->childrenById);
 	
 	free(this);
 	
@@ -1210,25 +1238,32 @@ Node * Builder_nodeContents(Node * const node, Node * const parentNode, ezxml_t 
 	return node;
 }
 
+static ezxml_t rootNodeXml;
+
 Node * Builder_nodeFromFilename(const char * configFilename)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC]    Builder_buildFromConfig...\n");
 	#endif// ARC_DEBUG_ONEOFFS
 	
-	ezxml_t rootNodeXml = ezxml_parse_file(configFilename);
+	rootNodeXml = ezxml_parse_file(configFilename);
 	
 	const char * id = ezxml_attr(rootNodeXml, "id");
 	Node * rootNode = Node_construct(id);
 	Builder_nodeContents(rootNode, NULL, rootNodeXml);
 
-	//ezxml_free(hubXml);
+	//ezxml_free(rootNodeXml);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Builder_buildFromConfig   \n");
 	#endif// ARC_DEBUG_ONEOFFS
 	
 	return rootNode;
+}
+
+void Builder_dispose()
+{
+	ezxml_free(rootNodeXml);
 }
 
 //--------- misc ---------//
