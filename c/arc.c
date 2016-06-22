@@ -85,7 +85,7 @@ void UpdaterComponent_initialise(UpdaterComponent * component)
 	const char * componentClassName = ezxml_attr(component->config, "class");
 	char parserFunctionName[STRLEN_MAX];
 	strcpy(parserFunctionName, componentClassName);
-	strcat(parserFunctionName, "_fromConfig");
+	strcat(parserFunctionName, "_configure");
 	LOGI("[ARC]    UpdaterComponent_initialise() (id=%s class=%s)\n", component->id, componentClassName);
 	ConfigureFunction parser = addressofDynamic(parserFunctionName);
 	
@@ -469,10 +469,6 @@ Node * Node_construct(const char * id)
 	//#endif//__GNUC__
 	strcpy(node->id, id); //don't rely on pointers to strings that may be deallocated during runtime.
 	node->childrenById = kh_init(StrPtr);
-	kv_init(node->children);
-	//kv_init(node->active);
-	//kv_init(node->stopped);
-	//kv_init(node->suspended);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Node_construct   (id=%s)\n", id);
@@ -491,10 +487,11 @@ void Node_initialise(Node * const this, UpdaterTypes types, bool recurse)
 	
 	if (recurse)
 	{
-		for (uint32_t i = 0; i < kv_size(this->children); ++i)
+		Node * nodeChild = this->childHead;
+		while (nodeChild)
 		{
-			Node * nodeChild = kv_A(this->children, i);
 			Node_initialise(nodeChild, types, recurse);
+			nodeChild = nodeChild->next;
 		}
 	}
 }
@@ -512,11 +509,12 @@ void Node_destruct(Node * const this, UpdaterTypes types, bool recurse)
 	//DFS destruct...
 	if (recurse)
 	{
-		for (uint32_t i = 0; i < kv_size(this->children); ++i)
+		Node * child = this->childHead;
+		while (child)
 		{
-			Node * nodeChild = kv_A(this->children, i);
-			Node_destruct(nodeChild, types, recurse);
-			kv_A(this->children, i) = NULL; //prevent dangling pointer
+			Node_removeChild(this, child); //removes all refs to this by parent or siblings
+			Node_destruct(child, types, recurse);
+			child = child->next;
 		}
 	}
 	
@@ -539,7 +537,6 @@ void Node_destruct(Node * const this, UpdaterTypes types, bool recurse)
 	}
 	
 	kh_destroy(StrPtr, this->childrenById);
-	kv_destroy(this->children);
 	free(this); //dangling pointers handled by parent, in recurse loop above.
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -589,10 +586,11 @@ void Node_start(Node * const this, UpdaterTypes types, bool recurse)
 	}
 	if (recurse)
 	{
-		for (uint32_t i = 0; i < kv_size(this->children); ++i)
+		Node * child = this->childHead;
+		while (child)
 		{
-			Node * nodeChild = kv_A(this->children, i);
-			Node_start(nodeChild, types, recurse);
+			Node_start(child, types, recurse);
+			child = child->next;
 		}
 	}
 
@@ -626,10 +624,11 @@ void Node_stop(Node * const this, UpdaterTypes types, bool recurse)
 	}
 	if (recurse)
 	{
-		for (uint32_t i = 0; i < kv_size(this->children); ++i)
+		Node * child = this->childHead;
+		while (child)
 		{
-			Node * nodeChild = kv_A(this->children, i);
-			Node_stop(nodeChild, types, recurse);
+			Node_stop(child, types, recurse);
+			child = child->next;
 		}
 	}
 
@@ -641,15 +640,16 @@ void Node_stop(Node * const this, UpdaterTypes types, bool recurse)
 void Node_suspend(Node * const this, UpdaterTypes types, bool recurse)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Node_stop... (id=%s)\n", this->id);
+	LOGI("[ARC]    Node_suspend... (id=%s)\n", this->id);
 	#endif
 	
 	if (recurse)
 	{
-		for (uint32_t i = 0; i < kv_size(this->children); ++i)
+		Node * child = this->childHead;
+		while (child)
 		{
-			Node * nodeChild = kv_A(this->children, i);
-			Node_suspend(nodeChild, types, recurse);
+			Node_suspend(child, types, recurse);
+			child = child->next;
 		}
 	}
 	
@@ -669,22 +669,23 @@ void Node_suspend(Node * const this, UpdaterTypes types, bool recurse)
 	}
 
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Node_stop    (id=%s)\n", this->id);
+	LOGI("[ARC] ...Node_suspend    (id=%s)\n", this->id);
 	#endif
 }
 
 void Node_resume(Node * const this, UpdaterTypes types, bool recurse)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Node_stop... (id=%s)\n", this->id);
+	LOGI("[ARC]    Node_resume... (id=%s)\n", this->id);
 	#endif
 
 	if (recurse)
 	{
-		for (uint32_t i = 0; i < kv_size(this->children); ++i)
+		Node * child = this->childHead;
+		while (child)
 		{
-			Node * nodeChild = kv_A(this->children, i);
-			Node_suspend(nodeChild, types, recurse);
+			Node_resume(child, types, recurse);
+			child = child->next;
 		}
 	}
 	
@@ -704,14 +705,14 @@ void Node_resume(Node * const this, UpdaterTypes types, bool recurse)
 	}
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Node_stop    (id=%s)\n", this->id);
+	LOGI("[ARC] ...Node_resume    (id=%s)\n", this->id);
 	#endif
 }
 
-void Node_update(Node * node)//, UpdaterTypes type, bool recurse)
+void Node_update(Node * this)//, UpdaterTypes type, bool recurse)
 {
 	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC]    Node_update... (id=%s)\n", node->id);
+	LOGI("[ARC]    Node_update... (id=%s)\n", this->id);
 	#endif
 	
 	//Updater * const updater;
@@ -723,15 +724,15 @@ void Node_update(Node * node)//, UpdaterTypes type, bool recurse)
 	//pre
 	//if (type & CTRL)
 	//{
-		if (node->ctrl)
-			Updater_update((Updater *) node->ctrl);
+		if (this->ctrl)
+			Updater_update((Updater *) this->ctrl);
 	//}
 	//if (type & VIEW)
 	//{
 	#ifdef ARC_DEBUG_UPDATES
 	LOGI("[ARC]    Updating View... \n");
 	#endif
-		if (node->view)
+		if (this->view)
 		{
 			/*
 			for (int i = 0; i < kv_size(node->view->children); ++i)
@@ -741,21 +742,22 @@ void Node_update(Node * node)//, UpdaterTypes type, bool recurse)
 			}
 			*/
 			
-			Updater_update((Updater *) node->view);
+			Updater_update((Updater *) this->view);
 			
 		}
 	//}
 	
 	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC]    Updating child Nodes of %s... \n", node->id);
+	LOGI("[ARC]    Updating child Nodes of %s... \n", this->id);
 	#endif
 	//children
 	//if (recurse)
 	//{
-		for (uint32_t i = 0; i < kv_size(node->children); ++i)
+		Node * child = this->childHead;
+		while (child)
 		{
-			Node * nodeChild = kv_A(node->children, i);
-			Node_update(nodeChild);//, type, recurse);
+			Node_update(child);//, type, recurse);
+			child = child->next;
 		}
 	//}
 	
@@ -765,8 +767,8 @@ void Node_update(Node * node)//, UpdaterTypes type, bool recurse)
 	#ifdef ARC_DEBUG_UPDATES
 	LOGI("[ARC]    Post-Updating Ctrl... \n");
 	#endif
-		if (node->ctrl)
-			Updater_updatePost((Updater *) node->ctrl);
+		if (this->ctrl)
+			Updater_updatePost((Updater *) this->ctrl);
 
 	//}
 	//if (type & VIEW)
@@ -774,11 +776,11 @@ void Node_update(Node * node)//, UpdaterTypes type, bool recurse)
 	#ifdef ARC_DEBUG_UPDATES
 	LOGI("[ARC]    PostUpdating View... \n");
 	#endif
-		if (node->view)
-			Updater_updatePost((Updater *) node->view);
+		if (this->view)
+			Updater_updatePost((Updater *) this->view);
 	//}
 	#ifdef ARC_DEBUG_UPDATES
-	LOGI("[ARC] ...Node_update    (id=%s)\n", node->id);
+	LOGI("[ARC] ...Node_update    (id=%s)\n", this->id);
 	#endif
 }
 
@@ -822,28 +824,122 @@ void Node_update(Node * const this)
 }
 */
 
-void Node_claimAncestry(Node * const this, Node * const child)
-{
-	//LOGI("@@@@this=%s child=%s root=%s\n", this->id, child->id, this->root->id);
-	child->parent = this;
-	child->root = this->root;
-}
 
-Node * Node_add(Node * const this, Node * const child)
+/// Append a child to the tail end of the list of children, and set ancestry against parent.
+Node * Node_addChild(Node * const this, Node * const child)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Node_add... (id=%s) (child id=%s)\n", this->id, child->id);
+	LOGI("[ARC]    Node_addChild... (parent id=%s) (child id=%s)\n", this->id, child->id);
 	#endif
 	
-	kv_push(Node *, this->children, child);
-	Node_claimAncestry(this, child);
+	//couple to parent
+	//make findable by ID within parent in O(1) time.
+	kh_set(StrPtr, this->childrenById, child->id, (uintptr_t) child);
+	child->parent = this;
+	child->root = this->root;
+	
+	//couple to siblings
+	if (this->childTail)
+		this->childTail->next = child;
+	else //no children (head or tail or anything between) yet
+		this->childHead = child;
+	
+	this->childTail = child;
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Node_add    (id=%s) (child id=%s)\n", this->id, child->id);
+	LOGI("[ARC] ...Node_addChild    (parent id=%s) (child id=%s)\n", this->id, child->id);
 	#endif
 	
 	return child;
 }
+
+/// Removes the tail node from its parent.
+Node * Node_removeChildTail(Node * const parent)
+{
+	Node * const child = parent->childTail;
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Node_popFromParent... (parent id=%s) (child id=%s)\n", parent->id, child->id);
+	#endif
+	if (child)
+	{
+		//decouple from parent
+		kh_del(StrPtr, parent->childrenById, (uintptr_t)child->id);
+		child->parent = NULL;	
+		
+		//decouple from siblings
+		if (child->prev)
+		{
+			child->prev->next = NULL;
+		}
+		else //only child - because it is the tail without a prev
+		{
+			parent->childHead = NULL;
+		}
+		parent->childTail = child->prev; //whether NULL or not, set new tail as old tail's prev
+	}
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Node_popFromParent    (parent id=%s) (child id=%s)\n", parent->id, child->id);
+	#endif
+	
+	return child;
+}
+
+Node * Node_removeChild(Node * const parent, Node * const child)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Node_remove... (parent id=%s) (child id=%s)\n", parent->id, child->id);
+	#endif
+	
+	Node * result;
+	
+	if (parent)
+	{
+		//decouple from parent
+		kh_del(StrPtr, parent->childrenById, (uintptr_t)child->id);
+		child->parent = NULL;	
+
+		//decouple from siblings
+		if (child->prev)
+			child->prev->next = child->next;
+		else //is childHead
+			parent->childHead = child->next;
+		if (child->next)
+			child->next->prev = child->prev;
+		else //is childTail
+			parent->childTail = child->prev;
+			
+		result = child;
+	}
+	else result = NULL; //for meaningful return
+
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Node_remove    (parent id=%s) (child id=%s)\n", parent->id, child->id);
+	#endif
+	
+	return result;
+}
+
+/// Removes a node from amonst its siblings (if any) and parent (if not root).
+/// return null if it no removal took place (e.g. if we attempt to remove root).
+Node * Node_orphan(Node * const child)
+{
+	Node * const parent = child->parent;
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Node_orphan... (parent id=%s) (child id=%s)\n", parent->id, child->id);
+	#endif
+	
+	Node_removeChild(parent, child);
+
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Node_orphan    (parent id=%s) (child id=%s)\n", parent->id, child->id);
+	#endif
+	
+	return child;
+}
+
 
 Node * Node_find(Node * const this, const char * id)
 {
@@ -853,12 +949,12 @@ Node * Node_find(Node * const this, const char * id)
 	
 	kvec_t(Node *) candidatesAtNextDepth;
 	kv_init(candidatesAtNextDepth);
-	//LOGI("child count=%d\n", kv_size(this->children));
 	//search first only amongst children - do not DFS
-	for (uint32_t i = 0; i < kv_size(this->children); ++i)
+	//TODO correct this to use hash search at each descendant level, instead of linear search
+	Node * child = this->childHead;
+	LOGI("child? = %p\n", child);
+	while (child)
 	{
-		Node * child = kv_A(this->children, i); //NB! dispose in draw order
-		//LOGI("child id=%s\n", child->id);
 		if (strcmp(id, child->id) == 0)
 		{
 			#ifdef ARC_DEBUG_ONEOFFS
@@ -870,11 +966,15 @@ Node * Node_find(Node * const this, const char * id)
 		}
 		else
 			kv_push(Node *, candidatesAtNextDepth, child);
+		
+		child = child->next;
 	}
 	
 	//BFS deeper if not found in children of this
+	//TODO use a temp linked list or array for this, to remove klib dep?
 	for (uint32_t i = 0; i < kv_size(candidatesAtNextDepth); ++i)
 	{
+		LOGI("i=%i\n", i);
 		Node * child = kv_A(candidatesAtNextDepth, i);
 		Node * result = Node_find(child, id);
 		if (result)
@@ -949,14 +1049,17 @@ void View_onParentResize(View * const this)
 	
 	this->onParentResize(this);
 	
-	for (uint32_t i = 0; i < kv_size(this->node->children); ++i)
+	Node * parent = this->node;
+	Node * child = parent->childHead;
+	while (child)
 	{
-		Node * node = kv_A(this->node->children, i);
-		View * child = node->view; //NB! dispose in draw order
+		//NB! dispose in draw order
 		
 		//depth first - update child and then recurse to its children
-		if (child)
-			View_onParentResize(child);
+		if (child->view)
+			View_onParentResize(child->view);
+		
+		child = child->next;
 	}
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -1235,7 +1338,7 @@ Node * Builder_nodeContents(Node * const node, Node * const parentNode, ezxml_t 
 		Node * childNode = Node_construct(childId);
 		childNode = Builder_nodeContents(childNode, node, childNodeXml);
 		
-		Node_add(node, childNode);
+		Node_addChild(node, childNode);
 		
 		//TODO - to prevent having to pass (parent) node into this function
 		//(read initial node from config - to be contained therein)
@@ -1258,7 +1361,7 @@ static ezxml_t rootNodeXml;
 Node * Builder_nodeFromFilename(const char * configFilename)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Builder_buildFromConfig...\n");
+	LOGI("[ARC]    Builder_buildconfigure...\n");
 	#endif// ARC_DEBUG_ONEOFFS
 	
 	rootNodeXml = ezxml_parse_file(configFilename);
@@ -1270,7 +1373,7 @@ Node * Builder_nodeFromFilename(const char * configFilename)
 	//ezxml_free(rootNodeXml);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Builder_buildFromConfig   \n");
+	LOGI("[ARC] ...Builder_buildconfigure   \n");
 	#endif// ARC_DEBUG_ONEOFFS
 	
 	return rootNode;
