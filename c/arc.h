@@ -125,7 +125,7 @@ typedef struct UpdaterComponent
 /// Collection of UpdaterComponent-related information.
 typedef struct UpdaterComponents
 {
-	kvec_t(UpdaterComponent *) ordered; ///< UpdaterComponents included on this instance, in order of declaration in config. (must be list of pointers - each is allocated as a wider user type, see Builder_component() - so lost of UpdaterComponent would truncate these).
+	kvec_t(UpdaterComponent *) ordered; ///< UpdaterComponents included on this instance, in order of declaration in config. (must be list of pointers - each is allocated as a wider user type, see UpdaterComponent_configure() - so lost of UpdaterComponent would truncate these).
 	khash_t(StrPtr) * byId; ///< UpdaterComponents included on this instance, if using config.
 	//kvec_t(ArcString) ids; ///< Array of fixed-length cstrings used as keys to components.byId (required once XML and its source strings are freed).
 	struct Updater * updater; ///< \internal Used to get a reference to the owning element when doing data path drilldown for UpdaterComponents. \endinternal
@@ -265,7 +265,7 @@ bool 		View_hasFocus					(View * view);
 void 		View_doNothing				(View * const this);
 bool 		View_doNothing_return_bool(View * const this);
 
-Node * 	Builder_nodeFromFilename(const char * configFilename); ///< Build the Hub contents from a config file; path should be relative to executable.
+Node * 	Node_configure(const char * configFilename); ///< Build the Hub contents from a config file; path should be relative to executable.
 void 		Builder_dispose();
 
 //misc

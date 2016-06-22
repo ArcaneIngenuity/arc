@@ -35,7 +35,42 @@
 KHASH_DEFINE(StrPtr, 	kh_cstr_t, uintptr_t, kh_str_hash_func, kh_str_hash_equal, 1)
 #endif//ARC_KHASH_TYPES_OFF
 
+//-------- for *_configure() -------//
+
+//typedef void * (*BuildFunction) (ezxml_t xml);
+
+#define FOREACH_UPDATER_FUNCTION(instance, name, HANDLER) \
+	HANDLER(instance, name, Updater_, start,) \
+	HANDLER(instance, name, Updater_, stop,) \
+	HANDLER(instance, name, Updater_, update,) \
+	HANDLER(instance, name, Updater_, updatePost,) \
+	HANDLER(instance, name, Updater_, initialise,) \
+	HANDLER(instance, name, Updater_, dispose,) \
+	HANDLER(instance, name, Updater_, suspend,) \
+	HANDLER(instance, name, Updater_, resume,)
+
+#define FOREACH_VIEW_FUNCTION(instance, name, HANDLER) \
+	HANDLER(instance, name, View_, onParentResize,) \
+	HANDLER(instance, name, View_, hasFocus, _return_bool)
+
+#define GENERATE_ASSIGN_METHOD(instance, instancename, type, member, suffix) \
+	name = ezxml_attr(instancename##Xml, #member); \
+	if (name) instance member = addressofDynamic(name); \
+	else \
+	{ \
+		strcpy(nameAssembled, instancename##Class); \
+		strcat(nameAssembled, "_"); \
+		strcat(nameAssembled, #member); \
+		instance member = addressofDynamic(nameAssembled); \
+	} \
+	if (!instance member) \
+	{ \
+		instance member = & type##doNothing##suffix; \
+		LOGI("[ARC]    Using default function: type##doNothing##suffix.\n"); \
+	}
+
 static khiter_t k;
+static ezxml_t rootNodeXml;
 
 //--------- Pub/Sub ---------//
 
@@ -73,7 +108,7 @@ void Sub_scribe(Sub * subPtr, Pub * pubPtr)
 	#ifdef ARC_DEBUG_PUBSUB
 	LOGI("[ARC]    Sub_scribe\n");
 	#endif
-	kv_push(Sub, pubPtr->subsList, *subPtr);	
+	kv_push(Sub, pubPtr->subsList, *subPtr);
 }
 
 //---------UpdaterComponent-----------//
@@ -107,6 +142,35 @@ void UpdaterComponent_initialise(UpdaterComponent * component)
 	}
 }
 
+void UpdaterComponent_configure(ezxml_t componentXml, UpdaterComponents * components)
+{
+	const char * componentId = ezxml_attr(componentXml, "id");
+	const char * componentClassName = ezxml_attr(componentXml, "class");
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    UpdaterComponent_configure... (id=%s class=%s)\n", componentId, componentClassName);
+	#endif// ARC_DEBUG_ONEOFFS
+	
+	UpdaterComponent * component = calloc(1, sizeofDynamic(componentClassName));
+	strncpy(component->id, componentId, STRLEN_MAX);
+	component->config = componentXml;
+	component->group = components;
+	//TODO this part (attachment) should happen after buildUpdaterComponent returns a valid UpdaterComponent *
+	kv_push(UpdaterComponent *, components->ordered, component);
+	kh_set(StrPtr, components->byId, component->id, (uintptr_t)component);
+	
+	component->runOnBuild = ezxml_attr(componentXml, "runOnBuild"); //don't need ="something", just need "runOnBuild"
+	if (component->runOnBuild)
+	{
+		LOGI("[ARC]    Processing UpdaterComponent during build...\n");
+		UpdaterComponent_initialise(component);
+	}
+	
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...UpdaterComponent_configure    (id=%s class=%s)\n", componentId, componentClassName);
+	#endif// ARC_DEBUG_ONEOFFS
+}
+
 void UpdaterComponent_dispose(UpdaterComponent * component)
 {
 	//get parser if available
@@ -114,11 +178,49 @@ void UpdaterComponent_dispose(UpdaterComponent * component)
 	char parserFunctionName[STRLEN_MAX];
 	strcpy(parserFunctionName, componentClassName);
 	strcat(parserFunctionName, "_dispose");
-	LOGI("[ARC]    UpdaterComponent_initialise() (id=%s class=%s)\n", component->id, componentClassName);
+	LOGI("[ARC]    UpdaterComponent_dispose() (id=%s class=%s)\n", component->id, componentClassName);
 	ConfigureFunction dispose = addressofDynamic(parserFunctionName);
 	
 	if (dispose)
 		dispose(component);
+}
+
+//--------- UpdaterComponents ---------//
+void UpdaterComponents_configure(ezxml_t xml, UpdaterComponents * components)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    UpdaterComponents_configure...\n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
+	ezxml_t elementXml, elementXmlCopy;
+	//first count the elements and resize the vec once-off - this prevents issues
+	//with using the kvec's elements as keys into components.byId (due to realloc)
+	size_t count = 0;
+	for (elementXml = ezxml_child_any(xml); elementXml; elementXml = elementXml->ordered) //run through distinct child element names
+	{
+		if (strcmp(ezxml_name(elementXml), "component") == 0) 
+			++count;
+	}
+	kv_resize(UpdaterComponent *, 	components->ordered, 	count);
+	kh_resize(StrPtr,   	components->byId, 		count);
+
+	//TODO find custom elements and build them using their name as a key into a map provided for each element type
+	for (elementXml = ezxml_child_any(xml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
+	{
+		if (strcmp(ezxml_name(elementXml), "component") == 0) 
+		{
+			elementXmlCopy = elementXml;
+			while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
+			{
+				UpdaterComponent_configure(elementXmlCopy, components);
+
+				elementXmlCopy = elementXmlCopy->next;
+			}
+		}
+	}
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...UpdaterComponents_configure   \n");
+	#endif// ARC_DEBUG_ONEOFFS
 }
 
 //---------Updater-----------//
@@ -453,6 +555,177 @@ void Updater_resume(Updater * const this)
 	#endif
 }
 
+//--------- Ctrl ---------//
+
+Ctrl * Ctrl_construct(size_t sizeofSubclass)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Ctrl_construct... \n");
+	#endif
+	
+	//as we can't pass in a type, allocate size of the "subclass" - this is fine as "base"
+	Ctrl * ctrl = calloc(1, sizeofSubclass);
+	//Updater_setDefaultCallbacks(ctrl);
+	Updater_construct((Updater *) ctrl);
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Ctrl_construct    \n");
+	#endif
+	
+	return ctrl;
+}
+
+Ctrl * Ctrl_configure(Node * node, ezxml_t ctrlXml)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Ctrl_configure...\n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
+	const char * ctrlClass = ezxml_attr(ctrlXml, "class");
+	
+	size_t size = sizeofDynamic(ctrlClass);
+	if (!size)
+		exit(EXIT_FAILURE); //error message already output via sizeofDynamic()
+	Ctrl * ctrl = Ctrl_construct(size);
+	ctrl->config = ctrlXml;
+	
+	//drilldown to Ctrl's specific model, if any
+	const char * name;
+	char nameAssembled[STRLEN_MAX];
+	FOREACH_UPDATER_FUNCTION(ctrl->, ctrl, GENERATE_ASSIGN_METHOD)
+	
+	//parent-child chain - must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
+	node->ctrl = ctrl;
+	ctrl->node = node;
+	
+	//get type names used for reflection in UpdaterComponent data path drilldown, then build UpdaterComponents
+	ctrl->ownClassName = (char *) ctrlClass;
+	UpdaterComponents_configure(ezxml_child(ctrlXml, "components"), &ctrl->components);
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Ctrl_configure   \n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
+	return ctrl;
+}
+
+void Ctrl_createPub(Ctrl * this, const char * name)
+{
+	Pub * pubPtr = Pub_construct(name);
+	kh_set(StrPtr, this->pubsByName, name, (uintptr_t)pubPtr);
+}
+
+//--------- View ---------//
+
+View * View_construct(size_t sizeofSubclass)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    View_construct... \n");
+	#endif
+	
+	//as we can't pass in a type, allocate size of the "subclass" - this is fine as "base"
+	View * view = calloc(1, sizeofSubclass);
+	view->onParentResize 	= &View_doNothing;
+	view->hasFocus 			= &View_doNothing_return_bool;
+	//Updater_setDefaultCallbacks(view);
+	Updater_construct((Updater *) view);
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...View_construct    \n");
+	#endif
+	
+	return view;
+}
+
+View * View_configure(Node * node, ezxml_t viewXml)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    View_configure...\n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
+	const char * viewClass = ezxml_attr(viewXml, "class");
+	
+	size_t size = sizeofDynamic(viewClass);
+	if (!size)
+		exit(EXIT_FAILURE); //error message already output via sizeofDynamic()
+	View * view = View_construct(size);
+	view->config = viewXml;
+
+	//function members
+	const char * name;
+	char nameAssembled[STRLEN_MAX];
+	
+	FOREACH_UPDATER_FUNCTION(view->,view,GENERATE_ASSIGN_METHOD)
+	FOREACH_VIEW_FUNCTION	(view->,view,GENERATE_ASSIGN_METHOD)
+	
+	//parent-child chain - must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
+	node->view = view;
+	view->node = node;
+	
+	//get type names used for reflection in UpdaterComponent data path drilldown, then build UpdaterComponents
+	view->ownClassName = (char *) viewClass;
+	UpdaterComponents_configure(ezxml_child(viewXml, "components"), &view->components);
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...View_configure   \n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
+	return view;
+}
+
+void View_onParentResize(View * const this)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    View_onParentResize... (id=%s)\n", this->node->id);
+	#endif
+	
+	this->onParentResize(this);
+	
+	Node * parent = this->node;
+	Node * child = parent->childHead;
+	while (child)
+	{
+		//NB! dispose in draw order
+		
+		//depth first - update child and then recurse to its children
+		if (child->view)
+			View_onParentResize(child->view);
+		
+		child = child->next;
+	}
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...View_onParentResize    (id=%s)\n", this->node->id);
+	#endif
+}
+
+void View_subscribe(View * this, const char * pubname, SubHandler handler)
+{
+	//TODO to reimplement, we'll need to pass the Ctrl in question in - don't rely on app
+	/*
+	App * app = this->app;
+	
+	//get the publisher in question off the app
+	k = kh_get(StrPtr, app->pubsByName, pubname);
+	Pub * pubPtr = kh_val(app->pubsByName, k);
+	
+	//add this and its handler to the Pub as a Sub (copy local scope struct data into subsList entry)
+	Sub sub;
+	sub.instance = this;
+	sub.handler = handler;
+	Sub_scribe(&sub, pubPtr);
+	*/
+}
+
+void View_listen(View * const this)
+{	
+}
+
+bool View_hasFocus(View * view)
+{
+	return view->hasFocus(view);
+}
+
 //--------- Node ---------//
 
 Node * Node_construct(const char * id)
@@ -496,6 +769,121 @@ void Node_initialise(Node * const this, UpdaterTypes types, bool recurse)
 	}
 }
 
+/// Build the config-specified contents into an already-constructed node.
+Node * Node_configureContents(Node * const node, Node * const parentNode, ezxml_t nodeXml)
+{
+	const char * id = ezxml_attr(nodeXml, "id");
+	if (id)
+		strcpy(node->id, id);
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Node_configureContents... (id=%s)\n", id);
+	#endif// ARC_DEBUG_ONEOFFS
+
+	if (parentNode)
+	{
+		node->root = parentNode->root;
+	}
+	else //this is root
+	{
+		node->root = node;
+	}
+	node->config 		= nodeXml;
+		
+	//model
+	ezxml_t modelXml = ezxml_child(nodeXml, "model");
+	if (modelXml)
+	{
+		const char * modelClass = ezxml_attr(modelXml, "class");
+		const char * modelPath = ezxml_attr(modelXml, "path");
+		if (modelClass
+			&& !modelPath) //DEV until we can forego specifying class on a sub-<model>
+		{
+			node->model = calloc(1, sizeofDynamic(modelClass));
+			node->modelClassName =(char *) modelClass;
+			//TODO - there is no node->modelClassName supplied for path, so children cannot drill down further.
+			//TODO - ok, they can, but they need to assemble the whole string path from all ancestors to model class (root)
+		}
+		else if (modelPath)
+		{
+			if (parentNode)
+			{
+				node->model = parentNode->model;
+				Updater_resolveDataPath(&node->model, parentNode->modelClassName, modelPath);
+			}
+		}
+	}
+	//don't use else here - there are un-elsed statements above so this acts as catchall
+	if (!node->model && parentNode)
+	{
+		node->model = parentNode->model;
+		node->modelClassName = parentNode->modelClassName;
+	}
+	
+	//view
+	ezxml_t viewXml = ezxml_child(nodeXml, "view");
+	if (viewXml)
+	{
+		//View * view = 
+			View_configure(node, viewXml);
+		//Node_setView(node, view);
+	}
+	
+	//ctrl
+	ezxml_t ctrlXml = ezxml_child(nodeXml, "ctrl");
+	if (ctrlXml)
+	{
+		//Ctrl * ctrl = 
+			Ctrl_configure(node, ctrlXml);
+		//Node_setCtrl(node, ctrl);
+	}
+	
+	ezxml_t nodesXml = ezxml_child(nodeXml, "nodes");
+	for (ezxml_t childNodeXml = ezxml_child(nodesXml, "node"); childNodeXml; childNodeXml = childNodeXml->next)
+	{
+		const char * childId = ezxml_attr(childNodeXml, "id");
+		Node * childNode = Node_construct(childId);
+		childNode = Node_configureContents(childNode, node, childNodeXml);
+		
+		Node_addChild(node, childNode);
+		
+		//TODO - to prevent having to pass (parent) node into this function
+		//(read initial node from config - to be contained therein)
+		//childNode = Node_configureContents(childNodeXml)
+		//if (!childNode->model)
+		//	childNode->model = node->model;
+		//UpdaterComponents_configure(ctrlXml, &childNode->ctrl->components);
+		//UpdaterComponents_configure(viewXml, &childNode->view->components);
+	}
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Node_configureContents   (id=%s)\n", id);
+	#endif// ARC_DEBUG_ONEOFFS
+	
+	return node;
+}
+
+Node * Node_configure(const char * configFilename)
+{
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC]    Node_configure...\n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
+	rootNodeXml = ezxml_parse_file(configFilename);
+	
+	const char * id = ezxml_attr(rootNodeXml, "id");
+	Node * rootNode = Node_construct(id);
+	Node_configureContents(rootNode, NULL, rootNodeXml);
+
+	//ezxml_free(rootNodeXml);
+	
+	#ifdef ARC_DEBUG_ONEOFFS
+	LOGI("[ARC] ...Node_configure   \n");
+	#endif// ARC_DEBUG_ONEOFFS
+	
+	return rootNode;
+}
+
 void Node_destruct(Node * const this, UpdaterTypes types, bool recurse)
 {
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -505,14 +893,20 @@ void Node_destruct(Node * const this, UpdaterTypes types, bool recurse)
 	
 	//Ctrl * ctrl = this->ctrl;
 	//View * view = this->view;
-		
+	
+	bool isRoot = false;
+	//must be done before parent of any given node is removed, below - so we can effectively check if root
+	if (this->parent == NULL)
+		isRoot = true;
+	else
+		Node_removeChild(this->parent, this); //removes all refs to this by parent or siblings
+	
 	//DFS destruct...
 	if (recurse)
 	{
 		Node * child = this->childHead;
 		while (child)
 		{
-			Node_removeChild(this, child); //removes all refs to this by parent or siblings
 			Node_destruct(child, types, recurse);
 			child = child->next;
 		}
@@ -538,23 +932,11 @@ void Node_destruct(Node * const this, UpdaterTypes types, bool recurse)
 	
 	kh_destroy(StrPtr, this->childrenById);
 	free(this); //dangling pointers handled by parent, in recurse loop above.
-	
+	if (isRoot) 
+		ezxml_free(rootNodeXml);
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("[ARC] ...Node_destruct    (id=%s)\n", id);
 	#endif//ARC_DEBUG_ONEOFFS
-}
-
-
-void Node_setCtrl(Node * node, Ctrl * ctrl)
-{
-	node->ctrl = ctrl;
-	ctrl->node = node;
-}
-
-void Node_setView(Node * node, View * view)
-{
-	node->view = view;
-	view->node = node;
 }
 
 bool Node_isRoot(Node * const this)
@@ -991,397 +1373,6 @@ Node * Node_find(Node * const this, const char * id)
 	#endif
 	
 	return NULL;
-}
-
-//--------- Ctrl ---------//
-
-Ctrl * Ctrl_construct(size_t sizeofSubclass)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Ctrl_construct... \n");
-	#endif
-	
-	//as we can't pass in a type, allocate size of the "subclass" - this is fine as "base"
-	Ctrl * ctrl = calloc(1, sizeofSubclass);
-	//Updater_setDefaultCallbacks(ctrl);
-	Updater_construct((Updater *) ctrl);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Ctrl_construct    \n");
-	#endif
-	
-	return ctrl;
-}
-
-void Ctrl_createPub(Ctrl * this, const char * name)
-{
-	Pub * pubPtr = Pub_construct(name);
-	kh_set(StrPtr, this->pubsByName, name, (uintptr_t)pubPtr);
-}
-
-//--------- View ---------//
-
-View * View_construct(size_t sizeofSubclass)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    View_construct... \n");
-	#endif
-	
-	//as we can't pass in a type, allocate size of the "subclass" - this is fine as "base"
-	View * view = calloc(1, sizeofSubclass);
-	view->onParentResize 	= &View_doNothing;
-	view->hasFocus 			= &View_doNothing_return_bool;
-	//Updater_setDefaultCallbacks(view);
-	Updater_construct((Updater *) view);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_construct    \n");
-	#endif
-	
-	return view;
-}
-
-void View_onParentResize(View * const this)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    View_onParentResize... (id=%s)\n", this->node->id);
-	#endif
-	
-	this->onParentResize(this);
-	
-	Node * parent = this->node;
-	Node * child = parent->childHead;
-	while (child)
-	{
-		//NB! dispose in draw order
-		
-		//depth first - update child and then recurse to its children
-		if (child->view)
-			View_onParentResize(child->view);
-		
-		child = child->next;
-	}
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...View_onParentResize    (id=%s)\n", this->node->id);
-	#endif
-}
-
-void View_subscribe(View * this, const char * pubname, SubHandler handler)
-{
-	//TODO to reimplement, we'll need to pass the Ctrl in question in - don't rely on app
-	/*
-	App * app = this->app;
-	
-	//get the publisher in question off the app
-	k = kh_get(StrPtr, app->pubsByName, pubname);
-	Pub * pubPtr = kh_val(app->pubsByName, k);
-	
-	//add this and its handler to the Pub as a Sub (copy local scope struct data into subsList entry)
-	Sub sub;
-	sub.instance = this;
-	sub.handler = handler;
-	Sub_scribe(&sub, pubPtr);
-	*/
-}
-
-void View_listen(View * const this)
-{	
-}
-
-bool View_hasFocus(View * view)
-{
-	return view->hasFocus(view);
-}
-
-//-------- Builder -------//
-
-typedef void * (*BuildFunction) (ezxml_t xml);
-
-#define FOREACH_UPDATER_FUNCTION(instance, name, HANDLER) \
-	HANDLER(instance, name, Updater_, start,) \
-	HANDLER(instance, name, Updater_, stop,) \
-	HANDLER(instance, name, Updater_, update,) \
-	HANDLER(instance, name, Updater_, updatePost,) \
-	HANDLER(instance, name, Updater_, initialise,) \
-	HANDLER(instance, name, Updater_, dispose,) \
-	HANDLER(instance, name, Updater_, suspend,) \
-	HANDLER(instance, name, Updater_, resume,)
-
-#define FOREACH_VIEW_FUNCTION(instance, name, HANDLER) \
-	HANDLER(instance, name, View_, onParentResize,) \
-	HANDLER(instance, name, View_, hasFocus, _return_bool)
-
-#define GENERATE_ASSIGN_METHOD(instance, instancename, type, member, suffix) \
-	name = ezxml_attr(instancename##Xml, #member); \
-	if (name) instance member = addressofDynamic(name); \
-	else \
-	{ \
-		strcpy(nameAssembled, instancename##Class); \
-		strcat(nameAssembled, "_"); \
-		strcat(nameAssembled, #member); \
-		instance member = addressofDynamic(nameAssembled); \
-	} \
-	if (!instance member) \
-	{ \
-		instance member = & type##doNothing##suffix; \
-		LOGI("[ARC]    Using default function: type##doNothing##suffix.\n"); \
-	}
-
-void Builder_component(ezxml_t componentXml, UpdaterComponents * components)
-{
-	const char * componentId = ezxml_attr(componentXml, "id");
-	const char * componentClassName = ezxml_attr(componentXml, "class");
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Builder_component... (id=%s class=%s)\n", componentId, componentClassName);
-	#endif// ARC_DEBUG_ONEOFFS
-	
-	UpdaterComponent * component = calloc(1, sizeofDynamic(componentClassName));
-	strncpy(component->id, componentId, STRLEN_MAX);
-	component->config = componentXml;
-	component->group = components;
-	//TODO this part (attachment) should happen after buildUpdaterComponent returns a valid UpdaterComponent *
-	kv_push(UpdaterComponent *, components->ordered, component);
-	kh_set(StrPtr, components->byId, component->id, (uintptr_t)component);
-	
-	component->runOnBuild = ezxml_attr(componentXml, "runOnBuild"); //don't need ="something", just need "runOnBuild"
-	if (component->runOnBuild)
-	{
-		LOGI("[ARC]    Processing UpdaterComponent during build...\n");
-		UpdaterComponent_initialise(component);
-	}
-	
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Builder_component    (id=%s class=%s)\n", componentId, componentClassName);
-	#endif// ARC_DEBUG_ONEOFFS
-}
-
-void Builder_components(ezxml_t xml, UpdaterComponents * components)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Builder_components...\n");
-	#endif// ARC_DEBUG_ONEOFFS
-	
-	ezxml_t elementXml, elementXmlCopy;
-	//first count the elements and resize the vec once-off - this prevents issues
-	//with using the kvec's elements as keys into components.byId (due to realloc)
-	size_t count = 0;
-	for (elementXml = ezxml_child_any(xml); elementXml; elementXml = elementXml->ordered) //run through distinct child element names
-	{
-		if (strcmp(ezxml_name(elementXml), "component") == 0) 
-			++count;
-	}
-	kv_resize(UpdaterComponent *, 	components->ordered, 	count);
-	kh_resize(StrPtr,   	components->byId, 		count);
-
-	//TODO find custom elements and build them using their name as a key into a map provided for each element type
-	for (elementXml = ezxml_child_any(xml); elementXml; elementXml = elementXml->sibling) //run through distinct child element names
-	{
-		if (strcmp(ezxml_name(elementXml), "component") == 0) 
-		{
-			elementXmlCopy = elementXml;
-			while (elementXmlCopy) //iterate over child elements of same name (that sit adjacent?)
-			{
-				Builder_component(elementXmlCopy, components);
-
-				elementXmlCopy = elementXmlCopy->next;
-			}
-		}
-	}
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Builder_components   \n");
-	#endif// ARC_DEBUG_ONEOFFS
-}
-
-View * Builder_view(Node * node, ezxml_t viewXml)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Builder_view...\n");
-	#endif// ARC_DEBUG_ONEOFFS
-	
-	const char * viewClass = ezxml_attr(viewXml, "class");
-	
-	size_t size = sizeofDynamic(viewClass);
-	if (!size)
-		exit(EXIT_FAILURE); //error message already output via sizeofDynamic()
-	View * view = View_construct(size);
-	view->config = viewXml;
-
-	//function members
-	const char * name;
-	char nameAssembled[STRLEN_MAX];
-	
-	FOREACH_UPDATER_FUNCTION(view->,view,GENERATE_ASSIGN_METHOD)
-	FOREACH_VIEW_FUNCTION	(view->,view,GENERATE_ASSIGN_METHOD)
-	
-	//parent-child chain
-	Node_setView(node, view); //must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
-	
-	//get type names used for reflection in UpdaterComponent data path drilldown, then build UpdaterComponents
-	view->ownClassName = (char *) viewClass;
-	Builder_components(ezxml_child(viewXml, "components"), &view->components);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Builder_view   \n");
-	#endif// ARC_DEBUG_ONEOFFS
-	
-	return view;
-}
-
-Ctrl * Builder_ctrl(Node * node, ezxml_t ctrlXml)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Builder_ctrl...\n");
-	#endif// ARC_DEBUG_ONEOFFS
-	
-	const char * ctrlClass = ezxml_attr(ctrlXml, "class");
-	
-	size_t size = sizeofDynamic(ctrlClass);
-	if (!size)
-		exit(EXIT_FAILURE); //error message already output via sizeofDynamic()
-	Ctrl * ctrl = Ctrl_construct(size);
-	ctrl->config = ctrlXml;
-	
-	//drilldown to Ctrl's specific model, if any
-	const char * name;
-	char nameAssembled[STRLEN_MAX];
-	FOREACH_UPDATER_FUNCTION(ctrl->, ctrl, GENERATE_ASSIGN_METHOD)
-	
-	//parent-child chain
-	Node_setCtrl(node, ctrl); //must be done here *before* further attachments, so as to provide full ancestry (incl. app & hub) to descendants
-	
-	//get type names used for reflection in UpdaterComponent data path drilldown, then build UpdaterComponents
-	ctrl->ownClassName = (char *) ctrlClass;
-	Builder_components(ezxml_child(ctrlXml, "components"), &ctrl->components);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Builder_ctrl   \n");
-	#endif// ARC_DEBUG_ONEOFFS
-	
-	return ctrl;
-}
-
-/// Build the config-specified contents into an already-constructed node.
-Node * Builder_nodeContents(Node * const node, Node * const parentNode, ezxml_t nodeXml)
-{
-	const char * id = ezxml_attr(nodeXml, "id");
-	if (id)
-		strcpy(node->id, id);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Builder_nodeContents... (id=%s)\n", id);
-	#endif// ARC_DEBUG_ONEOFFS
-
-	if (parentNode)
-	{
-		node->root = parentNode->root;
-	}
-	else //this is root
-	{
-		node->root = node;
-	}
-	node->config 		= nodeXml;
-		
-	//model
-	ezxml_t modelXml = ezxml_child(nodeXml, "model");
-	if (modelXml)
-	{
-		const char * modelClass = ezxml_attr(modelXml, "class");
-		const char * modelPath = ezxml_attr(modelXml, "path");
-		if (modelClass
-			&& !modelPath) //DEV until we can forego specifying class on a sub-<model>
-		{
-			node->model = calloc(1, sizeofDynamic(modelClass));
-			node->modelClassName =(char *) modelClass;
-			//TODO - there is no node->modelClassName supplied for path, so children cannot drill down further.
-			//TODO - ok, they can, but they need to assemble the whole string path from all ancestors to model class (root)
-		}
-		else if (modelPath)
-		{
-			if (parentNode)
-			{
-				node->model = parentNode->model;
-				Updater_resolveDataPath(&node->model, parentNode->modelClassName, modelPath);
-			}
-		}
-	}
-	//don't use else here - there are un-elsed statements above so this acts as catchall
-	if (!node->model && parentNode)
-	{
-		node->model = parentNode->model;
-		node->modelClassName = parentNode->modelClassName;
-	}
-	
-	//view
-	ezxml_t viewXml = ezxml_child(nodeXml, "view");
-	if (viewXml)
-	{
-		//View * view = 
-			Builder_view(node, viewXml);
-		//Node_setView(node, view);
-	}
-	
-	//ctrl
-	ezxml_t ctrlXml = ezxml_child(nodeXml, "ctrl");
-	if (ctrlXml)
-	{
-		//Ctrl * ctrl = 
-			Builder_ctrl(node, ctrlXml);
-		//Node_setCtrl(node, ctrl);
-	}
-	
-	ezxml_t nodesXml = ezxml_child(nodeXml, "nodes");
-	for (ezxml_t childNodeXml = ezxml_child(nodesXml, "node"); childNodeXml; childNodeXml = childNodeXml->next)
-	{
-		const char * childId = ezxml_attr(childNodeXml, "id");
-		Node * childNode = Node_construct(childId);
-		childNode = Builder_nodeContents(childNode, node, childNodeXml);
-		
-		Node_addChild(node, childNode);
-		
-		//TODO - to prevent having to pass (parent) node into this function
-		//(read initial node from config - to be contained therein)
-		//childNode = Builder_nodeContents(childNodeXml)
-		//if (!childNode->model)
-		//	childNode->model = node->model;
-		//Builder_components(ctrlXml, &childNode->ctrl->components);
-		//Builder_components(viewXml, &childNode->view->components);
-	}
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Builder_nodeContents   (id=%s)\n", id);
-	#endif// ARC_DEBUG_ONEOFFS
-	
-	return node;
-}
-
-static ezxml_t rootNodeXml;
-
-Node * Builder_nodeFromFilename(const char * configFilename)
-{
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC]    Builder_buildconfigure...\n");
-	#endif// ARC_DEBUG_ONEOFFS
-	
-	rootNodeXml = ezxml_parse_file(configFilename);
-	
-	const char * id = ezxml_attr(rootNodeXml, "id");
-	Node * rootNode = Node_construct(id);
-	Builder_nodeContents(rootNode, NULL, rootNodeXml);
-
-	//ezxml_free(rootNodeXml);
-	
-	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("[ARC] ...Builder_buildconfigure   \n");
-	#endif// ARC_DEBUG_ONEOFFS
-	
-	return rootNode;
-}
-
-void Builder_dispose()
-{
-	ezxml_free(rootNodeXml);
 }
 
 //--------- misc ---------//
