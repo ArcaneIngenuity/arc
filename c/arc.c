@@ -324,6 +324,7 @@ void Updater_destruct(Updater * const this)
 		{
 			UpdaterComponent * component = kv_A(components->ordered, i);
 			UpdaterComponent_dispose(component);
+			free(component);
 		}
 		
 		this->dispose(this);
@@ -331,7 +332,7 @@ void Updater_destruct(Updater * const this)
 	}
 	
 	kh_destroy(StrPtr, this->components.byId);
-	
+	kv_destroy(this->components.ordered);
 	free(this);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -538,7 +539,7 @@ void Node_destruct(Node * const this, UpdaterTypes types, bool recurse)
 	}
 	
 	kh_destroy(StrPtr, this->childrenById);
-	
+	kv_destroy(this->children);
 	free(this); //dangling pointers handled by parent, in recurse loop above.
 	
 	#ifdef ARC_DEBUG_ONEOFFS
@@ -863,7 +864,8 @@ Node * Node_find(Node * const this, const char * id)
 			#ifdef ARC_DEBUG_ONEOFFS
 			LOGI("[ARC] ...Node_find    (id=%s) (descendant id=%s)\n", this->id, id);
 			#endif
-			//LOGI("HIT!\n");
+			
+			kv_destroy(candidatesAtNextDepth);
 			return child;
 		}
 		else
@@ -875,8 +877,14 @@ Node * Node_find(Node * const this, const char * id)
 	{
 		Node * child = kv_A(candidatesAtNextDepth, i);
 		Node * result = Node_find(child, id);
-		if (result) return result;
+		if (result)
+		{
+			kv_destroy(candidatesAtNextDepth);
+			return result;
+		}			
 	}
+	
+	kv_destroy(candidatesAtNextDepth);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
 	LOGI("-[ARC] ...Node_find    (id=%s) (descendant id=%s)\n", this->id, id);
