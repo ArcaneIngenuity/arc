@@ -85,7 +85,7 @@ void UpdaterComponent_initialise(UpdaterComponent * component)
 	const char * componentClassName = ezxml_attr(component->config, "class");
 	char parserFunctionName[STRLEN_MAX];
 	strcpy(parserFunctionName, componentClassName);
-	strcat(parserFunctionName, "_configure");
+	strcat(parserFunctionName, "_fromConfig");
 	LOGI("[ARC]    UpdaterComponent_initialise() (id=%s class=%s)\n", component->id, componentClassName);
 	ConfigureFunction parser = addressofDynamic(parserFunctionName);
 	
