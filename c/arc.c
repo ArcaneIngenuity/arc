@@ -1334,7 +1334,7 @@ Node * Node_find(Node * const this, const char * id)
 	//search first only amongst children - do not DFS
 	//TODO correct this to use hash search at each descendant level, instead of linear search
 	Node * child = this->childHead;
-	LOGI("child? = %p\n", child);
+	
 	while (child)
 	{
 		if (strcmp(id, child->id) == 0)
@@ -1356,7 +1356,6 @@ Node * Node_find(Node * const this, const char * id)
 	//TODO use a temp linked list or array for this, to remove klib dep?
 	for (uint32_t i = 0; i < kv_size(candidatesAtNextDepth); ++i)
 	{
-		LOGI("i=%i\n", i);
 		Node * child = kv_A(candidatesAtNextDepth, i);
 		Node * result = Node_find(child, id);
 		if (result)
@@ -1369,7 +1368,7 @@ Node * Node_find(Node * const this, const char * id)
 	kv_destroy(candidatesAtNextDepth);
 	
 	#ifdef ARC_DEBUG_ONEOFFS
-	LOGI("-[ARC] ...Node_find    (id=%s) (descendant id=%s)\n", this->id, id);
+	LOGI("[ARC] ...Node_find    (id=%s) (descendant id=%s)\n", this->id, id);
 	#endif
 	
 	return NULL;
